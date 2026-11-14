@@ -64,6 +64,12 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#17191D"
+    "backgroundColor": "#17191D",
+    "extra": {
+      "eas": {
+        "projectId": "34bd53e1-93c3-47a6-8c2b-d0d8e4e17335"
+      }
+    },
+    "owner": "berat53"
   }
 }
