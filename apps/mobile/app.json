@@ -12,7 +12,8 @@
       "supportsTablet": false,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Araç fotoğrafı ve fatura eklemek için galerine erişim gerekiyor.",
-        "NSCameraUsageDescription": "Araç fotoğrafı ve fiş çekmek için kameraya erişim gerekiyor."
+        "NSCameraUsageDescription": "Araç fotoğrafı ve fiş çekmek için kameraya erişim gerekiyor.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
