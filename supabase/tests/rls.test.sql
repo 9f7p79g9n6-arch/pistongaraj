@@ -100,6 +100,21 @@ do $$ begin
   if (select count(*) from public.maintenance_due) <> 1 then raise exception 'maintenance_due satır sayısı yanlış'; end if;
 end $$;
 
+\echo '10b. Trafik cezası: kurallar ve indirim süresi görünümü'
+insert into public.traffic_fines (id, vehicle_id, fine_date, notified_on, amount)
+values ('30000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '2026-11-01', '2026-11-03', 2000);
+select pg_temp.expect_error($$insert into public.traffic_fines (vehicle_id, fine_date, notified_on, amount)
+  values ('10000000-0000-0000-0000-000000000001', '2026-11-05', '2026-11-01', 100)$$, 'check');
+select pg_temp.expect_error($$update public.traffic_fines set paid_on = '2026-11-10' where id = '30000000-0000-0000-0000-000000000001'$$, 'check');
+do $$ begin
+  if (select discount_until from public.fine_due where fine_id = '30000000-0000-0000-0000-000000000001') <> '2026-11-18' then raise exception 'indirim son günü yanlış'; end if;
+  if (select due_on from public.fine_due where fine_id = '30000000-0000-0000-0000-000000000001') <> '2026-12-03' then raise exception 'ödeme son günü yanlış'; end if;
+end $$;
+update public.traffic_fines set paid_on = '2026-11-10', paid_amount = 1500 where id = '30000000-0000-0000-0000-000000000001';
+do $$ begin
+  if (select count(*) from public.fine_due) <> 0 then raise exception 'ödenen ceza hâlâ listede'; end if;
+end $$;
+
 \echo '11. İzin kaydı eklenir ama değiştirilemez'
 insert into public.consents (consent, granted, text_version) values ('kvkk_notice', true, '2026-11-v1');
 select pg_temp.expect_error($$update public.consents set granted = false$$, 'permission denied');
@@ -136,6 +151,7 @@ do $$ begin
   if (select count(*) from public.maintenance_due) <> 0 then raise exception 'B, A bakım durumunu görüyor'; end if;
   if (select count(*) from public.consents) <> 0 then raise exception 'B, A izinlerini görüyor'; end if;
   if (select count(*) from public.ai_usage) <> 0 then raise exception 'B, A yapay zekâ kullanımını görüyor'; end if;
+  if (select count(*) from public.traffic_fines) <> 0 then raise exception 'B, A cezalarını görüyor'; end if;
   if (select count(*) from public.profiles) <> 1 then raise exception 'B başka profilleri görüyor'; end if;
 end $$;
 update public.vehicles set odometer_km = 1 where id = '10000000-0000-0000-0000-000000000001';
@@ -169,6 +185,7 @@ do $$ begin
   if (select count(*) from public.vehicles) <> 0 then raise exception 'araçlar silinmedi'; end if;
   if (select count(*) from private.vehicle_vins) <> 0 then raise exception 'şasi numaraları silinmedi'; end if;
   if (select count(*) from public.fuel_records) <> 0 then raise exception 'yakıt kayıtları silinmedi'; end if;
+  if (select count(*) from public.traffic_fines) <> 0 then raise exception 'cezalar silinmedi'; end if;
   if (select count(*) from public.consents where user_id = '00000000-0000-0000-0000-00000000000a') <> 0 then raise exception 'izinler silinmedi'; end if;
   if (select count(*) from public.ai_usage where user_id = '00000000-0000-0000-0000-00000000000a') <> 0 then raise exception 'yapay zekâ kullanım kayıtları silinmedi'; end if;
 end $$;

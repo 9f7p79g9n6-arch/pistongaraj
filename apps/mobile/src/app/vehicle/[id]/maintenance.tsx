@@ -50,6 +50,10 @@ export default function Maintenance() {
         ))
       )}
 
+      {bundle.rules.some((r) => r.itemKey === 'inspection') && (
+        <Button title="Muayene hazırlık listesi" icon="shield" variant="ghost" style={{ marginTop: space.lg }} onPress={() => router.push(`/vehicle/${vehicle.id}/inspection`)} />
+      )}
+
       <Section title="Geçmiş" action="İşlem ekle" onAction={() => router.push(`/vehicle/${vehicle.id}/log`)}>
         {bundle.events.length === 0 ? (
           <Muted small>Henüz yapılan işlem kaydı yok. Bir bakım yaptırdığında “İşlem ekle” ile kaydet; sayaç sıfırlanır.</Muted>

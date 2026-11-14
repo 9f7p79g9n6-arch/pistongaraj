@@ -1,4 +1,4 @@
-import { consumption, formatDate, formatKm, formatNumber, formatTL, monthLong, monthlyTotals } from '@piston/core';
+import { consumption, fineInfo, formatDate, formatKm, formatNumber, formatTL, monthLong, monthlyTotals, sortFines } from '@piston/core';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
@@ -31,6 +31,10 @@ export default function Home() {
 
   const top = rulesByUrgency.slice(0, 3);
   const vid = active.id;
+  const openFines = sortFines(bundle.fines.filter((f) => !f.paidOn), today).map((fine) => ({ fine, info: fineInfo(fine, today) }));
+  const urgentFine = openFines.find((f) => f.info.status === 'discount') ?? null;
+  const insp = rulesByUrgency.find((r) => r.rule.itemKey === 'inspection');
+  const inspectionSoon = insp && insp.due.daysLeft != null && insp.due.daysLeft >= 0 && insp.due.daysLeft <= 30 ? insp.due.daysLeft : null;
 
   return (
     <Screen
@@ -55,18 +59,27 @@ export default function Home() {
         <Button title="Kilometreyi güncelle" variant="ghost" small onPress={() => router.push(`/vehicle/${vid}/odometer`)} />
       </Card>
 
-      <Card onPress={() => router.push('/lights')} style={{ marginTop: space.md }} accessibilityLabel="Gösterge ışığı tanıma">
-        <Row>
-          <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: 'rgba(255,181,71,0.14)', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="alert" size={20} color={colors.warn} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text v="bodyStrong">Gösterge ışığı mı yandı?</Text>
-            <Muted small>Fotoğrafını çek; ne anlama geldiğini ve sürüp süremeyeceğini söyleyelim.</Muted>
-          </View>
-          <Icon name="chev" size={16} color={colors.textMuted} />
-        </Row>
-      </Card>
+      <Row gap={space.sm} style={{ marginTop: space.md }}>
+        <QuickAction icon="alert" tint={colors.warn} label="Gösterge ışığı" onPress={() => router.push('/lights')} />
+        <QuickAction icon="shield" tint={colors.danger} label="Kaza asistanı" onPress={() => router.push('/accident')} />
+        <QuickAction icon="doc" tint={colors.info} label="Cezalar" onPress={() => router.push(`/vehicle/${vid}/fines`)} />
+      </Row>
+
+      {urgentFine && (
+        <Card onPress={() => router.push(`/vehicle/${vid}/fines`)} highlight style={{ marginTop: space.md, gap: 4 }} accessibilityLabel="Ceza indirimi">
+          <Text v="bodyStrong" color={colors.warn}>
+            {urgentFine.info.daysLeftForDiscount === 0 ? 'Ceza indiriminin bugün son günü' : `Ceza indirimine ${urgentFine.info.daysLeftForDiscount} gün kaldı`}
+          </Text>
+          <Muted small>{formatTL(urgentFine.info.discountedAmount)} ile ödeyebilirsin (normali {formatTL(urgentFine.fine.amount)}). Son gün {formatDate(urgentFine.info.discountUntil)}.</Muted>
+        </Card>
+      )}
+
+      {inspectionSoon && (
+        <Card onPress={() => router.push(`/vehicle/${vid}/inspection`)} style={{ marginTop: space.md, gap: 4 }} accessibilityLabel="Muayene hazırlığı">
+          <Text v="bodyStrong">Muayeneye {inspectionSoon} gün kaldı</Text>
+          <Muted small>Muayeneden kaldıran kalemleri önceden kontrol et: far, lastik, silecek, ekipman.</Muted>
+        </Card>
+      )}
 
       <Section title="Sıradaki işler" action={rulesByUrgency.length ? 'Tümü' : undefined} onAction={() => router.push(`/vehicle/${vid}/maintenance`)}>
         {top.length ? (
@@ -108,6 +121,15 @@ export default function Home() {
         </Card>
       </Section>
     </Screen>
+  );
+}
+
+function QuickAction({ icon, tint, label, onPress }: { icon: 'alert' | 'shield' | 'doc'; tint: string; label: string; onPress: () => void }) {
+  return (
+    <Card onPress={onPress} style={{ flex: 1, alignItems: 'center', gap: 6, paddingVertical: space.md, paddingHorizontal: space.sm }} accessibilityLabel={label}>
+      <Icon name={icon} size={22} color={tint} />
+      <Text v="smallStrong" style={{ textAlign: 'center' }}>{label}</Text>
+    </Card>
   );
 }
 

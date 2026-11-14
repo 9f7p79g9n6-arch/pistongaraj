@@ -56,6 +56,10 @@ export default function VehicleDetail() {
           <Divider />
           <ListItem icon="fuel" title="Yakıt ve masraf" subtitle={`${bundle.fuel.length} yakıt · ${bundle.expenses.length} masraf kaydı`} onPress={() => router.push(`/vehicle/${v.id}/fuel`)} />
           <Divider />
+          <ListItem icon="doc" title="Trafik cezaları" subtitle={`${bundle.fines.filter((f) => !f.paidOn).length} ödenmemiş`} onPress={() => router.push(`/vehicle/${v.id}/fines`)} />
+          <Divider />
+          <ListItem icon="shield" title="Muayene hazırlığı" subtitle="Muayeneden önce kontrol listesi" onPress={() => router.push(`/vehicle/${v.id}/inspection`)} />
+          <Divider />
           <ListItem icon="car" title="Kilometreyi güncelle" subtitle={`${formatNumber(v.odometerKm)} km`} onPress={() => router.push(`/vehicle/${v.id}/odometer`)} />
         </Card>
       </Section>

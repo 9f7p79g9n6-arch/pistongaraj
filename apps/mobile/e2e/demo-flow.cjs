@@ -96,6 +96,38 @@ const assert=(cond,msg)=>{ if(!cond){ console.error('BAŞARISIZ:',msg); process.
   assert(await p2.getByText('Yağ basıncı',{exact:true}).count()===1 && await p2.getByText('Aracı kullanma',{exact:true}).count()>=1,'Claude\'un tanıdığı ışık katalog kararıyla gösteriliyor');
   assert(await p2.getByText('Örnek sonuç · gerçek analiz değildir').count()===0,'Gerçek analizde örnek etiketi yok');
   await p2.close();
+  // Türkiye araçları: ceza, muayene, kaza (örnek Focus ile temiz oturum)
+  { const p=await b.newPage({viewport:{width:390,height:844}}); p.on('pageerror',e=>errs.push('PAGEERR '+e.message));
+  await p.goto(`${BASE}/`);await p.waitForTimeout(2000);
+  await p.getByRole('switch',{name:'Aydınlatma metnini okudum'}).click();await p.getByText('Demo ile gez').click();await p.waitForTimeout(1500);
+  assert(await p.getByText('Ceza indirimine 3 gün kaldı').count()===1,'Ana sayfada ceza indirimi uyarısı');
+  assert(await p.getByText('Muayeneye 18 gün kaldı').count()===1,'Ana sayfada muayene hazırlığı uyarısı');
+  await p.getByText('Ceza indirimine 3 gün kaldı').click();await p.waitForTimeout(1200);await shot('16-fines');
+  assert(await p.getByText('1.625,25 ₺').count()>=1,'İndirimli tutar %25 düşük (2.167 → 1.625,25)');
+  await p.getByText('Ceza ekle').last().click();await p.waitForTimeout(400);
+  await p.getByRole('textbox',{name:'Ceza tarihi'}).last().fill('10.11.2026');
+  await p.getByRole('textbox',{name:'Tebliğ tarihi'}).last().fill('05.11.2026');
+  await p.getByRole('textbox',{name:'Tutar (₺)'}).last().fill('993');
+  await p.getByText('Kaydet',{exact:true}).last().click();await p.waitForTimeout(400);
+  assert(await p.getByText('Tebliğ tarihi ceza tarihinden önce olamaz.').count()===1,'Tebliğ ceza tarihinden önce olamaz');
+  await p.getByText('Vazgeç',{exact:true}).last().click();await p.waitForTimeout(300);
+  await p.getByText('Ödedim').last().click();await p.waitForTimeout(300);
+  await p.getByText('Kaydet',{exact:true}).last().click();await p.waitForTimeout(1200);
+  assert(await p.getByText('Ödenenler').count()===1 && await p.getByText('Ödenmemiş ceza yok').count()===1,'Ödenen ceza "Ödenenler"e geçiyor');
+  await p.goto(`${BASE}/`);await p.waitForTimeout(1500);
+  assert(await p.getByText(/Ceza indirimine/).count()===0,'Ödenince ana sayfa uyarısı kalkıyor');
+  await p.getByText('Muayeneye 18 gün kaldı').click();await p.waitForTimeout(1200);
+  await p.getByText('Arka park, plaka ve geri vites lambaları').click();await p.waitForTimeout(300);
+  assert(await p.getByText('1 / 18 kontrol tamam').count()===1,'Muayene listesi işaretleniyor');
+  await p.reload();await p.waitForTimeout(2000);await shot('17-inspection');
+  assert(await p.getByText('1 / 18 kontrol tamam').count()===1,'Muayene işaretleri yeniden açınca korunuyor');
+  await p.goto(`${BASE}/accident`);await p.waitForTimeout(1500);
+  assert(await p.getByText(/112 · Acil çağrı/).count()===1,'Kaza asistanında 112 düğmesi');
+  await p.getByText('Önce güvenlik').click();
+  await p.getByRole('textbox',{name:'Plaka'}).last().fill('34 XYZ 99');await p.waitForTimeout(500);
+  await p.reload();await p.waitForTimeout(2000);await shot('18-accident');
+  assert(await p.getByRole('textbox',{name:'Plaka'}).last().inputValue()==='34 XYZ 99','Kaza notları yeniden açınca korunuyor');
+  await p.close(); }
   // desktop width
   await p.setViewportSize({width:1280,height:900});await p.goto(`${BASE}/`);await p.waitForTimeout(1500);await shot('12-desktop');
   assert(errs.length===0,'Konsolda hata yok'+(errs.length?': '+errs.slice(0,3).join(' | '):''));

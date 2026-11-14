@@ -18,11 +18,12 @@ import {
   type MaintenanceEvent,
   type MaintenanceRule,
   type Plan,
+  type TrafficFine,
   type Vehicle,
 } from '@piston/core';
 
 import { analyzeWithArtifactClaude, ArtifactAiError } from '@/lib/artifact-ai';
-import { RepoError, type Account, type LightIdentification, type LightRequest, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
+import { RepoError, type Account, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
 
 const KEY = 'piston-demo-v1';
 
@@ -34,6 +35,7 @@ interface DemoState {
   events: MaintenanceEvent[];
   fuel: FuelRecord[];
   expenses: ExpenseRecord[];
+  fines?: TrafficFine[];
   consents: { consent: string; granted: boolean; textVersion: string; at: string }[];
 }
 
@@ -85,6 +87,10 @@ function seed(): DemoState {
       { id: id(), vehicleId: v1, category: 'parking', amount: 260, spentOn: addDays(t, -6), note: null },
       { id: id(), vehicleId: v1, category: 'wash', amount: 420, spentOn: addDays(t, -40), note: null },
       { id: id(), vehicleId: v1, category: 'insurance', amount: 6400, spentOn: addMonths(t, -4), note: 'Kasko taksiti' },
+    ],
+    fines: [
+      // Örnek: indirim süresi bitmek üzere olan bir ceza (demo verisi)
+      { id: id(), vehicleId: v1, fineDate: addDays(t, -13), notifiedOn: addDays(t, -12), amount: 2167, description: 'Hız sınırı ihlali (örnek)', paidOn: null, paidAmount: null },
     ],
     consents: [],
   };
@@ -210,6 +216,7 @@ export class DemoRepo implements GarageRepo {
       events: s.events.filter((e) => e.vehicleId === vid).sort((a, b) => b.performedOn.localeCompare(a.performedOn)),
       fuel: s.fuel.filter((f) => f.vehicleId === vid).sort((a, b) => b.odometerKm - a.odometerKm),
       expenses: s.expenses.filter((e) => e.vehicleId === vid).sort((a, b) => b.spentOn.localeCompare(a.spentOn)),
+      fines: (s.fines ?? []).filter((f) => f.vehicleId === vid).sort((a, b) => b.notifiedOn.localeCompare(a.notifiedOn)),
     };
   }
 
@@ -256,6 +263,25 @@ export class DemoRepo implements GarageRepo {
 
   async addExpense(e: NewExpense) {
     await this.mutate((s) => { s.expenses.push({ ...e, id: id() }); });
+  }
+
+  async addFine(f: NewFine) {
+    await this.mutate((s) => { (s.fines ??= []).push({ ...f, id: id(), paidOn: null, paidAmount: null }); });
+  }
+
+  async payFine(fid: string, paidOn: string, paidAmount: number) {
+    await this.mutate((s) => {
+      const f = (s.fines ?? []).find((x) => x.id === fid);
+      if (!f) throw new RepoError('NOT_FOUND', 'Ceza bulunamadı.');
+      if (f.paidOn) return;
+      f.paidOn = paidOn;
+      f.paidAmount = paidAmount;
+      s.expenses.push({ id: id(), vehicleId: f.vehicleId, category: 'fine', amount: paidAmount, spentOn: paidOn, note: f.description });
+    });
+  }
+
+  async deleteFine(fid: string) {
+    await this.mutate((s) => { s.fines = (s.fines ?? []).filter((f) => f.id !== fid); });
   }
 
   async deleteExpense(eid: string) {

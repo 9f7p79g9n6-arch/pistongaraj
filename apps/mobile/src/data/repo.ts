@@ -5,6 +5,7 @@ import type {
   MaintenanceEvent,
   MaintenanceRule,
   Plan,
+  TrafficFine,
   Vehicle,
 } from '@piston/core';
 
@@ -17,6 +18,7 @@ export type NewRule = Omit<MaintenanceRule, 'id'>;
 export type NewEvent = Omit<MaintenanceEvent, 'id' | 'hasDocument'>;
 export type NewFuel = Omit<FuelRecord, 'id'>;
 export type NewExpense = Omit<ExpenseRecord, 'id'>;
+export type NewFine = Omit<TrafficFine, 'id' | 'paidOn' | 'paidAmount'>;
 
 export interface Account {
   userId: string;
@@ -46,6 +48,7 @@ export interface VehicleBundle {
   events: MaintenanceEvent[];
   fuel: FuelRecord[];
   expenses: ExpenseRecord[];
+  fines: TrafficFine[];
 }
 
 /** Kullanıcıya gösterilebilir hata. `code` sunucudaki hata adlarıyla eşleşir. */
@@ -89,6 +92,12 @@ export interface GarageRepo {
   deleteFuel(id: string): Promise<void>;
   addExpense(record: NewExpense): Promise<void>;
   deleteExpense(id: string): Promise<void>;
+
+  // Trafik cezası
+  addFine(fine: NewFine): Promise<void>;
+  /** Ödendi olarak işaretler ve tutarı "Ceza" masrafı olarak yıllık giderlere ekler */
+  payFine(id: string, paidOn: string, paidAmount: number): Promise<void>;
+  deleteFine(id: string): Promise<void>;
 
   // Gösterge ışığı tanıma (yapay zekâ)
   identifyWarningLights(req: LightRequest): Promise<LightIdentification>;

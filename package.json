@@ -15,6 +15,6 @@
     "e2e": "node apps/mobile/e2e/demo-flow.cjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run db:test",
     "sync:shared": "cp packages/core/src/warning-lights.json supabase/functions/_shared/warning-lights.json",
-    "fn:test": "bash supabase/functions/identify-warning-light/test/run.sh"
+    "fn:test": "bash supabase/functions/identify-warning-light/test/run.sh && bash supabase/functions/send-reminders/test/run.sh"
   }
 }

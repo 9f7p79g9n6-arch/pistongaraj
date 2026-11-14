@@ -12,7 +12,7 @@ import { RepoError, type Account, type GarageRepo, type VehicleBundle } from './
 import { SupabaseRepo } from './supabase-repo';
 
 const ACTIVE_KEY = 'piston-active-vehicle';
-const EMPTY: VehicleBundle = { rules: [], events: [], fuel: [], expenses: [] };
+const EMPTY: VehicleBundle = { rules: [], events: [], fuel: [], expenses: [], fines: [] };
 
 export const repo: GarageRepo = env.isDemo ? new DemoRepo() : new SupabaseRepo();
 

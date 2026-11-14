@@ -31,6 +31,9 @@ function Routes() {
         <Stack.Screen name="garage" />
         <Stack.Screen name="premium" />
         <Stack.Screen name="lights" />
+        <Stack.Screen name="accident" />
+        <Stack.Screen name="vehicle/[id]/fines" />
+        <Stack.Screen name="vehicle/[id]/inspection" />
         <Stack.Screen name="vehicle/new" />
         <Stack.Screen name="vehicle/[id]/index" />
         <Stack.Screen name="vehicle/[id]/maintenance" />

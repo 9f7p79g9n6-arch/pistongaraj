@@ -74,6 +74,12 @@ Telefonda **Expo Go** ile QR kodu okut. `.env` yoksa uygulama **DEMO** modunda a
 - Anthropic API anahtarını yalnızca Supabase secret olarak tut; uygulamaya koyma.
 - Demo modunda fotoğraf analiz edilmez; akışı göstermek için "örnek sonuç" etiketli sabit bir sonuç döner.
 
+### Trafik cezası, muayene ve kaza asistanı
+
+- **Trafik cezası:** süreler tebliğ tarihinden işler (2918 s. KTK md. 115): 15 gün içinde %25 indirimli, bir ay içinde normal ödeme. Ödenen ceza "Ceza" masrafı olarak giderlere eklenir. `send-reminders`, indirim süresinin bitmesine 3 gün ya da daha az kalan cezalar için bildirim gönderir. Gecikme zammı hesaplanmaz; kullanıcı e-Devlet'e yönlendirilir.
+- **Muayene hazırlığı:** 18 maddelik kontrol listesi (`packages/core/src/inspection-checklist.ts`). İşaretler cihazda, araç ve muayene tarihine göre saklanır.
+- **Kaza asistanı:** adım adım rehber, fotoğraf listesi, karşı taraf bilgileri. Karşı tarafın bilgileri kişisel veridir; yalnızca cihazda saklanır, sunucuya gönderilmez.
+
 ## Testler ve kontroller
 
 ```bash
@@ -82,7 +88,7 @@ npm test             # packages/core birim testleri (Vitest)
 npm run db:test      # migration'ları geçici PostgreSQL'e uygular, RLS testlerini çalıştırır
 npm run web:build    # web derlemesi (apps/mobile/dist)
 npm run e2e          # derlenmiş web uygulamasında uçtan uca akış (BASE_URL ile)
-npm run fn:test      # identify-warning-light fonksiyonunu sahte Supabase ve sahte Claude API'ye karşı çalıştırır (ücretsiz)
+npm run fn:test      # identify-warning-light ve send-reminders fonksiyonlarını sahte sunuculara karşı çalıştırır (ücretsiz, gerçek istek yok)
 ```
 
 `db:test` için makinede PostgreSQL 15+ ikili dosyaları gerekir (`initdb`, `pg_ctl`, `psql`). Supabase'in `auth`, `vault` ve `storage` nesneleri `supabase/tests/supabase_stub.sql` ile taklit edilir.

@@ -5,11 +5,11 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, FunctionsHttpError, type PostgrestError, type SupabaseClient } from '@supabase/supabase-js';
-import { normalizePlate, type ExpenseRecord, type FuelRecord, type MaintenanceEvent, type MaintenanceRule, type Vehicle } from '@piston/core';
+import { normalizePlate, type TrafficFine, type ExpenseRecord, type FuelRecord, type MaintenanceEvent, type MaintenanceRule, type Vehicle } from '@piston/core';
 import { Platform } from 'react-native';
 
 import { env } from '@/lib/env';
-import { RepoError, type Account, type LightIdentification, type LightRequest, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
+import { RepoError, type Account, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
 
 type Row = Record<string, any>;
 
@@ -51,6 +51,11 @@ const toFuel = (r: Row): FuelRecord => ({
 });
 const toExpense = (r: Row): ExpenseRecord => ({
   id: r.id, vehicleId: r.vehicle_id, category: r.category, amount: Number(r.amount), spentOn: r.spent_on, note: r.note,
+});
+
+const toFine = (r: Row): TrafficFine => ({
+  id: r.id, vehicleId: r.vehicle_id, fineDate: r.fine_date, notifiedOn: r.notified_on, amount: Number(r.amount),
+  description: r.description, paidOn: r.paid_on, paidAmount: r.paid_amount == null ? null : Number(r.paid_amount),
 });
 
 export class SupabaseRepo implements GarageRepo {
@@ -176,18 +181,20 @@ export class SupabaseRepo implements GarageRepo {
   }
 
   async loadBundle(vehicleId: string): Promise<VehicleBundle> {
-    const [rules, events, fuel, expenses] = await Promise.all([
+    const [rules, events, fuel, expenses, fines] = await Promise.all([
       this.sb.from('maintenance_rules').select('*').eq('vehicle_id', vehicleId),
       this.sb.from('maintenance_events').select('*').eq('vehicle_id', vehicleId).order('performed_on', { ascending: false }).limit(200),
       this.sb.from('fuel_records').select('*').eq('vehicle_id', vehicleId).order('odometer_km', { ascending: false }).limit(500),
       this.sb.from('expense_records').select('*').eq('vehicle_id', vehicleId).order('spent_on', { ascending: false }).limit(500),
+      this.sb.from('traffic_fines').select('*').eq('vehicle_id', vehicleId).order('notified_on', { ascending: false }).limit(200),
     ]);
-    for (const r of [rules, events, fuel, expenses]) if (r.error) fail(r.error);
+    for (const r of [rules, events, fuel, expenses, fines]) if (r.error) fail(r.error);
     return {
       rules: (rules.data ?? []).map(toRule),
       events: (events.data ?? []).map(toEvent),
       fuel: (fuel.data ?? []).map(toFuel),
       expenses: (expenses.data ?? []).map(toExpense),
+      fines: (fines.data ?? []).map(toFine),
     };
   }
 
@@ -233,6 +240,34 @@ export class SupabaseRepo implements GarageRepo {
     const { error } = await this.sb.from('expense_records').insert({
       vehicle_id: e.vehicleId, category: e.category, amount: e.amount, spent_on: e.spentOn, note: e.note,
     });
+    if (error) fail(error);
+  }
+
+  async addFine(f: NewFine) {
+    const { error } = await this.sb.from('traffic_fines').insert({
+      vehicle_id: f.vehicleId, fine_date: f.fineDate, notified_on: f.notifiedOn, amount: f.amount, description: f.description,
+    });
+    if (error) fail(error);
+  }
+
+  async payFine(id: string, paidOn: string, paidAmount: number) {
+    const { data: fine, error: e1 } = await this.sb.from('traffic_fines').select('*').eq('id', id).single();
+    if (e1 || !fine) fail(e1);
+    if (fine.paid_on) return;
+    // Önce masraf, sonra ceza: ikinci adım başarısız olursa masraf geri alınır
+    const { data: exp, error: e2 } = await this.sb.from('expense_records')
+      .insert({ vehicle_id: fine.vehicle_id, category: 'fine', amount: paidAmount, spent_on: paidOn, note: fine.description })
+      .select('id').single();
+    if (e2 || !exp) fail(e2);
+    const { error: e3 } = await this.sb.from('traffic_fines').update({ paid_on: paidOn, paid_amount: paidAmount, expense_id: exp.id }).eq('id', id);
+    if (e3) {
+      await this.sb.from('expense_records').delete().eq('id', exp.id);
+      fail(e3);
+    }
+  }
+
+  async deleteFine(id: string) {
+    const { error } = await this.sb.from('traffic_fines').delete().eq('id', id);
     if (error) fail(error);
   }
 

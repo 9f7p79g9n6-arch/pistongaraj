@@ -73,9 +73,12 @@ Deno.serve(async (req) => {
   if (!apiKey) return json({ error: 'not_configured' }, 503);
 
   // 1) Oturum
-  const userClient = createClient(url, anonKey, { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
-  const { data: { user } } = await userClient.auth.getUser();
-  if (!user) return json({ error: 'unauthorized' }, 401);
+  // Oturum anahtarı açıkça verilir: anahtarsız getUser() sunucuya sormadan "oturum yok" döner
+  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return json({ error: 'unauthorized' }, 401);
+  const userClient = createClient(url, anonKey, { auth: { persistSession: false } });
+  const { data: { user }, error: authErr } = await userClient.auth.getUser(token);
+  if (authErr || !user) return json({ error: 'unauthorized' }, 401);
 
   // 2) Girdi
   let body: Record<string, unknown>;
