@@ -1,0 +1,19 @@
+# Supabase CLI yapılandırması (yerel geliştirme). Ayrıntı: README.md > Kurulum
+project_id = "piston-garage"
+
+[api]
+schemas = ["public"]
+
+[auth]
+site_url = "pistongarage://"
+additional_redirect_urls = ["pistongarage://auth-callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+otp_length = 6
+otp_expiry = 600
+
+[functions.send-reminders]
+verify_jwt = false # cron çağırır; içeride gizli başlık kontrol edilir

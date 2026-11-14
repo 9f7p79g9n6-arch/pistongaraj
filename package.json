@@ -1,0 +1,20 @@
+{
+  "name": "piston-garage",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "npm run test -w @piston/core",
+    "typecheck": "npm run typecheck -w @piston/core && npm run typecheck -w mobile",
+    "lint": "npm run lint -w mobile",
+    "db:test": "bash supabase/tests/run.sh",
+    "mobile": "npm run start -w mobile",
+    "web:build": "npm run export:web -w mobile",
+    "e2e": "node apps/mobile/e2e/demo-flow.cjs",
+    "check": "npm run typecheck && npm run lint && npm test && npm run db:test",
+    "sync:shared": "cp packages/core/src/warning-lights.json supabase/functions/_shared/warning-lights.json",
+    "fn:test": "bash supabase/functions/identify-warning-light/test/run.sh"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@piston/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PISTON GARAGE iş kuralları: bakım, yakıt, masraf, doğrulama. Saf TypeScript, platformdan bağımsız.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9",
+    "vitest": "^3.2.7"
+  }
+}

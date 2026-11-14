@@ -1,0 +1,1113 @@
+<title>Piston Garage Prototip</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: üst sekmeli çalışma alanı · solda telefon prototipi, sağda ekran notları; analiz sayfaları tek kolon okuma düzeni */
+:root{
+  --bg:#17191D; --card:#252B35; --surface:#303640; --line:#3A414C;
+  --fg:#F4F5F6; --muted:#A3AAB4; --neon:#B6F000; --neon-ink:#17191D;
+  --warn:#FFB547; --bad:#FF6B5E; --ok:#B6F000; --info:#7CC4FF;
+  --display:"Chakra Petch","Barlow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--fg)}
+:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.01em}
+
+/* ---------- site header ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;letter-spacing:.08em;font-size:17px}
+.brand i{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--neon);color:var(--neon-ink);font-style:normal;font-size:15px}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{color:var(--muted);text-decoration:none;padding:7px 12px;border-radius:8px;font-weight:600;font-size:14px}
+.nav a:hover{color:var(--fg);background:var(--card)}
+.nav a[aria-current="page"]{color:var(--fg);background:var(--surface)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- prototype layout ---------- */
+.proto{display:grid;grid-template-columns:400px minmax(0,1fr);gap:40px;align-items:start}
+@media (max-width:900px){.proto{grid-template-columns:minmax(0,1fr)}}
+.phone{position:relative;width:100%;max-width:400px;height:min(840px,calc(100dvh - 120px));min-height:560px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:40px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 0 0 6px #0f1114}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:14px 26px 4px;font-size:13px;font-weight:600}
+.demo-tag{font-size:10px;letter-spacing:.12em;font-weight:700;color:var(--neon-ink);background:var(--warn);padding:2px 7px;border-radius:5px}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 18px 24px;scrollbar-width:thin}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:#1B1E23;padding:6px 4px 14px}
+.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:10.5px;font-weight:600}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-current="true"]{color:var(--neon)}
+
+/* ---------- phone UI kit ---------- */
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0 14px}
+.hdr h2{font-size:22px}
+.back{background:var(--card);border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
+.icon-btn{background:var(--card);border:0;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;position:relative;flex:none}
+.dot{position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--neon)}
+.card{background:var(--card);border-radius:16px;padding:14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.sec-t{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 10px}
+.sec-t h3{font-size:15px;letter-spacing:.03em}
+.link{background:none;border:0;color:var(--neon);font-weight:600;font-size:13px;padding:0}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.xs{font-size:11px}
+.label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-weight:700;background:var(--surface);width:100%}
+.btn.pri{background:var(--neon);color:var(--neon-ink)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.sm{width:auto;padding:8px 12px;font-size:13px;border-radius:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--fg);white-space:nowrap}
+.chip.on{border-color:var(--neon);color:var(--neon)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;letter-spacing:.02em;white-space:nowrap}
+.pill.ok{background:rgba(182,240,0,.13);color:var(--ok)}
+.pill.warn{background:rgba(255,181,71,.14);color:var(--warn)}
+.pill.bad{background:rgba(255,107,94,.15);color:var(--bad)}
+.pill.info{background:rgba(124,196,255,.13);color:var(--info)}
+.pill.n{background:var(--surface);color:var(--muted)}
+.bar{height:6px;border-radius:9px;background:var(--surface);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:9px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;color:var(--muted);font-weight:600}
+.inp{background:var(--surface);border:1px solid transparent;border-radius:11px;padding:11px 12px;width:100%;outline:none}
+.inp:focus{border-color:var(--neon)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;text-align:right;font-weight:600}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left}
+.list-item:last-child{border-bottom:0}
+.ic{width:38px;height:38px;border-radius:11px;background:var(--surface);display:grid;place-items:center;flex:none}
+.ic svg{width:20px;height:20px}
+.grow{flex:1;min-width:0}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hscroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -18px;padding:0 18px}
+.prod-mini{flex:none;width:150px;background:var(--card);border-radius:14px;padding:10px;border:0;text-align:left}
+.thumb{aspect-ratio:4/3;max-width:100%;border-radius:10px;background:linear-gradient(135deg,#2c323c,#20252c);display:grid;place-items:center;color:var(--muted)}
+.thumb svg{width:44%;height:auto;opacity:.75}
+.price{font-family:var(--display);font-weight:700;font-size:16px}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:20;display:flex;align-items:flex-end}
+.sheet{background:#1F2329;width:100%;border-radius:22px 22px 0 0;padding:10px 18px 22px;max-height:86%;overflow-y:auto;border-top:1px solid var(--line)}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:4px auto 12px}
+.toast{position:absolute;left:16px;right:16px;bottom:86px;background:var(--fg);color:var(--bg);padding:11px 14px;border-radius:12px;font-weight:600;font-size:13.5px;z-index:30}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface);border-radius:11px;padding:3px}
+.seg button{border:0;background:none;padding:8px;border-radius:9px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--fg)}
+.switch{width:42px;height:24px;border-radius:20px;background:var(--surface);border:0;position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:transform .15s}
+.switch[aria-checked="true"]{background:var(--neon)}
+.switch[aria-checked="true"]::after{transform:translateX(18px);background:var(--neon-ink)}
+.compat{border-radius:14px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.compat.ok{background:rgba(182,240,0,.09);border:1px solid rgba(182,240,0,.35)}
+.compat.check{background:rgba(255,181,71,.08);border:1px solid rgba(255,181,71,.35)}
+.compat.no{background:rgba(255,107,94,.08);border:1px solid rgba(255,107,94,.35)}
+.bubble{max-width:88%;padding:10px 13px;border-radius:15px;font-size:14px}
+.bubble.me{align-self:flex-end;background:var(--neon);color:var(--neon-ink);border-bottom-right-radius:5px;font-weight:600}
+.bubble.ai{align-self:flex-start;background:var(--card);border-bottom-left-radius:5px}
+.conf{display:grid;grid-template-columns:1fr 64px;gap:4px 10px;align-items:center;font-size:13px;margin-top:8px}
+.vhero{position:relative;border-radius:20px;padding:16px;background:radial-gradient(120% 90% at 85% 10%,#323a46 0%,var(--card) 55%);overflow:hidden}
+.vhero .car{width:100%;height:auto;margin:6px 0 2px}
+.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.stat3>div{background:rgba(23,25,29,.55);border-radius:11px;padding:8px 10px}
+.stat3 b{display:block;font-family:var(--display);font-size:15px}
+.cta-band{border:1px solid rgba(182,240,0,.4);background:linear-gradient(180deg,rgba(182,240,0,.08),rgba(182,240,0,.02));border-radius:16px;padding:14px}
+.post{background:var(--card);border-radius:16px;padding:14px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.verified{color:var(--neon);font-size:11px;font-weight:700}
+.post-acts{display:flex;gap:16px;margin-top:10px}
+.post-acts button{background:none;border:0;display:flex;align-items:center;gap:5px;color:var(--muted);font-size:13px;font-weight:600;padding:0}
+.post-acts button.on{color:var(--neon)}
+.plan{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--card);text-align:left;width:100%}
+.plan.on{border-color:var(--neon)}
+.check-li{display:flex;gap:8px;font-size:13.5px;padding:3px 0}
+.check-li::before{content:"✓";color:var(--neon);font-weight:700}
+.tline{position:relative;padding-left:18px}
+.tline::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tline .ev{position:relative;padding:6px 0 12px}
+.tline .ev::before{content:"";position:absolute;left:-17px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--muted)}
+.tline .ev.n::before{border-color:var(--neon)}
+.login-hero{min-height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding-top:30px}
+.err{color:var(--bad);font-size:12.5px;font-weight:600}
+
+/* ---------- notes panel ---------- */
+.notes{position:sticky;top:84px}
+.notes .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--neon);font-weight:700}
+.notes h2{font-size:28px;margin:6px 0 10px}
+.notes p{color:var(--muted);max-width:62ch;margin:0 0 14px}
+.notes h4{margin:18px 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.notes ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:64ch}
+.notes li::marker{color:var(--neon)}
+.jump{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.jump button{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--muted)}
+.jump button[aria-current="true"]{color:var(--neon);border-color:var(--neon)}
+@media (max-width:900px){.notes{position:static}}
+
+/* ---------- report pages ---------- */
+.doc{max-width:980px}
+.doc .lead{font-size:18px;color:var(--muted);max-width:66ch;margin:10px 0 28px}
+.doc h1{font-size:clamp(28px,4vw,40px)}
+.doc h2{font-size:22px;margin:40px 0 14px}
+.doc p,.doc li{max-width:72ch}
+.thesis{border-left:3px solid var(--neon);padding:4px 0 4px 18px;font-size:18px;font-weight:500;margin:24px 0}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:14px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;background:var(--card)}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--bg)}
+th:first-child{background:var(--card)}
+td.pg,th.pg{background:rgba(182,240,0,.06)}
+tr:last-child td{border-bottom:0}
+.m{font-weight:700;font-size:15px}
+.m.y{color:var(--ok)}.m.p{color:var(--warn)}.m.n{color:#69717C}.m.u{color:var(--info)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 0 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.rc{background:var(--card);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.rc h3{font-size:17px}
+.rc p{margin:0;color:var(--muted);font-size:14.5px}
+.rc .who{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.issue{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.issue:last-child{border-bottom:0}
+.issue h3{font-size:16px;margin-bottom:4px}
+.issue p{margin:4px 0 0;color:var(--muted)}
+.issue p b{color:var(--fg);font-weight:600}
+@media (max-width:600px){.issue{grid-template-columns:minmax(0,1fr);gap:6px}}
+.phase{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.phase .tag{font-family:var(--display);font-weight:700;color:var(--neon)}
+.phase ul{margin:6px 0 0;padding-left:18px;color:var(--muted)}
+@media (max-width:600px){.phase{grid-template-columns:minmax(0,1fr);gap:4px}}
+pre.code{background:var(--card);border-radius:12px;padding:14px;overflow-x:auto;font-size:13px;line-height:1.55;color:#D9DEE4}
+.src a{color:var(--info)}
+.src li{font-size:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><i>P</i>PISTON GARAGE</div>
+    <nav class="nav" aria-label="Bölümler">
+      <a href="#prototip">Prototip</a>
+      <a href="#rakipler">Rakip Analizi</a>
+      <a href="#brif">Brif Düzeltmeleri</a>
+      <a href="#yol">Yol Haritası</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ===================== PROTOTYPE ===================== -->
+  <section id="v-prototip" class="proto">
+    <div>
+      <div class="phone" id="phone">
+        <div class="sbar num"><span>09:41</span><span class="demo-tag">DEMO VERİ</span><span>5G ▮▮▮</span></div>
+        <div class="screen" id="screen"></div>
+        <nav class="tabbar" id="tabbar" aria-label="Alt menü"></nav>
+        <div id="overlay"></div>
+      </div>
+    </div>
+    <aside class="notes" id="notes"></aside>
+  </section>
+
+  <!-- ===================== COMPETITORS ===================== -->
+  <section id="v-rakipler" class="doc" hidden>
+    <span class="label" style="color:var(--neon)">Rakip analizi · Kasım 2026</span>
+    <h1>Pazar parçalı. Döngüyü kimse kapatmıyor.</h1>
+    <p class="lead">Türkiye'de araç sahibi bugün en az dört uygulama kullanıyor: masraf için Drivvo veya Fuelio, parça için Trendyol veya Hepsiburada, servis için arabam.com Garaj veya bir tanıdık, sorular için Facebook grupları ve forumlar. Bunların hiçbiri birbirinden haberdar değil.</p>
+
+    <p class="thesis">PISTON GARAGE'ın konumu: <b>"Bakım zamanı geldi → aracına uyan doğru parça → güvenilir usta → kayıt geçmişe işlendi"</b> döngüsünü tek uygulamada kapatan ilk platform.</p>
+
+    <h2>Özellik karşılaştırması</h2>
+    <div class="tbl-wrap">
+      <table id="cmp"></table>
+    </div>
+    <div class="legend"><span><b class="m y">●</b> Var</span><span><b class="m p">◐</b> Kısmen</span><span><b class="m n">○</b> Yok</span><span><b class="m u">?</b> Doğrulanamadı</span></div>
+    <p class="muted small">Tablo; mağaza sayfaları, yardım sayfaları ve basın haberlerinden derlendi. "?" işaretli hücreler lansman öncesi uygulamalar indirilerek tek tek kontrol edilmeli.</p>
+
+    <h2>Rakipler tek tek</h2>
+    <div class="cards">
+      <div class="rc"><span class="who">Hizmet pazaryeri</span><h3>arabam.com Garaj</h3><p><b style="color:var(--fg)">Güçlü:</b> Büyük kullanıcı tabanı, araç değeri takibi, servis, lastik, kuaför, sigorta ve kredi hizmetlerini uygulama içinden satıyor.</p><p><b style="color:var(--fg)">Zayıf:</b> Yardım sayfasına göre Garaj'a yalnızca 1 araç eklenebiliyor. Km tabanlı bakım takibi, yakıt analizi ve parça pazarı yok.</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> Çoklu araç ücretsiz, derin bakım takibi ve satışta değer kazandıran Araç Pasaportu.</p></div>
+      <div class="rc"><span class="who">Masraf ve yakıt takibi</span><h3>Drivvo · Fuelio</h3><p><b style="color:var(--fg)">Güçlü:</b> Olgun yakıt ve masraf takibi, çoklu araç, LPG desteği (Fuelio), raporlar.</p><p><b style="color:var(--fg)">Zayıf:</b> Kayıt defteri olarak kalıyorlar. Hatırlatmadan sonra parça, usta ya da randevu adımı yok. Arayüzleri eski bulunuyor.</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> Her hatırlatma bir aksiyona dönüşüyor: tek dokunuşla uyumlu set ve servis teklifi.</p></div>
+      <div class="rc"><span class="who">Parça perakende + bakım</span><h3>AUTODOC CLUB</h3><p><b style="color:var(--fg)">Güçlü:</b> Km ve tarihe göre hatırlatma, çoklu araç, belge fotoğrafı, video tamir kılavuzları.</p><p><b style="color:var(--fg)">Zayıf:</b> Tek satıcı (AUTODOC) modeli. Türkiye'deki usta ağıyla ve yerel satıcılarla bağı yok. Yerel kurallara göre hatırlatma da yok (muayene, MTV, kış lastiği).</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> Yerel çok satıcılı pazar ve yerel usta ağı.</p></div>
+      <div class="rc"><span class="who">Genel e-ticaret</span><h3>Trendyol · Hepsiburada · n11</h3><p><b style="color:var(--fg)">Güçlü:</b> Trafik, güven, hızlı kargo, kampanya gücü.</p><p><b style="color:var(--fg)">Zayıf:</b> Uyumluluk çoğunlukla satıcının beyanına dayanıyor. Şikâyet sitelerinde "yanlış parça gönderildi" ve "iade alınmadı" türü kayıtlar sık.</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> OEM ve şasi numarasıyla doğrulanmış uyumluluk, ayrıca uyumsuz çıkarsa ücretsiz iade güvencesi.</p></div>
+      <div class="rc"><span class="who">Servis randevusu</span><h3>Servislet · Otovınn · marka uygulamaları</h3><p><b style="color:var(--fg)">Güçlü:</b> Randevu ve ödeme akışı, üye iş yeri paneli.</p><p><b style="color:var(--fg)">Zayıf:</b> Ya belirli bir ağa ya da markaya bağlılar. Birden fazla ustadan şeffaf teklif alıp karşılaştırma yok. Aracın geçmişini ustayla paylaşma da yok.</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> Bağımsız ustalar için teklif karşılaştırma. Usta, kullanıcının izniyle aracın geçmişini görüyor.</p></div>
+      <div class="rc"><span class="who">Topluluk</span><h3>Facebook grupları · DonanımHaber · model kulüpleri</h3><p><b style="color:var(--fg)">Güçlü:</b> Gerçek sahip deneyimi, model bazlı derin bilgi.</p><p><b style="color:var(--fg)">Zayıf:</b> Bilgi dağınık ve aranamıyor. Kimin gerçekten araç sahibi olduğu belli değil. Bilgi alışverişe ya da servise bağlanmıyor.</p><p><b style="color:var(--neon)">Bizim hamlemiz:</b> Doğrulanmış sahip rozeti, model bazlı "Kronik Sorunlar" sayfası, gönderiden parçaya ve ustaya geçiş.</p></div>
+    </div>
+
+    <h2>Öne geçiren 10 fark</h2>
+    <div class="cards" id="edges"></div>
+
+    <h2>Kaynaklar</h2>
+    <ul class="src">
+      <li><a href="https://www.arabam.com/yardim/garaj" target="_blank" rel="noopener">arabam.com Garaj yardım sayfası</a> · <a href="https://www.webtekno.com/arabam-com-arabam-garaj-tanitti-h116650.html" target="_blank" rel="noopener">Webtekno: arabam Garaj tanıtımı</a></li>
+      <li><a href="https://www.capterra.com/p/219368/Drivvo/" target="_blank" rel="noopener">Drivvo · Capterra</a> · <a href="https://www.slashgear.com/1925961/best-apps-tracking-fuel-economy-car-expenses" target="_blank" rel="noopener">SlashGear: yakıt ve masraf uygulamaları</a></li>
+      <li><a href="https://apps.apple.com/US/app/id1462874968" target="_blank" rel="noopener">AUTODOC CLUB · App Store</a></li>
+      <li><a href="https://www.webtekno.com/arac-masrafi-yakit-takip-uygulamalari-h206350.html" target="_blank" rel="noopener">Webtekno: araç masrafı ve yakıt takip uygulamaları</a></li>
+      <li><a href="https://apps.apple.com/cd/app/servislet/id1668207633" target="_blank" rel="noopener">Servislet · App Store</a> · <a href="https://apps.apple.com/us/app/id1611316833" target="_blank" rel="noopener">Otovınn · App Store</a> · <a href="https://apps.apple.com/us/app/id1611484175" target="_blank" rel="noopener">Otovınn Üye İşyeri</a></li>
+      <li><a href="https://ecdb.com/resources/sample-data/market/tr/vehicle-parts" target="_blank" rel="noopener">ECDB: Türkiye araç parçası e-ticaret pazarı</a> (pazar payı tahmini, ücretli veri)</li>
+      <li><a href="https://www.sikayetvar.com/tst-otomotiv" target="_blank" rel="noopener">Şikayetvar: yanlış parça şikâyet örnekleri</a> · <a href="https://www.sikayetvar.com/trendyol/kargo-gecikmesi-ve-siparis-iptali-nedeniyle-yasadigim-magduriyet" target="_blank" rel="noopener">kargo gecikmesi örneği</a></li>
+      <li><a href="https://play.google.com/store/apps/details?id=com.aracimpro.app" target="_blank" rel="noopener">Aracım Pro · Google Play</a> · <a href="https://apps.apple.com/py/app/fuelify-pro/id6749482313" target="_blank" rel="noopener">Fuelify Pro</a> · <a href="https://apps.apple.com/mx/app/otomasraf/id6749705107" target="_blank" rel="noopener">OtoMasraf</a> (yeni küçük rakipler)</li>
+    </ul>
+  </section>
+
+  <!-- ===================== BRIEF FIXES ===================== -->
+  <section id="v-brif" class="doc" hidden>
+    <span class="label" style="color:var(--neon)">Brif incelemesi</span>
+    <h1>Brifte düzeltilen 18 nokta</h1>
+    <p class="lead">Brifin yönü doğru. Aşağıdakiler çelişkiler, yasal ya da mağaza kurallarından doğan riskler ve sonradan pahalıya patlayacak eksiklerdir. Her maddede önerilen düzeltme yazıyor. Prototip bu düzeltmelerle kuruldu.</p>
+    <div id="issues"></div>
+  </section>
+
+  <!-- ===================== ROADMAP ===================== -->
+  <section id="v-yol" class="doc" hidden>
+    <span class="label" style="color:var(--neon)">Yol haritası ve mimari</span>
+    <h1>Gözden geçirilmiş aşamalar</h1>
+    <p class="lead">Ana değişiklik şu: pazaryeri, kullanıcı tabanı olmadan çalışmaz. Önce garaj ve hatırlatmalarla kullanıcı toplanıyor. Ardından ucuz ve hızlı gelir için Plus abonelik ve servis teklifleri geliyor. Pazaryeri, pilot satıcılarla bunların üzerine kuruluyor.</p>
+    <div id="phases"></div>
+
+    <h2>Mimari</h2>
+    <pre class="code">apps/
+  mobile/        Expo + React Native + TypeScript (expo-router)
+  admin/         Next.js yönetim, satıcı ve işletme panelleri
+packages/
+  ui/            Tasarım sistemi: tokenlar, bileşenler (Antrasit + Neon)
+  core/          İş kuralları: bakım hesaplama, tüketim, uyumluluk durumları (saf TS, test edilir)
+  api/           Supabase istemcisi, tipler (supabase gen types)
+supabase/
+  migrations/    Şema + RLS politikaları (her tablo için)
+  functions/     Edge Functions: ödeme webhook, bildirim zamanlayıcı, AI proxy, katalog eşleme
+  seed/          Yalnızca demo ortamı verisi</pre>
+
+    <h2>Veritabanına eklenmesi gereken tablolar</h2>
+    <p class="muted">Brifteki 27 tablo korunuyor. <code>users</code> yerine Supabase'in <code>auth.users</code> tablosu ve <code>profiles</code> kullanılıyor. Eksik kalan tablolar:</p>
+    <pre class="code">-- Araç kataloğu (uyumluluğun temeli)
+vehicle_makes, vehicle_models, vehicle_generations, vehicle_variants (motor kodu, üretim aralığı)
+-- Bakım: kural ve örnek ayrımı
+maintenance_rules      (kullanıcı/servis/üretici kaynaklı aralık, source + verified alanı)
+maintenance_events     (yapılan işlem, km, tarih, servis, fatura -> documents)
+-- Pazaryeri
+addresses, favorites, product_questions, returns, refunds,
+seller_payouts, commission_rates, fitment_sources (TecDoc/OEM/satıcı beyanı)
+-- Servisler
+service_quote_requests, service_quotes, appointments, business_staff
+-- Topluluk
+communities, community_members, follows, saved_posts, moderation_actions
+-- Platform
+roles, user_roles, device_tokens, consents (KVKK açık rıza kayıtları),
+audit_logs, ai_conversations, ai_usage, feature_flags, vehicle_shares (aile/filo)</pre>
+
+    <h2>Uyumluluk kararı nasıl verilir</h2>
+    <pre class="code">verified_compatible  ← OEM no veya lisanslı katalog (ör. TecDoc) eşleşti + araç varyantı (motor kodu / şasi) kesin
+check_required       ← yalnızca marka/model/yıl eşleşti, ya da varyant belirsiz (ör. iki farklı fren diski)
+incompatible         ← katalog açıkça dışlıyor
+-- Satıcı beyanı tek başına asla "doğrulanmış" üretmez.</pre>
+  </section>
+</main>
+
+<script>
+/* =========================================================
+   DEMO STATE (yalnızca demo ortamı — gerçek veri değildir)
+   ========================================================= */
+const TODAY = new Date('2026-11-14T09:41:00');
+const $ = s => document.querySelector(s);
+const fmt = n => Math.round(n).toLocaleString('tr-TR');
+const tl = n => n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';
+const tl0 = n => Math.round(n).toLocaleString('tr-TR')+' ₺';
+const days = d => Math.round((new Date(d) - TODAY)/864e5);
+const dstr = d => new Date(d).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'});
+const addMonths = (d,m) => { const x = new Date(d); x.setMonth(x.getMonth()+m); return x; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const I = { // inline icons
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  parts:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  forum:'<path d="M4 5h16v11H8l-4 4z"/>',
+  wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  oil:'<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  fuel:'<path d="M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M4 21h11M15 9h2l2 2v7a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M7 7h5v4H7z"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  ai:'<path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  search:'<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  cart:'<path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+  pin:'<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1 6.2L12 17.4 6.5 20.3l1-6.2L3 9.7l6.2-.9z"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6A7 7 0 0 0 19 12z"/>',
+  car:'<path d="M5 16h14M3 16v-3l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v3"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/>',
+  qr:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  send:'<path d="M4 12l16-8-6 16-2-6z"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',
+  alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+};
+const ic = (n, s=20, c='currentColor') => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+
+const CAR_SVG = (color='#B6F000') => `<svg class="car" viewBox="0 0 320 110" aria-hidden="true">
+  <defs><linearGradient id="cb" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4a5361"/><stop offset="1" stop-color="#2a3039"/></linearGradient></defs>
+  <ellipse cx="160" cy="98" rx="140" ry="7" fill="#0d0f12" opacity=".7"/>
+  <path d="M22 78 C22 66 30 60 46 57 L92 50 C108 34 128 24 160 22 L206 22 C230 23 246 32 262 48 L290 54 C302 57 306 64 306 74 L306 80 C306 84 303 86 299 86 L28 86 C24 86 22 83 22 78Z" fill="url(#cb)"/>
+  <path d="M104 50 C118 36 134 30 160 29 L200 29 C220 30 234 38 246 50Z" fill="#1b1f25"/>
+  <path d="M176 29 L176 50" stroke="#2c323c" stroke-width="3"/>
+  <path d="M28 70 L62 66" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+  <path d="M286 62 L302 66" stroke="#ff6b5e" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+  <circle cx="82" cy="86" r="19" fill="#111317"/><circle cx="82" cy="86" r="10" fill="#3a414c"/>
+  <circle cx="246" cy="86" r="19" fill="#111317"/><circle cx="246" cy="86" r="10" fill="#3a414c"/>
+</svg>`;
+
+function maintSet(lastOilKm){ return [
+  {id:'m1', name:'Motor yağı + yağ filtresi', icon:'oil', lastKm:lastOilKm, lastDate:'2026-03-10', everyKm:15000, everyM:12, src:'Sizin tanımınız'},
+  {id:'m2', name:'Hava filtresi', icon:'gear', lastKm:lastOilKm-15000, lastDate:'2025-03-02', everyKm:30000, everyM:24, src:'Servis önerisi'},
+  {id:'m3', name:'Polen filtresi', icon:'gear', lastKm:lastOilKm-6000, lastDate:'2025-10-01', everyKm:null, everyM:12, src:'Sizin tanımınız'},
+  {id:'m4', name:'Triger seti', icon:'gear', lastKm:lastOilKm-46000, lastDate:'2022-05-20', everyKm:150000, everyM:120, src:'Sizin tanımınız'},
+  {id:'m5', name:'Ön fren balatası', icon:'gear', lastKm:lastOilKm-8000, lastDate:'2025-12-12', everyKm:40000, everyM:null, src:'Servis önerisi'},
+  {id:'m6', name:'Akü', icon:'gear', lastKm:null, lastDate:'2023-01-08', everyKm:null, everyM:48, src:'Sizin tanımınız'},
+  {id:'m7', name:'Şanzıman yağı', icon:'oil', lastKm:lastOilKm-36000, lastDate:'2023-06-01', everyKm:60000, everyM:null, src:'Sizin tanımınız'},
+  {id:'m8', name:'Araç muayenesi', icon:'shield', due:'2026-12-02', src:'Ruhsattaki tarih'},
+  {id:'m9', name:'Trafik sigortası', icon:'shield', due:'2027-02-20', src:'Poliçe'},
+  {id:'m10', name:'MTV 1. taksit', icon:'doc', due:'2027-01-31', src:'Yasal takvim'},
+  {id:'m11', name:'Kış lastiğine geçiş', icon:'car', due:'2026-12-01', src:'Mevsimsel öneri'},
+]; }
+
+const S = {
+  authed:false, screen:'login', stack:[], tab:'home', active:0, plan:'free',
+  vehicles:[
+    {id:'v1', brand:'Ford', model:'Focus', year:2016, engine:'1.5 TDCi 120 PS', fuel:'Dizel', gear:'Manuel', km:148760, plate:'34 PG 0001', vin:'WF0XXXGCDXG•••••45', type:'Otomobil', color:'#B6F000',
+      maint:maintSet(136000),
+      fuelLog:[
+        {date:'2026-08-30', km:145100, l:46.0, p:60.80, full:true},
+        {date:'2026-09-15', km:145920, l:44.3, p:61.40, full:true},
+        {date:'2026-09-30', km:146810, l:47.9, p:62.10, full:true},
+        {date:'2026-10-15', km:147620, l:45.1, p:62.85, full:true},
+        {date:'2026-10-30', km:148530, l:50.2, p:63.20, full:true},
+        {date:'2026-11-13', km:148700, l:10.0, p:63.50, full:false},
+      ],
+      exp:[{date:'2026-11-08',cat:'Otopark',amt:260},{date:'2026-10-21',cat:'Bakım',amt:1850,note:'Ön balata + işçilik'},{date:'2026-10-03',cat:'Yıkama',amt:420}],
+      history:[
+        {date:'2026-10-21', km:147900, t:'Ön fren balatası değişti', by:'Usta Kemal Oto (örnek)', amt:1850, doc:true},
+        {date:'2026-03-10', km:136000, t:'Motor yağı + yağ filtresi', by:'Kendim', amt:1980, doc:true},
+        {date:'2025-10-01', km:130000, t:'Polen filtresi', by:'Kendim', amt:340, doc:false},
+      ]},
+    {id:'v2', brand:'Ford', model:'Transit Courier', year:2020, engine:'1.5 TDCi 100 PS', fuel:'Dizel', gear:'Manuel', km:86300, plate:'', vin:'', type:'Ticari', color:'#7CC4FF',
+      maint:maintSet(78000), fuelLog:[{date:'2026-10-20',km:85500,l:40,p:62.9,full:true},{date:'2026-11-06',km:86210,l:41.2,p:63.3,full:true}], exp:[], history:[{date:'2026-04-02', km:78000, t:'Periyodik bakım', by:'Anadolu Ford Uzman (örnek)', amt:3400, doc:true}]},
+  ],
+  cart:[], favs:new Set(['p3']), liked:new Set(), saved:new Set(),
+  widgets:{rem:true, cta:true, exp:true, ai:true, prods:true, forum:true, hist:true},
+  community:'Ford Focus', marketCat:'Tümü', myCarFilter:true, svcFilter:'Tümü',
+  chat:[], quoteSent:false, productId:null, serviceId:null, postId:null, fuelErr:'', addErr:'',
+};
+const V = () => S.vehicles[S.active];
+
+/* ---------- calculations (core package'a taşınacak saf fonksiyonlar) ---------- */
+function mStatus(v, m){
+  let kmLeft = null, dLeft = null, used = 0;
+  if (m.due){ dLeft = days(m.due); used = Math.min(1, Math.max(0, 1 - dLeft/365)); }
+  else {
+    if (m.everyKm && m.lastKm != null){ kmLeft = m.lastKm + m.everyKm - v.km; used = Math.max(used, (v.km - m.lastKm)/m.everyKm); }
+    if (m.everyM && m.lastDate){ const due = addMonths(m.lastDate, m.everyM); dLeft = Math.round((due - TODAY)/864e5);
+      used = Math.max(used, (TODAY - new Date(m.lastDate))/(due - new Date(m.lastDate))); }
+  }
+  const late = (kmLeft != null && kmLeft < 0) || (dLeft != null && dLeft < 0);
+  const soon = !late && ((kmLeft != null && kmLeft < 3000) || (dLeft != null && dLeft < 30));
+  return {kmLeft, dLeft, used:Math.min(1.05,used), st: late ? 'bad' : soon ? 'warn' : 'ok'};
+}
+function mLeftText(s){
+  const p = [];
+  if (s.kmLeft != null) p.push(s.kmLeft < 0 ? `${fmt(-s.kmLeft)} km geçti` : `${fmt(s.kmLeft)} km kaldı`);
+  if (s.dLeft != null) p.push(s.dLeft < 0 ? `${fmt(-s.dLeft)} gün gecikti` : `${fmt(s.dLeft)} gün kaldı`);
+  return p.join(' · ');
+}
+const stLabel = {bad:'Gecikmiş', warn:'Yaklaşıyor', ok:'Zamanında'};
+function sortedMaint(v){ return v.maint.map(m => ({m, s:mStatus(v,m)})).sort((a,b)=>({bad:0,warn:1,ok:2}[a.s.st]-{bad:0,warn:1,ok:2}[b.s.st]) || b.s.used - a.s.used); }
+
+function fuelStats(v){
+  const log = [...v.fuelLog].sort((a,b)=>a.km-b.km);
+  let prevFull = null, pend = 0, totL = 0, totKm = 0; const per = [];
+  for (const r of log){
+    if (prevFull){ pend += r.l; if (r.full){ const dist = r.km - prevFull.km; per.push({date:r.date, val: pend/dist*100}); totL += pend; totKm += dist; pend = 0; prevFull = r; } }
+    else if (r.full) prevFull = r;
+  }
+  const avg = totKm ? totL/totKm*100 : null;
+  const lastP = log.length ? log[log.length-1].p : 0;
+  const month = log.filter(r => r.date.startsWith('2026-10')).reduce((a,r)=>a+r.l*r.p,0);
+  return {avg, perKm: avg ? avg/100*lastP : null, month, per, last: log[log.length-1]};
+}
+function monthly(v){
+  const ms = [['06','Haz'],['07','Tem'],['08','Ağu'],['09','Eyl'],['10','Eki'],['11','Kas']];
+  const base = {'06':[2650,0,450],'07':[3100,4200,300],'08':[2900,0,1250]};
+  return ms.map(([k,l]) => {
+    if (base[k] && v.id==='v1') return {l, f:base[k][0], b:base[k][1], o:base[k][2]};
+    const f = v.fuelLog.filter(r=>r.date.slice(5,7)===k).reduce((a,r)=>a+r.l*r.p,0);
+    const b = v.exp.filter(e=>e.date.slice(5,7)===k && e.cat==='Bakım').reduce((a,e)=>a+e.amt,0);
+    const o = v.exp.filter(e=>e.date.slice(5,7)===k && e.cat!=='Bakım').reduce((a,e)=>a+e.amt,0);
+    return {l,f,b,o};
+  });
+}
+
+/* ---------- catalog (DEMO) ---------- */
+const PRODUCTS = [
+  {id:'p1', name:'Motor yağı 5W-30 · 5 L', brand:'Nordline (örnek)', cat:'Motor parçaları', price:1249.90, cond:'Sıfır', oem:'Ford WSS-M2C913-D normu', alt:['Norm: ACEA A5/B5'], stock:42, seller:'Kadıköy Yağ Market', sr:4.8, sc:1240, compat:'ok', why:'Aracınızın varyantı için katalogdaki yağ normu eşleşti.'},
+  {id:'p2', name:'Yağ filtresi', brand:'Filtrum (örnek)', cat:'Filtreler', price:289.00, cond:'Sıfır', oem:'OEM 1 883 037 (örnek)', alt:['ALT-OF-2231','ALT-HU7008'], stock:120, seller:'Parçacı Murat', sr:4.9, sc:3810, compat:'ok', why:'OEM numarası, şasi numaranızdan çözülen motor koduyla (XWDB) eşleşti.'},
+  {id:'p6', name:'Hava filtresi', brand:'Filtrum (örnek)', cat:'Filtreler', price:349.00, cond:'Sıfır', oem:'OEM 1 848 220 (örnek)', alt:['ALT-AF-118'], stock:64, seller:'Parçacı Murat', sr:4.9, sc:3810, compat:'ok', why:'OEM numarası katalogda bu varyant için listeleniyor.'},
+  {id:'p3', name:'Ön fren balata seti', brand:'Brakon (örnek)', cat:'Fren sistemi', price:1180.00, cond:'Sıfır', oem:'OEM 1 engel (örnek)', alt:['ALT-BP-4410'], stock:9, seller:'Anadolu Oto Yedek', sr:4.6, sc:740, compat:'check', why:'Bu modelde iki farklı ön disk çapı var (278 / 300 mm). Kesinleştirmek için disk çapını ya da şasi numaranızı doğrulayın.'},
+  {id:'p4', name:'Debriyaj seti (ikinci el, test edilmiş)', brand:'Orijinal sökme', cat:'Debriyaj', price:3900.00, cond:'İkinci el', oem:'OEM 2 016 642 (örnek)', alt:[], stock:1, seller:'Çıkmacı Ali', sr:4.3, sc:212, compat:'check', why:'Satıcı beyanı var ama katalogla doğrulanmadı. Satın almadan önce satıcıya şasi numaranızı sorun.'},
+  {id:'p5', name:'Ön sağ far · LED', brand:'Lumora (örnek)', cat:'Aydınlatma', price:8450.00, cond:'Sıfır', oem:'OEM F1EB-13W029 (örnek)', alt:[], stock:3, seller:'Anadolu Oto Yedek', sr:4.6, sc:740, compat:'no', why:'Bu parça makyaj sonrası kasa ve LED donanım içindir. Sizin aracınızda halojen far var.'},
+  {id:'p7', name:'Polen filtresi · aktif karbon', brand:'Filtrum (örnek)', cat:'Filtreler', price:415.00, cond:'Sıfır', oem:'OEM 1 709 013 (örnek)', alt:['ALT-CF-77'], stock:38, seller:'Parçacı Murat', sr:4.9, sc:3810, compat:'ok', why:'OEM numarası katalogda bu varyant için listeleniyor.'},
+];
+const CATS = ['Tümü','Motor parçaları','Şanzıman','Debriyaj','Fren sistemi','Ön takım','Süspansiyon','Elektrik','Filtreler','Kaporta','Aydınlatma','İç trim','Aksesuar'];
+const COMPAT = {ok:['ok','Doğrulanmış uyumlu'], check:['warn','Kontrol gerekli'], no:['bad','Uyumsuz']};
+
+const SERVICES = [
+  {id:'s1', name:'Usta Kemal Oto (örnek)', area:'Kadıköy, İstanbul', dist:1.2, rating:4.8, rev:214, tags:['Ford','Dizel','Periyodik bakım'], hours:'09:00–19:00 · Pazar kapalı', phone:'0216 000 00 01', price:'Yağ bakımı işçilik ~650 ₺'},
+  {id:'s2', name:'Anadolu Ford Uzman (örnek)', area:'Ataşehir, İstanbul', dist:3.8, rating:4.6, rev:532, tags:['Ford','Şanzıman','Elektrik'], hours:'08:30–18:30', phone:'0216 000 00 02', price:'Yağ bakımı işçilik ~900 ₺'},
+  {id:'s3', name:'Hızlı Fren & Balata (örnek)', area:'Üsküdar, İstanbul', dist:4.4, rating:4.4, rev:97, tags:['Fren','Ön takım','Lastik'], hours:'09:00–20:00', phone:'0216 000 00 03', price:'Balata değişimi ~700 ₺'},
+];
+const COMMUNITIES = ['Ford Focus','Ford Courier','Ford Transit','Volkswagen','BMW','Renault','Toyota'];
+const POSTS = [
+  {id:'f1', c:'Ford Focus', who:'Emre K.', ver:true, car:'Focus 1.5 TDCi · 2016', t:'EGR temizliği sonrası P0401 geri geldi', b:'Temizlikten 3.000 km sonra arıza lambası yine yandı. Benzer yaşayan oldu mu? Boruyu da temizletmek gerekiyor mu?', likes:84, com:31, ago:'3 sa'},
+  {id:'f2', c:'Ford Focus', who:'Selin A.', ver:true, car:'Focus 1.6 Ti-VCT · 2015', t:'Powershift titremesi: kavrama yazılımı güncellemesi işe yaradı', b:'Yetkili serviste TCM güncellemesi yapıldı, 1. viteste kalkış titremesi büyük ölçüde geçti. Fatura ve süreç aşağıda.', likes:212, com:58, ago:'1 g'},
+  {id:'f3', c:'Ford Courier', who:'Hakan T.', ver:false, car:'Courier 1.5 TDCi · 2019', t:'Ticari araçta yıllık masrafım: 42.000 km, tüm kalemler', b:'Esnaf arkadaşlar için tablo paylaşıyorum. Yakıt, bakım, lastik, sigorta. Km başı maliyet 3,1 ₺ çıktı.', likes:147, com:40, ago:'2 g'},
+  {id:'f4', c:'Toyota', who:'Burak Y.', ver:true, car:'Corolla 1.8 Hybrid · 2021', t:'Hibritte 12V akü 4. yılda bitti, uyarısız', b:'Sabah açılmadı. Hibritlerde 12V aküyü 4. yıldan sonra test ettirin.', likes:96, com:22, ago:'4 g'},
+  {id:'f5', c:'Renault', who:'Deniz Ç.', ver:false, car:'Clio 1.0 TCe · 2022', t:'LPG taktırmak garantiyi bozar mı?', b:'Bayi net bir cevap vermedi. Deneyimi olan var mı?', likes:38, com:47, ago:'5 g'},
+];
+
+/* =========================================================
+   SCREENS
+   ========================================================= */
+const TABS = [['home','Ana Sayfa','home'],['market','Parça Pazarı','parts'],['forum','Forum','forum'],['services','Servisler','wrench'],['profile','Profil','user']];
+const TAB_OF = {home:'home',garage:'home',vehicle:'home',addVehicle:'home',maint:'home',fuel:'home',ai:'home',notif:'home',market:'market',product:'market',cart:'market',forum:'forum',post:'forum',services:'services',service:'services',quotes:'services',profile:'profile',premium:'profile'};
+
+function hdr(title, back=true, right=''){
+  return `<div class="hdr"><div class="row">${back?`<button class="back" onclick="goBack()" aria-label="Geri">${ic('back',18)}</button>`:''}<h2>${title}</h2></div>${right}</div>`;
+}
+function sec(t, link='', act=''){ return `<div class="sec-t"><h3>${t}</h3>${link?`<button class="link" onclick="${act}">${link}</button>`:''}</div>`; }
+
+const SCREENS = {
+/* ---------------- LOGIN ---------------- */
+login(){ return `<div class="login-hero">
+  <div>
+    <div class="brand" style="font-size:22px"><i style="width:36px;height:36px;font-size:19px">P</i>PISTON GARAGE</div>
+    <h2 style="font-size:32px;margin-top:28px;line-height:1.1">Aracının bütün<br>hayatı tek yerde.</h2>
+    <p class="muted" style="margin-top:10px">Bakım, masraf, uyumlu parça ve güvenilir usta tek uygulamada.</p>
+    ${CAR_SVG()}
+  </div>
+  <div class="stack">
+    <button class="btn pri" onclick="login()">Telefon numarasıyla devam et</button>
+    <div class="grid2"><button class="btn" onclick="login()"> Apple ile</button><button class="btn" onclick="login()">Google ile</button></div>
+    <button class="btn ghost" onclick="login()">E-posta ile giriş</button>
+    <p class="xs muted" style="margin:4px 0 0;text-align:center">Devam ederek <u>Kullanım Koşulları</u>'nı kabul etmiş olursun. Kişisel verilerin <u>KVKK Aydınlatma Metni</u> kapsamında işlenir. Pazarlama izni ayrıca istenir.</p>
+  </div></div>`; },
+
+/* ---------------- HOME ---------------- */
+home(){
+  const v = V(), ms = sortedMaint(v), fs = fuelStats(v), mo = monthly(v), cur = mo[mo.length-2];
+  const top3 = ms.slice(0,3);
+  const oil = ms.find(x=>x.m.id==='m1');
+  const W = S.widgets;
+  return `
+  <div class="hdr">
+    <button class="chip" onclick="openSheet('switcher')" style="padding:8px 12px">${ic('car',16)} ${v.brand} ${v.model} <span class="muted">▾</span></button>
+    <div class="row"><button class="icon-btn" onclick="go('ai')" aria-label="PISTON AI">${ic('ai',19,'#B6F000')}</button><button class="icon-btn" onclick="go('notif')" aria-label="Bildirimler">${ic('bell',19)}<span class="dot"></span></button></div>
+  </div>
+  <div class="vhero">
+    <div class="row between"><div><div class="label">${v.type} · ${v.year}</div><h2 style="font-size:24px;margin-top:2px">${v.brand} ${v.model}</h2><div class="muted small">${v.engine} · ${v.fuel} · ${v.gear}</div></div>
+    <button class="btn sm" onclick="go('garage')">Garaj</button></div>
+    ${CAR_SVG(v.color)}
+    <div class="stat3 num">
+      <div><span class="xs muted">Kilometre</span><b>${fmt(v.km)}</b></div>
+      <div><span class="xs muted">Ort. tüketim</span><b>${fs.avg?fs.avg.toFixed(1).replace('.',','):'—'} L</b></div>
+      <div><span class="xs muted">Ekim gideri</span><b>${tl0(cur.f+cur.b+cur.o)}</b></div>
+    </div>
+    <button class="btn ghost sm" style="margin-top:10px;width:100%" onclick="openSheet('km')">Kilometreyi güncelle</button>
+  </div>
+
+  ${W.rem?`${sec('Sıradaki işler','Tümü',"go('maint')")}
+  <div class="stack">${top3.map(({m,s})=>maintRow(m,s)).join('')}</div>`:''}
+
+  ${W.cta && oil && oil.s.st!=='ok' ? `<div class="cta-band" style="margin-top:14px">
+    <div class="row" style="align-items:flex-start"><div class="ic" style="background:rgba(182,240,0,.15)">${ic('oil',20,'#B6F000')}</div>
+    <div class="grow"><b>Yağ bakımına ${fmt(oil.s.kmLeft)} km kaldı</b><div class="small muted">Aracına uyan yağ, yağ filtresi ve hava filtresinden oluşan set hazır. İstersen yakınındaki 3 ustadan teklif de al.</div></div></div>
+    <div class="grid2" style="margin-top:12px"><button class="btn pri sm" onclick="addBundle()">Seti sepete ekle · ${tl0(1249.9+289+349)}</button><button class="btn sm" onclick="tab('services');openSheet('quote')">Teklif al</button></div>
+  </div>`:''}
+
+  ${W.exp?`${sec('Aylık giderler','Detay',"go('fuel')")}
+  <div class="card">${expChart(mo)}</div>`:''}
+
+  ${W.ai?`${sec('PISTON AI')}
+  <button class="card row" style="width:100%;border:0;text-align:left" onclick="go('ai')">
+    <div class="ic" style="background:rgba(182,240,0,.12)">${ic('ai',20,'#B6F000')}</div>
+    <div class="grow"><b>Arıza kodu ya da belirti yaz</b><div class="small muted">Örn. "P0401" veya "frenlerken direksiyon titriyor"</div></div>${ic('chev',18)}
+  </button>`:''}
+
+  ${W.prods?`${sec('Aracına uyan ürünler','Pazar',"tab('market')")}
+  <div class="hscroll">${PRODUCTS.filter(p=>p.compat==='ok').map(prodMini).join('')}</div>`:''}
+
+  ${W.forum?`${sec(v.model+' topluluğunda popüler','Forum',"tab('forum')")}
+  <div class="stack">${POSTS.slice(0,2).map(p=>`<button class="card" style="border:0;text-align:left;width:100%" onclick="openPost('${p.id}')"><b>${esc(p.t)}</b><div class="xs muted" style="margin-top:4px">${p.who} · ${p.likes} beğeni · ${p.com} yorum</div></button>`).join('')}</div>`:''}
+
+  ${W.hist?`${sec('Son bakım geçmişi')}
+  <div class="card tline">${v.history.slice(0,3).map(h=>`<div class="ev"><div class="row between"><b class="small">${esc(h.t)}</b><span class="small num">${tl0(h.amt)}</span></div><div class="xs muted">${dstr(h.date)} · ${fmt(h.km)} km · ${esc(h.by)}${h.doc?' · Fatura ekli':''}</div></div>`).join('')}</div>`:''}
+
+  <button class="btn ghost" style="margin-top:18px" onclick="openSheet('widgets')">Ana ekranı düzenle</button>`;
+},
+
+/* ---------------- GARAGE ---------------- */
+garage(){
+  return hdr('Garajım', true, `<button class="icon-btn" onclick="tryAddVehicle()" aria-label="Araç ekle">${ic('plus',19)}</button>`) +
+  `<div class="stack">${S.vehicles.map((v,i)=>{ const ms = sortedMaint(v); const bad = ms.filter(x=>x.s.st!=='ok').length;
+    return `<button class="card" style="border:0;text-align:left;width:100%;${i===S.active?'outline:1px solid var(--neon)':''}" onclick="S.active=${i};go('vehicle')">
+      <div class="row between"><div><div class="label">${v.type}${v.plate?' · '+esc(v.plate):''}</div><b style="font-size:17px">${esc(v.brand)} ${esc(v.model)}</b><div class="small muted">${v.year} · ${esc(v.engine)} · ${fmt(v.km)} km</div></div>
+      ${bad?`<span class="pill warn">${bad} iş bekliyor</span>`:'<span class="pill ok">Her şey yolunda</span>'}</div>
+      ${CAR_SVG(v.color)}</button>`; }).join('')}
+  <button class="btn ghost" onclick="tryAddVehicle()">${'+ Araç ekle'}</button>
+  <p class="xs muted" style="margin:0">Ücretsiz planda 2 araç. Plus ile sınırsız araç, aile ve şoför paylaşımı.</p></div>`;
+},
+
+vehicle(){
+  const v = V(); const docs = v.history.filter(h=>h.doc).length;
+  const score = Math.min(100, 40 + v.history.length*12 + docs*8);
+  return hdr(`${esc(v.brand)} ${esc(v.model)}`) + `
+  <div class="card"><dl class="kv num">
+    <dt>Model yılı</dt><dd>${v.year}</dd><dt>Motor</dt><dd>${esc(v.engine)}</dd><dt>Yakıt</dt><dd>${v.fuel}</dd><dt>Şanzıman</dt><dd>${v.gear}</dd>
+    <dt>Kilometre</dt><dd>${fmt(v.km)} km</dd><dt>Plaka</dt><dd>${v.plate?esc(v.plate):'<span class="muted">Eklenmedi</span>'}</dd>
+    <dt>Şasi no</dt><dd>${v.vin?`${ic('lock',13)} ${esc(v.vin)}`:'<span class="muted">Eklenmedi</span>'}</dd></dl></div>
+
+  ${sec('Araç Pasaportu')}
+  <div class="cta-band">
+    <div class="row between"><div><b>Belgelenmiş geçmiş skoru</b><div class="small muted">${v.history.length} kayıt · ${docs} faturalı işlem</div></div><div style="font-family:var(--display);font-size:30px;font-weight:700;color:var(--neon)" class="num">${score}</div></div>
+    <div class="bar" style="margin:10px 0"><i style="width:${score}%;background:var(--neon)"></i></div>
+    <p class="small muted" style="margin:0 0 10px">Aracı satarken alıcıya bakım geçmişini ve faturalarını tek bağlantıyla göster. Kişisel bilgilerin ve plakan gizli kalır.</p>
+    <button class="btn pri sm" style="width:100%" onclick="${S.plan==='free'?"go('premium')":"toast('Paylaşım bağlantısı oluşturuldu · 30 gün geçerli (demo)')"}">${ic('qr',16)} Paylaşılabilir pasaport oluştur ${S.plan==='free'?'· Plus':''}</button>
+  </div>
+
+  ${sec('Kısayollar')}
+  <div class="grid2">
+    <button class="card" style="border:0;text-align:left" onclick="go('maint')">${ic('wrench',20,'#B6F000')}<div style="margin-top:6px"><b>Bakım</b></div><div class="xs muted">${v.maint.length} takip kalemi</div></button>
+    <button class="card" style="border:0;text-align:left" onclick="go('fuel')">${ic('fuel',20,'#B6F000')}<div style="margin-top:6px"><b>Yakıt ve masraf</b></div><div class="xs muted">${v.fuelLog.length} yakıt kaydı</div></button>
+  </div>
+
+  ${sec('Belgeler')}
+  <div class="card">
+    ${[['Ruhsat fotoğrafı','Şifreli saklanır · yalnızca sen görürsün'],['Trafik sigortası poliçesi','Bitiş 20 Şub 2027'],['Servis faturaları',docs+' dosya']].map(([a,b])=>`<div class="list-item"><div class="ic">${ic('doc')}</div><div class="grow"><b class="small">${a}</b><div class="xs muted">${b}</div></div>${ic('chev',16)}</div>`).join('')}
+  </div>
+  <button class="btn ghost" style="margin-top:14px" onclick="openSheet('share')">Aracı paylaş (eş, şoför, usta)</button>`;
+},
+
+addVehicle(){
+  return hdr('Araç ekle') + `
+  <form class="stack" onsubmit="saveVehicle(event)" novalidate>
+    <div class="seg" role="tablist" id="vtype">${['Otomobil','Ticari','Motosiklet'].map((t,i)=>`<button type="button" class="${i===0?'on':''}" ${i===2?'disabled title="Yakında"':''} onclick="segPick(this)">${t}${i===2?' · yakında':''}</button>`).join('')}</div>
+    <div class="grid2">
+      <div class="field"><label for="f-brand">Marka</label><select class="inp" id="f-brand" required><option value="">Seç</option>${['Ford','Volkswagen','Renault','Fiat','Toyota','Hyundai','BMW','Mercedes-Benz','Peugeot','Togg'].map(b=>`<option>${b}</option>`).join('')}</select></div>
+      <div class="field"><label for="f-model">Model</label><input class="inp" id="f-model" placeholder="Örn. Focus" required></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="f-year">Model yılı</label><input class="inp num" id="f-year" inputmode="numeric" placeholder="2019" required></div>
+      <div class="field"><label for="f-engine">Motor</label><input class="inp" id="f-engine" placeholder="1.5 TDCi 120 PS"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label for="f-fuel">Yakıt</label><select class="inp" id="f-fuel">${['Benzin','Dizel','Benzin + LPG','Hibrit','Elektrik'].map(b=>`<option>${b}</option>`).join('')}</select></div>
+      <div class="field"><label for="f-gear">Şanzıman</label><select class="inp" id="f-gear">${['Manuel','Otomatik','Yarı otomatik / DCT','CVT'].map(b=>`<option>${b}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label for="f-km">Güncel kilometre</label><input class="inp num" id="f-km" inputmode="numeric" placeholder="86.300" required></div>
+    <div class="field"><label for="f-plate">Plaka (isteğe bağlı)</label><input class="inp" id="f-plate" placeholder="34 ABC 123" autocapitalize="characters"></div>
+    <div class="field"><label for="f-vin">Şasi numarası (isteğe bağlı)</label><input class="inp" id="f-vin" placeholder="17 karakter" maxlength="17" autocapitalize="characters">
+      <span class="xs muted">${ic('lock',12)} Şifrelenerek saklanır. Yalnızca parça uyumluluğunu doğrulamak için kullanılır.</span></div>
+    <label class="card row" style="cursor:pointer" for="f-photo">${ic('camera',20)}<span class="grow small"><b>Araç fotoğrafı ekle</b><br><span class="muted">Galeriden seç ya da çek</span></span><input type="file" id="f-photo" accept="image/*" hidden></label>
+    ${S.addErr?`<div class="err">${S.addErr}</div>`:''}
+    <button class="btn pri" type="submit">Garaja ekle</button>
+    <p class="xs muted" style="margin:0">Kaydettikten sonra bakım aralıklarını sen belirlersin. Doğrulanmamış üretici aralıklarını kesin bilgi gibi göstermeyiz.</p>
+  </form>`;
+},
+
+/* ---------------- MAINTENANCE ---------------- */
+maint(){
+  const v = V(), ms = sortedMaint(v);
+  const g = {bad:ms.filter(x=>x.s.st==='bad'), warn:ms.filter(x=>x.s.st==='warn'), ok:ms.filter(x=>x.s.st==='ok')};
+  return hdr('Bakım ve hatırlatmalar', true, `<button class="icon-btn" onclick="openSheet('logMaint')" aria-label="İşlem ekle">${ic('plus',19)}</button>`) + `
+  <div class="grid2" style="grid-template-columns:repeat(3,1fr)">
+    ${[['bad','Gecikmiş'],['warn','Yaklaşıyor'],['ok','Zamanında']].map(([k,l])=>`<div class="card" style="padding:10px"><div class="xs muted">${l}</div><b class="num" style="font-family:var(--display);font-size:22px;color:var(--${k==='ok'?'fg':k})">${g[k].length}</b></div>`).join('')}
+  </div>
+  ${['bad','warn','ok'].map(k=> g[k].length?`${sec(stLabel[k])}<div class="stack">${g[k].map(({m,s})=>maintRow(m,s,true)).join('')}</div>`:'').join('')}
+  ${sec('Geçmiş')}
+  <div class="card tline">${v.history.map(h=>`<div class="ev n"><div class="row between"><b class="small">${esc(h.t)}</b><span class="small num">${tl0(h.amt)}</span></div><div class="xs muted">${dstr(h.date)} · ${fmt(h.km)} km · ${esc(h.by)}${h.doc?' · Fatura ekli':''}</div></div>`).join('')}</div>
+  <p class="xs muted">Aralıklar kullanıcı tanımlıdır. Her kalemde kaynağı yazar. Kesin bilgi için aracının kullanım kılavuzuna ya da yetkili servise başvur.</p>`;
+},
+
+/* ---------------- FUEL & EXPENSES ---------------- */
+fuel(){
+  const v = V(), fs = fuelStats(v), mo = monthly(v);
+  const yearly = mo.reduce((a,m)=>a+m.f+m.b+m.o,0)*2;
+  return hdr('Yakıt ve masraf', true, `<button class="icon-btn" onclick="openSheet('addFuel')" aria-label="Kayıt ekle">${ic('plus',19)}</button>`) + `
+  <div class="grid2">
+    <div class="card"><div class="xs muted">100 km ortalama</div><b class="num" style="font-family:var(--display);font-size:24px">${fs.avg?fs.avg.toFixed(2).replace('.',','):'—'} L</b><div class="xs muted">depo dolum yöntemi</div></div>
+    <div class="card"><div class="xs muted">Km başına yakıt</div><b class="num" style="font-family:var(--display);font-size:24px">${fs.perKm?tl(fs.perKm):'—'}</b><div class="xs muted">son litre fiyatıyla</div></div>
+    <div class="card"><div class="xs muted">Ekim yakıt gideri</div><b class="num" style="font-family:var(--display);font-size:20px">${tl0(fs.month)}</b></div>
+    <div class="card"><div class="xs muted">Yıllık tahmini gider</div><b class="num" style="font-family:var(--display);font-size:20px">${tl0(yearly)}</b><div class="xs muted">son 6 aydan</div></div>
+  </div>
+  ${sec('Aylık giderler')}<div class="card">${expChart(mo)}</div>
+  ${sec('Tüketim (L/100 km)')}<div class="card">${consChart(fs.per)}</div>
+  <div class="card row" style="margin-top:12px"><div class="ic">${ic('car',20)}</div><div class="grow small"><b>Topluluk karşılaştırması</b><div class="muted">Aynı motoru kullanan doğrulanmış sahiplerin ortalaması: <b class="num" style="color:var(--fg)">5,6 L</b> (demo, 312 sahip)</div></div></div>
+  ${sec('Son kayıtlar')}
+  <div class="card">${[...v.fuelLog].sort((a,b)=>b.km-a.km).map(r=>`<div class="list-item"><div class="ic">${ic('fuel',18)}</div><div class="grow"><b class="small num">${r.l.toFixed(1).replace('.',',')} L · ${tl(r.l*r.p)}</b><div class="xs muted num">${dstr(r.date)} · ${fmt(r.km)} km · ${tl(r.p)}/L</div></div>${r.full?'<span class="pill n">Depo dolu</span>':'<span class="pill info">Kısmi</span>'}</div>`).join('')}
+  ${v.exp.map(e=>`<div class="list-item"><div class="ic">${ic('doc',18)}</div><div class="grow"><b class="small">${esc(e.cat)} · ${tl0(e.amt)}</b><div class="xs muted">${dstr(e.date)}${e.note?' · '+esc(e.note):''}</div></div></div>`).join('')}</div>
+  <p class="xs muted">Kısmi dolumlar bir sonraki tam dolumda hesaba katılır. Kilometre son kayıttan küçük girilemez.</p>`;
+},
+
+/* ---------------- AI ---------------- */
+ai(){
+  const v = V();
+  const msgs = S.chat.length ? S.chat : [{r:'ai', h:`Merhaba. ${esc(v.brand)} ${esc(v.model)} ${esc(v.engine)} aracının bakım geçmişini görebiliyorum. Arıza kodunu ya da yaşadığın belirtiyi yaz. Sana olası nedenleri ve güven düzeylerini göstereceğim. <b>Bu bir teşhis değildir.</b>`}];
+  return hdr('PISTON AI', true, `<span class="pill warn">Demo yanıtlar</span>`) + `
+  <div class="stack" style="gap:10px;min-height:52%">${msgs.map(m=>`<div class="bubble ${m.r}">${m.h}</div>`).join('')}</div>
+  <div class="chips" style="margin:14px 0 10px">${['P0401','Frenlerken titreme','Yağ lambası yandı','Bakım geçmişimi yorumla'].map(q=>`<button class="chip" onclick="ask('${q}')">${q}</button>`).join('')}</div>
+  <form class="row" onsubmit="event.preventDefault();ask($('#ai-in').value)"><input id="ai-in" class="inp" placeholder="Kod ya da belirti yaz…" autocomplete="off"><button class="icon-btn" style="background:var(--neon);color:var(--neon-ink)" aria-label="Gönder">${ic('send',18)}</button></form>
+  <p class="xs muted">Ücretsiz planda ayda 5 soru · Plus'ta 100 soru</p>`;
+},
+
+notif(){
+  return hdr('Bildirimler') + `<div class="card">${[
+    ['alert','Polen filtresi gecikti','Son değişimden bu yana 13 ay geçti.','Bugün'],
+    ['shield','Muayeneye 18 gün kaldı','Randevu almayı unutma. Muayene öncesi kontrol için ustalara bak.','Dün'],
+    ['wrench','3 teklif geldi','Yağ bakımı talebine 3 servis yanıt verdi.','2 g'],
+    ['forum','Emre K. sorunu yanıtladı','"EGR borusunu da temizletmek gerekiyor…"','3 g'],
+    ['cart','Siparişin kargoda','Yağ filtresi · Parçacı Murat · takip no hazır','5 g'],
+  ].map(([i,a,b,c])=>`<div class="list-item"><div class="ic">${ic(i,18)}</div><div class="grow"><b class="small">${a}</b><div class="xs muted">${b}</div></div><span class="xs muted">${c}</span></div>`).join('')}</div>`;
+},
+
+/* ---------------- MARKET ---------------- */
+market(){
+  const v = V();
+  let list = PRODUCTS.filter(p => S.marketCat==='Tümü' || p.cat===S.marketCat);
+  if (S.myCarFilter) list = list.filter(p=>p.compat!=='no');
+  return hdr('Parça Pazarı', false, `<button class="icon-btn" onclick="go('cart')" aria-label="Sepet">${ic('cart',19)}${S.cart.length?'<span class="dot"></span>':''}</button>`) + `
+  <div class="row inp" style="padding:0 12px">${ic('search',18)}<input class="grow" style="background:none;border:0;outline:none;padding:11px 0" placeholder="Parça adı, OEM no veya marka"></div>
+  <div class="card row" style="margin-top:10px;padding:10px 12px"><div class="grow small"><b>${esc(v.brand)} ${esc(v.model)} · ${esc(v.engine)}</b><div class="xs muted">${v.vin?'Şasi no ile doğrulama açık':'Şasi no ekle, daha çok parça doğrulansın'}</div></div>
+    <button class="switch" role="switch" aria-checked="${S.myCarFilter}" aria-label="Yalnızca aracıma uyanlar" onclick="S.myCarFilter=!S.myCarFilter;render()"></button></div>
+  <div class="chips" style="margin-top:12px">${CATS.map(c=>`<button class="chip ${S.marketCat===c?'on':''}" onclick="S.marketCat='${c}';render()">${c}</button>`).join('')}</div>
+  <div class="stack" style="margin-top:12px">${list.length?list.map(prodRow).join(''):'<p class="muted small">Bu kategoride aracına uyan demo ürün yok.</p>'}</div>
+  <p class="xs muted">Satıcılar ürünleri kendi deposundan gönderir. Ödemeler lisanslı ödeme kuruluşu üzerinden yapılır ve satıcıya teslimattan sonra aktarılır.</p>`;
+},
+product(){
+  const p = PRODUCTS.find(x=>x.id===S.productId); const [cls,lab] = COMPAT[p.compat]; const fav = S.favs.has(p.id);
+  return hdr('Ürün', true, `<button class="icon-btn" onclick="toggleFav('${p.id}')" aria-label="Favori" style="color:${fav?'#B6F000':'inherit'}">${ic('heart',19,fav?'#B6F000':'currentColor')}</button>`) + `
+  <div class="thumb" style="aspect-ratio:16/10">${ic('parts',80)}</div>
+  <div class="xs muted" style="margin-top:6px;text-align:center">1 / 4 fotoğraf</div>
+  <div class="row between" style="margin-top:10px"><span class="label">${esc(p.brand)} · ${p.cond}</span><span class="pill ${cls}">${lab}</span></div>
+  <h2 style="font-size:21px;margin-top:4px">${esc(p.name)}</h2>
+  <div class="price" style="font-size:24px;margin-top:6px">${tl(p.price)}</div>
+
+  <div class="compat ${p.compat}" style="margin-top:12px">${ic(p.compat==='ok'?'check':p.compat==='no'?'x':'alert',20,p.compat==='ok'?'#B6F000':p.compat==='no'?'#FF6B5E':'#FFB547')}
+    <div class="small"><b>${lab}: ${esc(V().brand)} ${esc(V().model)} ${V().year}</b><div class="muted" style="margin-top:2px">${esc(p.why)}</div>
+    ${p.compat==='check'?`<button class="link" style="margin-top:6px" onclick="toast('Şasi numarası doğrulama ekranı (demo)')">Şasi numarasıyla doğrula</button>`:''}</div></div>
+
+  <div class="card" style="margin-top:12px"><dl class="kv">
+    <dt>OEM / norm</dt><dd>${esc(p.oem)}</dd><dt>Alternatif no</dt><dd>${p.alt.length?p.alt.join(', '):'—'}</dd>
+    <dt>Durum</dt><dd>${p.cond}</dd><dt>Stok</dt><dd>${p.stock>5?'Stokta':'Son '+p.stock+' adet'}</dd>
+    <dt>Kargo</dt><dd>Yarın kargoda · 2–3 gün</dd><dt>Garanti</dt><dd>${p.cond==='Sıfır'?'2 yıl':'30 gün satıcı garantisi'}</dd><dt>İade</dt><dd>14 gün cayma hakkı</dd></dl></div>
+
+  <div class="card row" style="margin-top:12px"><div class="avatar">${p.seller[0]}</div><div class="grow"><b class="small">${esc(p.seller)}</b><div class="xs muted">${ic('star',11)} ${String(p.sr).replace('.',',')} · ${fmt(p.sc)} satış · Onaylı satıcı</div></div><button class="btn sm" onclick="toast('Satıcıya soru gönderildi (demo)')">Soru sor</button></div>
+  ${p.compat==='ok'?`<div class="card small" style="margin-top:12px">${ic('shield',16,'#B6F000')} <b>Uyum Güvencesi:</b> <span class="muted">Doğrulanmış uyumlu etiketli parça aracına uymazsa iade kargosu bizden.</span></div>`:''}
+  <div class="grid2" style="margin-top:14px">
+    <button class="btn" onclick="toast('Karşılaştırma listesine eklendi')">Karşılaştır</button>
+    <button class="btn pri" ${p.compat==='no'?'disabled style="opacity:.45"':''} onclick="addCart('${p.id}')">Sepete ekle</button>
+  </div>
+  <button class="btn ghost" style="margin-top:10px" onclick="toast('Teslimat adresi olarak servis seçilebilir (demo)')">Servise teslim edilsin</button>`;
+},
+cart(){
+  const items = S.cart.map(id=>PRODUCTS.find(p=>p.id===id)); const sum = items.reduce((a,p)=>a+p.price,0);
+  const ship = items.length ? (sum>1500?0:89.9) : 0;
+  return hdr('Sepet') + (items.length ? `
+  <div class="card">${items.map((p,i)=>`<div class="list-item"><div class="ic">${ic('parts',18)}</div><div class="grow"><b class="small ellipsis" style="display:block">${esc(p.name)}</b><div class="xs muted">${esc(p.seller)}</div></div><span class="small num">${tl(p.price)}</span><button class="back" style="width:30px;height:30px" aria-label="Çıkar" onclick="S.cart.splice(${i},1);render()">${ic('x',14)}</button></div>`).join('')}</div>
+  <div class="card" style="margin-top:12px"><dl class="kv num"><dt>Ürünler</dt><dd>${tl(sum)}</dd><dt>Kargo</dt><dd>${ship?tl(ship):'Ücretsiz'}</dd><dt><b style="color:var(--fg)">Toplam</b></dt><dd style="font-size:17px">${tl(sum+ship)}</dd></dl></div>
+  <div class="card small" style="margin-top:12px">${ic('lock',14)} <span class="muted">Ödeme lisanslı bir pazaryeri ödeme kuruluşu üzerinden alınır. Para, teslimat onayından sonra satıcıya aktarılır. Kart bilgilerin bizde saklanmaz.</span></div>
+  <button class="btn pri" style="margin-top:14px" onclick="S.cart=[];toast('Sipariş oluşturuldu (demo). Ödeme adımı bu prototipte yok.');render()">Ödemeye geç</button>
+  <p class="xs muted">Ön bilgilendirme formu ve mesafeli satış sözleşmesi ödemeden önce gösterilir.</p>`
+  : `<div class="card" style="text-align:center;padding:30px"><b>Sepetin boş</b><p class="small muted">Bakım hatırlatmalarından uyumlu setleri tek dokunuşla ekleyebilirsin.</p><button class="btn pri sm" onclick="tab('market')">Pazara dön</button></div>`);
+},
+
+/* ---------------- FORUM ---------------- */
+forum(){
+  const list = POSTS.filter(p=>p.c===S.community || S.community==='Akışım');
+  return hdr('Forum', false, `<button class="icon-btn" style="background:var(--neon);color:var(--neon-ink)" onclick="openSheet('newPost')" aria-label="Gönderi paylaş">${ic('plus',19)}</button>`) + `
+  <div class="chips">${['Akışım',...COMMUNITIES].map(c=>`<button class="chip ${S.community===c?'on':''}" onclick="S.community='${c}';render()">${c}</button>`).join('')}</div>
+  ${S.community!=='Akışım'?`<div class="card row" style="margin-top:12px"><div class="ic">${ic('car',20,'#B6F000')}</div><div class="grow"><b>${S.community}</b><div class="xs muted">${S.community==='Ford Focus'?'18,4 bin üye · 312 doğrulanmış sahip':'Topluluk · demo'}</div></div><button class="btn sm" onclick="toast('Topluluğa katıldın')">Katıl</button></div>
+  <button class="card row" style="margin-top:10px;width:100%;border:1px dashed var(--line);text-align:left" onclick="toast('Kronik Sorunlar sayfası: topluluk tarafından düzenlenir, moderatör onaylıdır (demo)')"><div class="grow small"><b>Kronik sorunlar ve çözümleri</b><div class="muted">Sahiplerin oyladığı 14 başlık · EGR, Powershift, enjektör</div></div>${ic('chev',16)}</button>`:''}
+  <div class="stack" style="margin-top:12px">${list.length?list.map(postCard).join(''):'<p class="muted small">Bu toplulukta henüz demo gönderi yok.</p>'}</div>`;
+},
+post(){
+  const p = POSTS.find(x=>x.id===S.postId);
+  return hdr(p.c) + postCard(p, true) + `
+  ${sec('Yorumlar · '+p.com)}
+  <div class="stack">
+    <div class="card"><div class="row"><div class="avatar">M</div><div><b class="small">Mert S.</b> <span class="verified">✓ Doğrulanmış sahip</span><div class="xs muted">2 sa</div></div></div><p class="small" style="margin:8px 0 0">Bende soğutucu tıkalıydı. Valfi temizlemek yetmedi, soğutucu ile boruyu da temizlettim, 20 bin km oldu, kod gelmedi.</p></div>
+    <div class="card"><div class="row"><div class="avatar">U</div><div><b class="small">Usta Kemal Oto</b> <span class="pill info">İşletme</span><div class="xs muted">1 sa</div></div></div><p class="small" style="margin:8px 0 0">Önce MAP sensörü ve vakum hortumlarını kontrol ettirin. Basit bir hortum çatlağı da aynı kodu verir.</p></div>
+  </div>
+  <form class="row" style="margin-top:14px" onsubmit="event.preventDefault();toast('Yorum gönderildi (demo)');this.reset()"><input class="inp" placeholder="Yorum yaz…"><button class="icon-btn" style="background:var(--neon);color:var(--neon-ink)" aria-label="Gönder">${ic('send',18)}</button></form>`;
+},
+
+/* ---------------- SERVICES ---------------- */
+services(){
+  const list = SERVICES.filter(s => S.svcFilter==='Tümü' || s.tags.includes(S.svcFilter));
+  return hdr('Servisler', false, `<button class="icon-btn" onclick="toast('Harita görünümü (demo)')" aria-label="Harita">${ic('pin',19)}</button>`) + `
+  <div class="grid2"><select class="inp" aria-label="Şehir"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option></select><select class="inp" aria-label="İlçe"><option>Tüm ilçeler</option><option>Kadıköy</option><option>Ataşehir</option><option>Üsküdar</option></select></div>
+  <div class="chips" style="margin-top:10px">${['Tümü','Ford','Periyodik bakım','Fren','Şanzıman','Elektrik','Lastik'].map(c=>`<button class="chip ${S.svcFilter===c?'on':''}" onclick="S.svcFilter='${c}';render()">${c}</button>`).join('')}</div>
+  <div class="cta-band" style="margin-top:12px"><b>Tek talep, birden çok teklif</b><div class="small muted" style="margin:4px 0 10px">İşini ve aracını bir kez yaz. Ustalar işçilik ve parça fiyatını ayrı ayrı yazar, sen karşılaştırırsın.</div><button class="btn pri sm" onclick="openSheet('quote')">Teklif iste</button></div>
+  <div class="stack" style="margin-top:12px">${list.map(s=>`<button class="card" style="border:0;text-align:left;width:100%" onclick="S.serviceId='${s.id}';go('service')">
+    <div class="row between"><b>${esc(s.name)}</b><span class="small num">${ic('star',12,'#B6F000')} ${String(s.rating).replace('.',',')}</span></div>
+    <div class="xs muted">${s.area} · ${String(s.dist).replace('.',',')} km · ${s.rev} onaylı yorum</div>
+    <div class="chips" style="margin-top:8px">${s.tags.map(t=>`<span class="pill n">${t}</span>`).join('')}</div></button>`).join('')}</div>
+  <p class="xs muted">Yorum yalnızca uygulama üzerinden randevusu tamamlanan kullanıcılardan alınır.</p>`;
+},
+service(){
+  const s = SERVICES.find(x=>x.id===S.serviceId);
+  return hdr('Servis') + `
+  <div class="thumb" style="aspect-ratio:16/9">${ic('wrench',70)}</div>
+  <h2 style="font-size:21px;margin-top:12px">${esc(s.name)}</h2>
+  <div class="small muted">${s.area} · ${String(s.dist).replace('.',',')} km</div>
+  <div class="row" style="margin-top:8px"><span class="pill ok">${ic('star',11)} ${String(s.rating).replace('.',',')} · ${s.rev} onaylı yorum</span><span class="pill info">Vergi levhası doğrulandı</span></div>
+  <div class="card" style="margin-top:12px"><dl class="kv"><dt>Çalışma saatleri</dt><dd>${s.hours}</dd><dt>Telefon</dt><dd style="user-select:all">${s.phone}</dd><dt>Uzmanlık</dt><dd>${s.tags.join(', ')}</dd><dt>Örnek fiyat</dt><dd>${s.price}</dd></dl></div>
+  ${sec('Son yorumlar')}
+  <div class="card small"><b>Ahmet D.</b> <span class="muted">· Focus · Randevu tamamlandı</span><p style="margin:6px 0 0">Değişen parçaları gösterdi, fatura uygulamaya geldi. Fiyat teklifteki gibi çıktı.</p></div>
+  <div class="grid2" style="margin-top:14px"><button class="btn" onclick="openSheet('appt')">Randevu iste</button><button class="btn pri" onclick="openSheet('quote')">Teklif iste</button></div>
+  <p class="xs muted">Randevu ve teklif taleplerinde, izin verirsen usta aracının bakım geçmişini görür.</p>`;
+},
+quotes(){
+  const Q = [['Usta Kemal Oto (örnek)',650,1890,'Yarın 10:00',4.8,'Parçaları ben de getirebilirim'],['Anadolu Ford Uzman (örnek)',900,2140,'Pzt 09:00',4.6,'Orijinal parça, 6 ay işçilik garantisi'],['Hızlı Fren & Balata (örnek)',600,2050,'Bugün 17:30',4.4,'Fren kontrolü ücretsiz']];
+  return hdr('Teklifler') + `<p class="small muted" style="margin-top:0">Yağ + yağ filtresi + hava filtresi · ${esc(V().brand)} ${esc(V().model)} · 3 teklif</p>
+  <div class="stack">${Q.map(([n,lab,par,when,r,note],i)=>`<div class="card" ${i===0?'style="outline:1px solid var(--neon)"':''}>
+    <div class="row between"><b>${n}</b>${i===0?'<span class="pill ok">En uygun</span>':''}</div>
+    <div class="xs muted">${ic('star',11)} ${String(r).replace('.',',')} · ${note}</div>
+    <div class="grid2 num" style="grid-template-columns:repeat(3,1fr);margin-top:10px"><div><div class="xs muted">İşçilik</div><b>${tl0(lab)}</b></div><div><div class="xs muted">Parça</div><b>${tl0(par)}</b></div><div><div class="xs muted">Toplam</div><b style="color:var(--neon)">${tl0(lab+par)}</b></div></div>
+    <div class="row between" style="margin-top:10px"><span class="small muted">${when}</span><button class="btn ${i===0?'pri':''} sm" onclick="toast('Randevu talebi gönderildi (demo)')">Kabul et</button></div></div>`).join('')}</div>
+  <div class="card small" style="margin-top:12px">${ic('cart',14)} <span class="muted">Pazardan uyumlu seti <b style="color:var(--fg)">${tl0(1888)}</b>'ye alıp seçtiğin servise teslim ettirebilirsin. O zaman yalnızca işçilik ödersin.</span></div>`;
+},
+
+/* ---------------- PROFILE ---------------- */
+profile(){
+  return hdr('Profil', false, `<button class="icon-btn" onclick="toast('Ayarlar (demo)')" aria-label="Ayarlar">${ic('gear',19)}</button>`) + `
+  <div class="card row"><div class="avatar" style="width:52px;height:52px;font-size:18px">EK</div><div class="grow"><b style="font-size:17px">Demo Kullanıcı</b><div class="small muted">${S.vehicles.length} araç · Ford Focus topluluğu</div></div><span class="pill ${S.plan==='free'?'n':'ok'}">${S.plan==='free'?'Ücretsiz':'Plus'}</span></div>
+  ${S.plan==='free'?`<button class="cta-band" style="margin-top:12px;width:100%;text-align:left;color:var(--fg)" onclick="go('premium')"><b>PISTON Plus'ı dene</b><div class="small muted">Sınırsız araç, Araç Pasaportu, gelişmiş raporlar, reklamsız kullanım. 7 gün ücretsiz.</div></button>`:''}
+  ${sec('Hesabım')}
+  <div class="card">${[['cart','Siparişlerim','1 kargoda'],['heart','Favoriler',S.favs.size+' ürün'],['bookmark','Kaydedilenler',S.saved.size+' gönderi'],['wrench','Randevu ve teklifler','3 teklif'],['doc','Belgelerim','Ruhsat, poliçe, faturalar']].map(([i,a,b])=>`<div class="list-item"><div class="ic">${ic(i,18)}</div><div class="grow"><b class="small">${a}</b></div><span class="xs muted">${b}</span>${ic('chev',16)}</div>`).join('')}</div>
+  ${sec('İşletmeler için')}
+  <div class="card">${[['parts','Satıcı ol','Mağazanı aç, ürün ekle'],['wrench','Servisini ekle','Teklif ve randevu al']].map(([i,a,b])=>`<button class="list-item" onclick="toast('Başvuru: vergi levhası ve kimlik doğrulaması istenir (demo)')"><div class="ic">${ic(i,18,'#B6F000')}</div><div class="grow"><b class="small">${a}</b><div class="xs muted">${b}</div></div>${ic('chev',16)}</button>`).join('')}</div>
+  ${sec('Gizlilik ve güvenlik')}
+  <div class="card">${[['bell','Bildirim tercihleri'],['shield','KVKK aydınlatma metni ve izinler'],['doc','Verilerimi indir'],['lock','Oturumlar ve cihazlar']].map(([i,a])=>`<div class="list-item"><div class="ic">${ic(i,18)}</div><div class="grow"><b class="small">${a}</b></div>${ic('chev',16)}</div>`).join('')}
+  <button class="list-item" onclick="openSheet('delete')"><div class="ic">${ic('x',18,'#FF6B5E')}</div><div class="grow"><b class="small" style="color:var(--bad)">Hesabımı sil</b></div></button></div>
+  <button class="btn ghost" style="margin-top:14px" onclick="logout()">Çıkış yap</button>`;
+},
+premium(){
+  const plans = [['free','Ücretsiz','0 ₺','',['2 araç','Sınırsız bakım geçmişi','Km ve tarih hatırlatmaları','Yakıt ve masraf takibi','AI: ayda 5 soru']],
+                 ['m','Plus aylık','149,99 ₺','/ay',['Sınırsız araç','Araç Pasaportu (paylaşılabilir)','Gelişmiş raporlar ve dışa aktarma','Aile ve şoför paylaşımı','AI: ayda 100 soru','Reklamsız']],
+                 ['y','Plus yıllık','1.199,99 ₺','/yıl',['Plus aylığın her şeyi','Aylık ödemeye göre %33 tasarruf','Ayda 100,00 ₺ eder']]];
+  return hdr('PISTON Plus') + `<div class="stack">${plans.map(([k,n,p,per,f])=>`<button class="plan ${S.pick===k||(!S.pick&&k==='y')?'on':''}" onclick="S.pick='${k}';render()">
+    <div class="row between"><b style="font-size:16px">${n}</b>${k==='y'?'<span class="pill ok">En avantajlı</span>':''}</div>
+    <div class="price num" style="font-size:24px;margin:4px 0 8px">${p}<span class="small muted" style="font-family:var(--body)">${per}</span></div>
+    ${f.map(x=>`<div class="check-li">${x}</div>`).join('')}</button>`).join('')}</div>
+  <button class="btn pri" style="margin-top:14px" onclick="subscribe()">7 gün ücretsiz dene</button>
+  <p class="xs muted">Satın alma App Store veya Google Play hesabın üzerinden yapılır. Deneme bitmeden 24 saat önce iptal etmezsen ücretlendirilirsin. Aboneliği mağaza ayarlarından yönetebilirsin. Fiyatlar test fiyatlarıdır.</p>
+  <div class="row" style="justify-content:center;gap:16px"><button class="link" onclick="toast('Satın alımlar geri yüklendi (demo)')">Satın alımları geri yükle</button></div>`;
+},
+};
+
+/* ---------- components ---------- */
+function maintRow(m, s, editable=false){
+  const col = s.st==='bad'?'var(--bad)':s.st==='warn'?'var(--warn)':'var(--neon)';
+  const iv = m.due ? `Son tarih ${dstr(m.due)}` : [m.everyKm?`her ${fmt(m.everyKm)} km`:'', m.everyM?`${m.everyM>=12&&m.everyM%12===0?m.everyM/12+' yıl':m.everyM+' ay'}`:''].filter(Boolean).join(' veya ');
+  return `<button class="card" style="border:0;text-align:left;width:100%" onclick="${editable?`openSheet('interval','${m.id}')`:"go('maint')"}">
+    <div class="row"><div class="ic">${ic(m.icon,19)}</div><div class="grow"><div class="row between"><b class="small">${m.name}</b><span class="pill ${s.st}">${stLabel[s.st]}</span></div>
+    <div class="xs muted num" style="margin-top:2px">${mLeftText(s)}</div></div></div>
+    <div class="bar" style="margin-top:10px"><i style="width:${Math.min(100,s.used*100)}%;background:${col}"></i></div>
+    <div class="xs muted" style="margin-top:6px">${iv} · Kaynak: ${m.src}${editable?' · <span style="color:var(--neon)">Düzenle</span>':''}</div></button>`;
+}
+function prodMini(p){ return `<button class="prod-mini" onclick="openProduct('${p.id}')"><div class="thumb">${ic('parts',40)}</div><div class="small ellipsis" style="margin-top:8px;font-weight:600">${esc(p.name)}</div><div class="row between" style="margin-top:4px"><span class="price" style="font-size:14px">${tl0(p.price)}</span><span class="pill ok" style="padding:2px 6px">✓</span></div></button>`; }
+function prodRow(p){ const [c,l] = COMPAT[p.compat]; return `<button class="card row" style="border:0;text-align:left;width:100%;align-items:flex-start" onclick="openProduct('${p.id}')">
+  <div class="thumb" style="width:78px;flex:none">${ic('parts',34)}</div>
+  <div class="grow"><div class="xs muted">${esc(p.brand)} · ${p.cond}</div><b class="small" style="display:block">${esc(p.name)}</b>
+  <div class="row between" style="margin-top:6px"><span class="price">${tl(p.price)}</span><span class="pill ${c}">${l}</span></div>
+  <div class="xs muted" style="margin-top:4px">${esc(p.seller)} · ${ic('star',10)} ${String(p.sr).replace('.',',')}</div></div></button>`; }
+function postCard(p, full=false){ const lk = S.liked.has(p.id), sv = S.saved.has(p.id);
+  return `<div class="post"><div class="row"><div class="avatar">${p.who[0]}</div><div class="grow"><b class="small">${p.who}</b> ${p.ver?'<span class="verified">✓ Doğrulanmış sahip</span>':''}<div class="xs muted">${p.car} · ${p.ago}</div></div>
+    <button class="back" style="width:30px;height:30px;background:none" aria-label="Şikâyet et" onclick="openSheet('report')">${ic('flag',15)}</button></div>
+    <div ${full?'':`onclick="openPost('${p.id}')" style="cursor:pointer"`}><b style="display:block;margin-top:10px">${esc(p.t)}</b><p class="small muted" style="margin:4px 0 0">${esc(p.b)}</p></div>
+    <div class="post-acts"><button class="${lk?'on':''}" onclick="tog(S.liked,'${p.id}')">${ic('heart',16)} ${p.likes+(lk?1:0)}</button><button onclick="openPost('${p.id}')">${ic('forum',16)} ${p.com}</button><button class="${sv?'on':''}" onclick="tog(S.saved,'${p.id}')">${ic('bookmark',16)} ${sv?'Kaydedildi':'Kaydet'}</button></div></div>`; }
+
+function expChart(mo){
+  const W=320,H=150,pl=34,pb=22,pt=8, max = Math.max(...mo.map(m=>m.f+m.b+m.o)), top = Math.ceil(max/2500)*2500;
+  const bw = (W-pl-8)/mo.length, y = v => H-pb - (v/top)*(H-pb-pt);
+  let g = ''; for (let t=0;t<=top;t+=2500){ g += `<line x1="${pl}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="#303640"/><text x="${pl-6}" y="${y(t)+4}" fill="#A3AAB4" font-size="9.5" text-anchor="end">${t/1000}b</text>`; }
+  const bars = mo.map((m,i)=>{ const x = pl + i*bw + bw*.22, w = bw*.56; let acc=0, r='';
+    [['f','#B6F000'],['b','#7CC4FF'],['o','#6B7380']].forEach(([k,c])=>{ if(!m[k]) return; const y0=y(acc), y1=y(acc+m[k]); r+=`<rect x="${x}" y="${y1}" width="${w}" height="${Math.max(0,y0-y1-1)}" rx="2" fill="${c}"/>`; acc+=m[k]; });
+    return r + `<text x="${x+w/2}" y="${H-6}" fill="#A3AAB4" font-size="10" text-anchor="middle">${m.l}</text>`; }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Son 6 ayın giderleri">${g}${bars}</svg>
+  <div class="row small muted" style="gap:14px;margin-top:4px"><span class="row" style="gap:5px"><i style="width:9px;height:9px;border-radius:2px;background:#B6F000;display:inline-block"></i>Yakıt</span><span class="row" style="gap:5px"><i style="width:9px;height:9px;border-radius:2px;background:#7CC4FF;display:inline-block"></i>Bakım</span><span class="row" style="gap:5px"><i style="width:9px;height:9px;border-radius:2px;background:#6B7380;display:inline-block"></i>Diğer</span></div>`;
+}
+function consChart(per){
+  if (per.length < 2) return '<p class="small muted" style="margin:0">Grafik için en az iki tam depo kaydı gerekir.</p>';
+  const W=320,H=120,pl=34,pb=20,pt=10, lo=5.0, hi=6.0, x = i => pl + 10 + i*((W-pl-30)/(per.length-1)), y = v => H-pb-((v-lo)/(hi-lo))*(H-pb-pt);
+  let g=''; [5.0,5.5,6.0].forEach(t=>{ g+=`<line x1="${pl}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="#303640"/><text x="${pl-6}" y="${y(t)+4}" fill="#A3AAB4" font-size="9.5" text-anchor="end">${t.toFixed(1).replace('.',',')}</text>`; });
+  const pts = per.map((p,i)=>`${x(i)},${y(Math.min(hi,Math.max(lo,p.val)))}`).join(' ');
+  const area = `${x(0)},${H-pb} ${pts} ${x(per.length-1)},${H-pb}`;
+  const last = per[per.length-1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Tüketim eğrisi">${g}<polygon points="${area}" fill="rgba(182,240,0,.08)"/><polyline points="${pts}" fill="none" stroke="#B6F000" stroke-width="2"/>
+  ${per.map((p,i)=>`<circle cx="${x(i)}" cy="${y(Math.min(hi,Math.max(lo,p.val)))}" r="${i===per.length-1?4:2.5}" fill="${i===per.length-1?'#B6F000':'#252B35'}" stroke="#B6F000" stroke-width="1.5"/>`).join('')}
+  <text x="${x(per.length-1)}" y="${y(last.val)-9}" fill="#F4F5F6" font-size="10.5" text-anchor="end" font-weight="700">${last.val.toFixed(2).replace('.',',')}</text>
+  ${per.map((p,i)=>`<text x="${x(i)}" y="${H-5}" fill="#A3AAB4" font-size="9" text-anchor="middle">${new Date(p.date).toLocaleDateString('tr-TR',{day:'numeric',month:'short'})}</text>`).join('')}</svg>`;
+}
+
+/* ---------- sheets ---------- */
+const SHEETS = {
+  switcher(){ return `<h3>Araç seç</h3><div class="stack" style="margin-top:12px">${S.vehicles.map((v,i)=>`<button class="card row" style="border:${i===S.active?'1px solid var(--neon)':'0'};text-align:left;width:100%" onclick="S.active=${i};closeSheet()"><div class="ic">${ic('car',19)}</div><div class="grow"><b>${esc(v.brand)} ${esc(v.model)}</b><div class="xs muted">${v.year} · ${fmt(v.km)} km</div></div></button>`).join('')}
+    <button class="btn ghost" onclick="closeSheet();tryAddVehicle()">+ Araç ekle</button></div>`; },
+  km(){ return `<h3>Kilometreyi güncelle</h3><p class="small muted">Son kayıt: ${fmt(V().km)} km. Hatırlatmalar yeni değere göre hesaplanır.</p>
+    <form class="stack" onsubmit="saveKm(event)"><input class="inp num" id="km-in" inputmode="numeric" value="${V().km+120}"><div id="km-err" class="err"></div><button class="btn pri">Kaydet</button></form>`; },
+  widgets(){ const L = {rem:'Sıradaki işler',cta:'Akıllı bakım seti',exp:'Aylık giderler',ai:'PISTON AI',prods:'Önerilen ürünler',forum:'Popüler gönderiler',hist:'Bakım geçmişi'};
+    return `<h3>Ana ekranı düzenle</h3><div class="card" style="margin-top:12px">${Object.keys(L).map(k=>`<div class="list-item"><div class="grow"><b class="small">${L[k]}</b></div><button class="switch" role="switch" aria-checked="${S.widgets[k]}" aria-label="${L[k]}" onclick="S.widgets.${k}=!S.widgets.${k};renderSheet('widgets');render()"></button></div>`).join('')}</div><button class="btn pri" style="margin-top:12px" onclick="closeSheet()">Tamam</button>`; },
+  interval(id){ const m = V().maint.find(x=>x.id===id); if (m.due) return `<h3>${m.name}</h3><div class="field" style="margin-top:12px"><label for="due-in">Son tarih</label><input class="inp" type="date" id="due-in" value="${m.due}"></div><p class="xs muted">Kaynak: ${m.src}</p><button class="btn pri" onclick="saveDue('${id}')">Kaydet</button>`;
+    return `<h3>${m.name}</h3><p class="small muted">Aralığı sen belirle. Hangisi önce dolarsa o tetiklenir.</p>
+    <div class="grid2"><div class="field"><label for="iv-km">Her … km</label><input class="inp num" id="iv-km" inputmode="numeric" value="${m.everyKm||''}" placeholder="Yok"></div><div class="field"><label for="iv-m">veya … ay</label><input class="inp num" id="iv-m" inputmode="numeric" value="${m.everyM||''}" placeholder="Yok"></div></div>
+    <div class="grid2" style="margin-top:10px"><div class="field"><label for="iv-lk">Son yapıldığı km</label><input class="inp num" id="iv-lk" inputmode="numeric" value="${m.lastKm??''}"></div><div class="field"><label for="iv-ld">Son tarih</label><input class="inp" type="date" id="iv-ld" value="${m.lastDate||''}"></div></div>
+    <div class="card small" style="margin-top:12px">${ic('alert',14,'#FFB547')} <span class="muted">Üretici aralıklarını yalnızca lisanslı katalogdan doğrulanmışsa "Üretici" etiketiyle gösteririz. Değilse kaynak "Sizin tanımınız" olarak kalır.</span></div>
+    <div class="grid2" style="margin-top:12px"><button class="btn" onclick="markDone('${id}')">Bugün yapıldı</button><button class="btn pri" onclick="saveIv('${id}')">Kaydet</button></div>`; },
+  logMaint(){ return `<h3>Yapılan işlemi ekle</h3><form class="stack" style="margin-top:12px" onsubmit="saveLog(event)">
+    <div class="field"><label for="lg-t">İşlem</label><select class="inp" id="lg-t">${V().maint.filter(m=>!m.due).map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select></div>
+    <div class="grid2"><div class="field"><label for="lg-km">Km</label><input class="inp num" id="lg-km" inputmode="numeric" value="${V().km}"></div><div class="field"><label for="lg-amt">Tutar (₺)</label><input class="inp num" id="lg-amt" inputmode="decimal" placeholder="0"></div></div>
+    <div class="field"><label for="lg-by">Kim yaptı</label><input class="inp" id="lg-by" placeholder="Servis adı ya da Kendim"></div>
+    <label class="card row" for="lg-file" style="cursor:pointer">${ic('camera',18)}<span class="small"><b>Fatura ya da fiş ekle</b><br><span class="muted">Fotoğrafından tutar ve tarih otomatik okunur</span></span><input type="file" id="lg-file" accept="image/*,application/pdf" hidden></label>
+    <button class="btn pri">Kaydet</button></form>`; },
+  addFuel(){ const last = [...V().fuelLog].sort((a,b)=>b.km-a.km)[0];
+    return `<h3>Yakıt kaydı</h3><form class="stack" style="margin-top:12px" onsubmit="saveFuel(event)" oninput="fuelCalc()">
+    <button type="button" class="card row" style="border:1px dashed var(--line);width:100%;text-align:left" onclick="scanReceipt()">${ic('camera',18,'#B6F000')}<span class="small"><b>Fişi tara</b> <span class="muted">· litre, tutar ve tarih otomatik dolar</span></span></button>
+    <div class="grid2"><div class="field"><label for="fu-km">Kilometre</label><input class="inp num" id="fu-km" inputmode="numeric" placeholder="> ${fmt(last?last.km:V().km)}"></div><div class="field"><label for="fu-l">Litre</label><input class="inp num" id="fu-l" inputmode="decimal" placeholder="45,0"></div></div>
+    <div class="grid2"><div class="field"><label for="fu-p">Litre fiyatı (₺)</label><input class="inp num" id="fu-p" inputmode="decimal" value="${last?String(last.p).replace('.',','):''}"></div><div class="field"><label for="fu-t">Tutar (₺)</label><input class="inp num" id="fu-t" readonly placeholder="otomatik"></div></div>
+    <div class="list-item" style="padding:6px 0"><div class="grow small"><b>Depo tamamen doldu</b><div class="xs muted">Doğru tüketim hesabı için gerekli</div></div><button type="button" class="switch" id="fu-full" role="switch" aria-checked="true" aria-label="Depo tamamen doldu" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true')"></button></div>
+    <div class="err" id="fu-err"></div><button class="btn pri">Kaydet</button></form>`; },
+  quote(){ return `<h3>Teklif iste</h3><p class="small muted">${esc(V().brand)} ${esc(V().model)} · ${fmt(V().km)} km · Kadıköy çevresi</p><form class="stack" onsubmit="event.preventDefault();closeSheet();S.tab='services';go('quotes')">
+    <div class="field"><label for="q-job">İş</label><select class="inp" id="q-job"><option>Yağ + yağ filtresi + hava filtresi</option><option>Ön fren balatası</option><option>Muayene öncesi kontrol</option><option>Arıza tespiti</option></select></div>
+    <div class="field"><label>Parçalar</label><div class="seg"><button type="button" class="on" onclick="segPick(this)">Servis temin etsin</button><button type="button" onclick="segPick(this)">Ben getireceğim</button></div></div>
+    <div class="field"><label for="q-note">Not</label><textarea class="inp" id="q-note" rows="2" placeholder="Örn. hafta sonu uygun"></textarea></div>
+    <div class="list-item" style="padding:6px 0"><div class="grow small"><b>Bakım geçmişimi paylaş</b><div class="xs muted">Yalnızca teklif veren servisler görür</div></div><button type="button" class="switch" role="switch" aria-checked="true" aria-label="Bakım geçmişini paylaş" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true')"></button></div>
+    <button class="btn pri">En yakın 5 servise gönder</button></form>`; },
+  appt(){ return `<h3>Randevu iste</h3><div class="chips" style="margin-top:12px">${['Yarın 10:00','Yarın 14:30','Pzt 09:00','Pzt 16:00'].map((d,i)=>`<button class="chip ${i===0?'on':''}" onclick="this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${d}</button>`).join('')}</div><button class="btn pri" style="margin-top:14px" onclick="closeSheet();toast('Randevu talebi gönderildi. Servis onaylayınca bildirim gelecek.')">Talep gönder</button>`; },
+  newPost(){ return `<h3>Gönderi paylaş</h3><form class="stack" style="margin-top:12px" onsubmit="event.preventDefault();closeSheet();toast('Gönderin yayında (demo)')">
+    <select class="inp" aria-label="Topluluk">${COMMUNITIES.map(c=>`<option ${c===S.community?'selected':''}>${c}</option>`).join('')}</select>
+    <input class="inp" placeholder="Başlık" aria-label="Başlık" required><textarea class="inp" rows="4" placeholder="Ne oldu? Km, belirti, yapılan işlem…" aria-label="İçerik"></textarea>
+    <div class="grid2"><label class="btn" for="np-img" style="text-align:center">Fotoğraf ekle<input type="file" id="np-img" accept="image/*" hidden></label><button type="button" class="btn" onclick="toast('Aracın gönderiye eklendi')">Aracımı ekle</button></div>
+    <button class="btn pri">Paylaş</button><p class="xs muted" style="margin:0">Topluluk kurallarına aykırı içerikler kaldırılır.</p></form>`; },
+  report(){ return `<h3>Şikâyet et</h3><div class="card" style="margin-top:12px">${['Spam veya reklam','Yanıltıcı ya da tehlikeli bilgi','Hakaret veya taciz','Kişisel bilgi paylaşımı (plaka, telefon)','Sahte ürün veya dolandırıcılık'].map(r=>`<button class="list-item" onclick="closeSheet();toast('Şikâyetin moderasyona iletildi. Sonucu bildirimle göreceksin.')"><b class="small grow">${r}</b>${ic('chev',16)}</button>`).join('')}</div>`; },
+  share(){ return `<h3>Aracı paylaş</h3><p class="small muted">Paylaştığın kişi hatırlatmaları görür ve kayıt ekleyebilir. Şasi no ve belgeler gizli kalır.</p><div class="card">${[['Eş / aile','Tam erişim'],['Şoför','Yalnızca yakıt ve km kaydı'],['Usta','Bakım geçmişini görür, 7 gün']].map(([a,b])=>`<div class="list-item"><div class="grow"><b class="small">${a}</b><div class="xs muted">${b}</div></div><button class="btn sm" onclick="${S.plan==='free'?"closeSheet();go('premium')":"toast('Davet bağlantısı kopyalandı (demo)')"}">Davet et</button></div>`).join('')}</div>${S.plan==='free'?'<p class="xs muted">Aile ve şoför paylaşımı Plus özelliğidir. Usta paylaşımı ücretsizdir.</p>':''}`; },
+  delete(){ return `<h3 style="color:var(--bad)">Hesabını sil</h3><p class="small muted">Araçların, bakım geçmişin ve gönderilerin kalıcı olarak silinir. Yasal saklama süresi olan sipariş ve fatura kayıtları süre dolana kadar saklanır. Aktif aboneliğini mağaza ayarlarından iptal etmen gerekir.</p><div class="grid2"><button class="btn" onclick="closeSheet()">Vazgeç</button><button class="btn" style="background:var(--bad);color:#fff" onclick="closeSheet();logout();">Hesabı sil</button></div>`; },
+  limit(){ return `<h3>Araç limiti</h3><p class="small muted">Ücretsiz planda 2 araç ekleyebilirsin. Plus ile sınırsız araç, aile paylaşımı ve Araç Pasaportu gelir.</p><button class="btn pri" onclick="closeSheet();go('premium')">Plus'a bak</button>`; },
+};
+
+/* ---------- AI demo engine ---------- */
+const AI = [
+  {k:/p0401|egr/i, h:`<b>P0401 · EGR akışı yetersiz</b><div class="small muted">Aracın: ${'Focus 1.5 TDCi'}, 148.760 km. Geçmişinde EGR işlemi kaydı yok.</div>
+   <div class="conf"><span>EGR valfinde kurum birikmesi</span><span class="pill warn">Orta-yüksek</span><span>EGR soğutucu veya boru tıkanıklığı</span><span class="pill warn">Orta</span><span>MAP sensörü / vakum hortumu</span><span class="pill n">Düşük-orta</span><span>Kablo veya konnektör arızası</span><span class="pill n">Düşük</span></div>
+   <div class="small" style="margin-top:8px"><b>Kontrol ettir:</b> EGR valfi, soğutucu, vakum hortumları, MAP sensörü.</div>
+   <div class="small" style="margin-top:6px;color:var(--warn)">Çekiş kaybı varsa ya da motor arıza lambası yanıp sönüyorsa uzun yola çıkmadan bir ustaya göster.</div>
+   <div class="row" style="margin-top:10px;gap:8px"><button class="btn pri sm" onclick="tab('services');openSheet('quote')">Arıza tespiti teklifi al</button><button class="btn sm" onclick="openPost('f1')">Toplulukta 31 yorum</button></div>`},
+  {k:/fren|titre/i, h:`<b>Frenlerken direksiyon titremesi</b>
+   <div class="conf"><span>Ön disklerde yamulma veya aşınma</span><span class="pill warn">Yüksek</span><span>Balata yüzeyinde düzensiz birikim</span><span class="pill warn">Orta</span><span>Ön takım boşluğu (rotil, salıncak burcu)</span><span class="pill n">Düşük-orta</span><span>Jant veya lastik balansı</span><span class="pill n">Düşük</span></div>
+   <div class="small" style="margin-top:8px">Geçmişine göre ön balatalar 21 Eki 2026'da değişmiş ama diskler değişmemiş.</div>
+   <div class="small" style="margin-top:6px;color:var(--bad)"><b>Güvenlik:</b> Pedal boşa gidiyorsa, araç bir yana çekiyorsa ya da metal sürtünme sesi geliyorsa aracı kullanma ve ustaya götür.</div>`},
+  {k:/ya[gğ] lamba/i, h:`<b>Yağ basıncı lambası</b><div class="small" style="margin-top:6px;color:var(--bad)"><b>Önce:</b> Lamba sürüş sırasında yanıyorsa güvenli bir yerde motoru hemen durdur. Düşük yağ basıncıyla sürmek motora kalıcı hasar verebilir.</div>
+   <div class="conf"><span>Yağ seviyesi düşük</span><span class="pill warn">Yüksek</span><span>Yağ basınç müşürü arızası</span><span class="pill n">Orta</span><span>Yağ pompası / süzgeç tıkanıklığı</span><span class="pill n">Düşük</span></div>
+   <div class="small" style="margin-top:8px">Seviye normalse aracı çekici ile servise götürmeni öneririz.</div>`},
+  {k:/ge[cç]mi[sş]/i, h:`<b>Bakım geçmişi özeti</b><div class="small" style="margin-top:6px">• Polen filtresi <b>44 gün gecikmiş</b>.<br>• Yağ ve hava filtresi aynı anda dolacak (2.240 km). Tek serviste birleştirirsen işçilikten tasarruf edersin.<br>• Triger için 91.240 km var. Kayıtta su pompası değişimi görünmüyor, bir sonraki triger işleminde sor.<br>• Tüketimin (5,47 L) aynı motorlu sahiplerin ortalamasının (5,6 L) altında. İyi gidiyor.</div>`},
+];
+function ask(q){
+  q = (q||'').trim(); if (!q) return;
+  const hit = AI.find(a=>a.k.test(q));
+  S.chat = S.chat.length ? S.chat : [{r:'ai', h:`Merhaba. ${esc(V().brand)} ${esc(V().model)} aracının bakım geçmişini görebiliyorum. <b>Bu bir teşhis değildir.</b>`}];
+  S.chat.push({r:'me', h:esc(q)});
+  S.chat.push({r:'ai', h: (hit?hit.h:`Bu prototipte yalnızca örnek sorular yanıtlanıyor. Gerçek sürümde yanıt araç bilgin, bakım geçmişin ve doğrulanmış kaynaklarla hazırlanır.`) + `<div class="xs muted" style="margin-top:8px">Olası nedenlerdir, kesin teşhis değildir. Güven düzeyleri tahminidir.</div>`});
+  render(); const sc = $('#screen'); sc.scrollTop = sc.scrollHeight;
+}
+
+/* ---------- actions ---------- */
+function login(){ S.authed = true; S.screen='home'; S.tab='home'; S.stack=[]; render(); }
+function logout(){ S.authed=false; S.screen='login'; S.stack=[]; S.plan='free'; render(); }
+function go(s){ S.stack.push(S.screen); S.screen = s; S.tab = TAB_OF[s] || S.tab; render(); $('#screen').scrollTop = 0; }
+function goBack(){ S.screen = S.stack.pop() || S.tab; render(); }
+function tab(t){ S.tab = t; S.screen = t; S.stack = []; render(); $('#screen').scrollTop = 0; }
+function openProduct(id){ S.productId = id; go('product'); }
+function openPost(id){ S.postId = id; S.tab='forum'; go('post'); }
+function tog(set,id){ set.has(id)?set.delete(id):set.add(id); render(); }
+function toggleFav(id){ tog(S.favs,id); toast(S.favs.has(id)?'Favorilere eklendi':'Favorilerden çıkarıldı'); }
+function addCart(id){ S.cart.push(id); toast('Sepete eklendi'); render(); }
+function addBundle(){ S.cart.push('p1','p2','p6'); toast('3 ürün sepete eklendi'); render(); }
+function tryAddVehicle(){ if (S.plan==='free' && S.vehicles.length>=2) openSheet('limit'); else { S.addErr=''; go('addVehicle'); } }
+function subscribe(){ S.plan='plus'; toast('Plus deneme başladı (demo, ödeme alınmadı)'); goBack(); }
+function segPick(b){ b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); }
+const num = s => parseFloat(String(s).replace(/\./g,'').replace(',','.'));
+const dec = s => parseFloat(String(s).replace(',','.'));
+
+function saveVehicle(e){ e.preventDefault();
+  const b=$('#f-brand').value, m=$('#f-model').value.trim(), y=parseInt($('#f-year').value,10), km=num($('#f-km').value), vin=$('#f-vin').value.trim().toUpperCase();
+  if (!b||!m) { S.addErr='Marka ve model zorunlu.'; return render(); }
+  if (!(y>=1950 && y<=2027)) { S.addErr='Model yılı 1950 ile 2027 arasında olmalı.'; return render(); }
+  if (!(km>=0 && km<2000000)) { S.addErr='Kilometreyi rakamla gir. Örn. 86300'; return render(); }
+  if (vin && !/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) { S.addErr='Şasi numarası 17 karakter olmalı. I, O ve Q harfleri kullanılmaz.'; return render(); }
+  S.vehicles.push({id:'v'+Date.now(), brand:b, model:m, year:y, engine:$('#f-engine').value||'—', fuel:$('#f-fuel').value, gear:$('#f-gear').value, km, plate:$('#f-plate').value.toUpperCase(), vin: vin? vin.slice(0,11)+'•••••'+vin.slice(-2):'', type:document.querySelector('#vtype .on').textContent.split(' ')[0], color:'#F4F5F6', maint:[], fuelLog:[], exp:[], history:[]});
+  S.active = S.vehicles.length-1; S.addErr=''; S.stack=['home']; S.screen='garage'; toast('Araç garaja eklendi. Şimdi bakım aralıklarını ekleyebilirsin.'); render();
+}
+function saveKm(e){ e.preventDefault(); const k = num($('#km-in').value); if (!(k>=V().km)) { $('#km-err').textContent = `Yeni değer son kayıttan (${fmt(V().km)} km) küçük olamaz.`; return; } if (k - V().km > 20000) { $('#km-err').textContent = 'Son kayıttan 20.000 km fazla. Doğru mu? Kontrol edip tekrar gir.'; return; } V().km = k; closeSheet(); toast('Kilometre güncellendi'); }
+function fuelCalc(){ const l = dec($('#fu-l').value), p = dec($('#fu-p').value); $('#fu-t').value = (l>0&&p>0) ? (l*p).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; }
+function scanReceipt(){ $('#fu-l').value='42,6'; $('#fu-p').value='63,50'; $('#fu-km').value=String(V().km+260); fuelCalc(); toast('Fiş okundu (demo): 42,6 L · 63,50 ₺/L'); }
+function saveFuel(e){ e.preventDefault(); const v=V(); const last=[...v.fuelLog].sort((a,b)=>b.km-a.km)[0]; const km=num($('#fu-km').value), l=dec($('#fu-l').value), p=dec($('#fu-p').value);
+  const err = $('#fu-err');
+  if (!(km>0)) return err.textContent='Kilometre gir.';
+  if (last && km<=last.km) return err.textContent=`Kilometre son kayıttan (${fmt(last.km)}) büyük olmalı.`;
+  if (!(l>0 && l<200)) return err.textContent='Litre 0 ile 200 arasında olmalı.';
+  if (!(p>0 && p<500)) return err.textContent='Litre fiyatını kontrol et.';
+  v.fuelLog.push({date:'2026-11-14', km, l, p, full: $('#fu-full').getAttribute('aria-checked')==='true'}); if (km>v.km) v.km=km; closeSheet(); toast('Yakıt kaydı eklendi'); }
+function saveIv(id){ const m=V().maint.find(x=>x.id===id); const k=num($('#iv-km').value), mo=parseInt($('#iv-m').value,10), lk=num($('#iv-lk').value), ld=$('#iv-ld').value;
+  m.everyKm = k>0?k:null; m.everyM = mo>0?mo:null; if (lk>=0) m.lastKm=lk; if (ld) m.lastDate=ld; m.src='Sizin tanımınız'; closeSheet(); toast('Aralık kaydedildi'); }
+function saveDue(id){ const m=V().maint.find(x=>x.id===id); m.due=$('#due-in').value||m.due; closeSheet(); toast('Tarih güncellendi'); }
+function markDone(id){ const v=V(), m=v.maint.find(x=>x.id===id); m.lastKm=v.km; m.lastDate='2026-11-14'; v.history.unshift({date:'2026-11-14',km:v.km,t:m.name,by:'Kendim',amt:0,doc:false}); closeSheet(); toast('İşlem kaydedildi, sayaç sıfırlandı'); }
+function saveLog(e){ e.preventDefault(); const v=V(), m=v.maint.find(x=>x.id===$('#lg-t').value); const km=num($('#lg-km').value)||v.km; m.lastKm=km; m.lastDate='2026-11-14';
+  v.history.unshift({date:'2026-11-14',km,t:m.name,by:$('#lg-by').value||'Kendim',amt:dec($('#lg-amt').value)||0,doc:!!$('#lg-file').files.length}); closeSheet(); toast('İşlem geçmişe eklendi'); }
+
+/* ---------- overlay ---------- */
+let sheetArg = null;
+function openSheet(n, arg){ sheetArg = arg; renderSheet(n); }
+function renderSheet(n){ $('#overlay').innerHTML = `<div class="sheet-bg" onclick="if(event.target===this)closeSheet()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${SHEETS[n](sheetArg)}</div></div>`; NOTES_KEY = 'sheet:'+n; renderNotes(); }
+function closeSheet(){ $('#overlay').innerHTML=''; render(); }
+let tt; function toast(m){ clearTimeout(tt); let t = document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); $('#phone').appendChild(t);} t.textContent=m; tt=setTimeout(()=>t.remove(),2600); }
+
+/* ---------- notes (sağ panel) ---------- */
+const NOTES = {
+  login:['Giriş ve kayıt','Telefon, Apple, Google ve e-posta ile giriş. Prototipte herhangi bir düğme demoya girer.',['Google ile giriş varsa Apple ile giriş zorunlu (App Store kuralı 4.8).','KVKK aydınlatması ve açık rıza ayrı. Pazarlama izni varsayılan olarak kapalı.','Uygulama girişsiz keşfe de açılabilir (forum ve pazar). Kayıt, araç eklerken istenir.']],
+  home:['Ana Sayfa','Araç kartı, durumuna göre sıralanmış hatırlatmalar, akıllı bakım seti, giderler, AI, ürünler, forum ve geçmiş. Tüm bölümler "Ana ekranı düzenle" ile açılıp kapanır.',['Rakiplerde hatırlatma bir bildirimden ibaret. Burada hatırlatma tek dokunuşla uyumlu set ve servis teklifine dönüşüyor.','Garaj sekmesi yok. Araç değiştirici ve Garaj düğmesi Ana Sayfa\'da, böylece 5 sekmeli menü korunuyor.','AI kısayolu sağ üstte sabit. Ayrı bir sekme açmaya gerek yok.']],
+  garage:['Garaj','Birden fazla araç; her birinin ayrı bakım, yakıt ve masraf geçmişi var.',['arabam.com Garaj\'da yalnızca 1 araç eklenebiliyor. Bizde ücretsiz planda 2 araç (ev halkı için), Plus\'ta sınırsız.','Ticari araçlar baştan desteklenir. Motosiklet şemada var, arayüzde "yakında".']],
+  vehicle:['Araç detayı ve Araç Pasaportu','Araç bilgileri, belgeler, paylaşım ve belgelenmiş geçmiş skoru.',['Araç Pasaportu: aracı satarken geçmişi tek bağlantıyla göster. Satıcıya değer katan ve hiçbir rakipte olmayan bir özellik.','Şasi numarası maskeli gösterilir ve şifreli saklanır.','Usta paylaşımı ücretsiz: servis ağını büyütür.']],
+  addVehicle:['Araç ekleme','Brifteki tüm alanlar, doğrulama kurallarıyla birlikte.',['Şasi numarası 17 karakter olmalı ve I, O, Q harflerini içeremez. Prototipte bu kontrol çalışıyor.','Yakıt türüne LPG, hibrit ve elektrik eklendi (Togg ve hibritler hızla artıyor).','Gerçek sürümde marka, model ve motor serbest metin değil, katalog tablosundan seçilir. Uyumluluk buna dayanıyor.']],
+  maint:['Bakım ve hatırlatmalar','Km ve tarih, hangisi önce dolarsa. Her kalemin kaynağı yazar. Dokununca aralık düzenlenir.',['Türkiye\'ye özel kalemler: muayene, trafik sigortası, MTV taksitleri, kış lastiği.','"Kaynak" etiketi briften gelen kuralı uyguluyor: doğrulanmamış üretici aralığı kesin bilgi gibi gösterilmez.','Gecikmiş, yaklaşıyor, zamanında: durum renkle ve metinle birlikte gösterilir (erişilebilirlik).']],
+  fuel:['Yakıt ve masraf','Depo dolum yöntemiyle 100 km tüketimi, km başı maliyet, aylık ve yıllık gider.',['Brifteki hesap hatası düzeltildi: kısmi dolumda tüketim doğrudan hesaplanırsa yanlış çıkar. Kısmi dolum bir sonraki tam dolumda hesaba katılır.','Kilometre geriye gidemez, 20.000 km üzeri sıçramada uyarı verilir.','Fiş tarama (OCR) ve doğrulanmış sahiplerin ortalamasıyla kıyaslama Drivvo ve Fuelio\'da yok.']],
+  ai:['PISTON AI','Arıza kodu ve belirti yorumlama. Yanıtta olası nedenler, güven düzeyi ve ne zaman profesyonel kontrol gerektiği yazar.',['Yanıt aracın bakım geçmişini kullanır ("balatalar değişmiş ama diskler değişmemiş").','Güvenlik kritik durumlarda (fren, yağ basıncı) "aracı kullanma" uyarısı en üstte.','AI çağrısı Edge Function üzerinden gider. Anahtar istemcide durmaz, kullanım kotası sunucuda sayılır.']],
+  notif:['Bildirimler','Bakım, teklif, forum ve sipariş bildirimleri tek listede.',['Bildirim türleri Profil > Bildirim tercihleri\'nden ayrı ayrı kapatılabilir.','Push izni ilk açılışta değil, ilk hatırlatma kurulurken istenir. Kabul oranı daha yüksek olur.']],
+  market:['Parça Pazarı','"Yalnızca aracıma uyanlar" anahtarı varsayılan olarak açık. Kategoriler briftekiyle aynı.',['Trendyol ve Hepsiburada\'da uyumluluk çoğunlukla satıcı beyanı. Bizde her üründe üç durumdan biri var: doğrulanmış uyumlu, kontrol gerekli, uyumsuz.','Uyumsuz ürünler varsayılan olarak gizli. Anahtarı kapatınca görünür ama sepete eklenemez.','Arama OEM numarasıyla da çalışır.']],
+  product:['Ürün sayfası','Brifteki tüm alanlar: OEM, alternatif numaralar, durum, stok, satıcı, kargo, garanti, iade ve uyumluluk.',['Uyumluluk kutusu nedenini açıklıyor ve "kontrol gerekli" durumunda şasi numarasıyla doğrulamaya yönlendiriyor.','Uyum Güvencesi: doğrulanmış uyumlu parça uymazsa iade kargosu platformdan. Güveni bu farkla kazanırız.','"Servise teslim edilsin": parça doğrudan seçilen ustaya gider.']],
+  cart:['Sepet ve ödeme','Ödeme lisanslı pazaryeri ödeme kuruluşu üzerinden. Para teslimattan sonra satıcıya aktarılır.',['Fiziksel ürünler Apple ve Google uygulama içi satın almasıyla satılamaz. Ödeme kuruluşu üzerinden yapılmalıdır.','Ön bilgilendirme formu ve mesafeli satış sözleşmesi ödemeden önce gösterilir.','Kart verisi platformda tutulmaz.']],
+  forum:['Forum ve topluluk','Marka ve model toplulukları, akış, gönderi paylaşma, beğeni, kaydetme ve şikâyet.',['Doğrulanmış sahip rozeti (ruhsat ya da şasi no ile) Facebook gruplarında olmayan bir güven katmanı.','"Kronik sorunlar" sayfası: dağınık forum bilgisini aranabilir, oylanmış bir rehbere çeviriyor.','İşletmeler "İşletme" etiketiyle yanıt verir. Bu, servislere organik müşteri kazandırır.']],
+  post:['Gönderi detayı','Yorumlar, işletme yanıtları ve şikâyet akışı.',['Plaka ya da telefon numarası paylaşımı otomatik olarak işaretlenir (KVKK).','Gönderiden ilgili parçaya ve ustaya bağlantı verilebilir.']],
+  services:['Servis arama','Şehir, ilçe, marka, hizmet türü, puan ve yakınlık filtreleri.',['Teklif modeli: tek talep, birden çok usta, işçilik ve parça ayrı yazılır. Bulduğumuz rakiplerde bu yok.','Yorumlar yalnızca uygulama üzerinden tamamlanan randevulardan alınır. Sahte yorumu bu engeller.']],
+  service:['Servis profili','Adres, telefon, saatler, fotoğraflar, uzmanlık, onaylı yorumlar, teklif ve randevu talebi.',['Vergi levhası doğrulama rozeti.','Usta, kullanıcının izniyle aracın bakım geçmişini görür. Doğru teklif verir, gereksiz işlem azalır.']],
+  quotes:['Teklif karşılaştırma','Üç teklif yan yana: işçilik, parça, toplam ve uygun saat.',['Pazarla bağlantı: parçayı pazardan al, servise gönder, yalnızca işçilik öde. Bu da pazaryeri komisyonu ve servis paketi gelirini birlikte büyütür.']],
+  profile:['Profil','Hesap, siparişler, favoriler, işletme başvuruları ve gizlilik ayarları.',['Uygulama içinden hesap silme App Store için zorunlu (kural 5.1.1). Brifte yoktu, eklendi.','"Verilerimi indir": KVKK md. 11 kapsamındaki başvuru haklarını kolaylaştırır.','Satıcı ve servis başvurusu aynı uygulamadan yapılır. Paneller web\'de.']],
+  premium:['PISTON Plus','Ücretsiz, Plus aylık ve Plus yıllık.',['Brifteki çelişki düzeltildi: "çoklu araç" ve "sınırsız geçmiş" ücretsizde de olmalı. Geçmiş, kullanıcıyı uygulamada tutan ana değer.','Plus\'ın değeri: Araç Pasaportu, raporlar, aile paylaşımı, AI kotası, reklamsız kullanım.','Yıllık fiyat aylığın 8 katı (%33 indirim). Mağaza kuralları gereği deneme koşulları açıkça yazılır.']],
+};
+let NOTES_KEY = 'login';
+function renderNotes(){
+  const key = NOTES_KEY.startsWith('sheet:') ? S.screen : S.screen;
+  const [t,p,edge] = NOTES[key] || ['','',[]];
+  const jumps = [['home','Ana Sayfa'],['garage','Garaj'],['addVehicle','Araç ekle'],['maint','Bakım'],['fuel','Yakıt'],['ai','PISTON AI'],['market','Pazar'],['product','Ürün'],['cart','Sepet'],['forum','Forum'],['services','Servisler'],['quotes','Teklifler'],['profile','Profil'],['premium','Plus'],['login','Giriş']];
+  $('#notes').innerHTML = `<span class="eyebrow">Ekran notu</span><h2>${t}</h2><p>${p}</p><h4>Rakiplerden farkı ve düzeltmeler</h4><ul>${edge.map(e=>`<li>${e}</li>`).join('')}</ul>
+  <h4>Ekrana atla</h4><div class="jump" style="margin-top:0">${jumps.map(([k,l])=>`<button aria-current="${S.screen===k}" onclick="jump('${k}')">${l}</button>`).join('')}</div>
+  <p class="small" style="margin-top:22px">Prototipteki araç, fiyat, servis, satıcı ve uyumluluk bilgilerinin hepsi demo verisidir. OEM numaraları ve işletme adları örnektir.</p>`;
+}
+function jump(k){ $('#overlay').innerHTML=''; if (k==='login'){ logout(); return; } S.authed=true; if (k==='product' && !S.productId) S.productId='p3'; S.tab = TAB_OF[k]; S.stack = k===S.tab?[]:[S.tab]; if(k==='addVehicle'){S.addErr='';} S.screen=k; render(); $('#screen').scrollTop=0; }
+
+/* ---------- render ---------- */
+function render(){
+  $('#screen').innerHTML = SCREENS[S.screen]();
+  $('#tabbar').hidden = !S.authed;
+  $('#tabbar').innerHTML = TABS.map(([k,l,i])=>`<button aria-current="${S.tab===k}" onclick="tab('${k}')">${ic(i,22)}<span>${l}</span></button>`).join('');
+  NOTES_KEY = S.screen; renderNotes();
+}
+
+/* =========================================================
+   REPORT CONTENT
+   ========================================================= */
+const CMP_COLS = ['PISTON GARAGE','arabam.com Garaj','Drivvo','Fuelio','AUTODOC CLUB','Trendyol / HB oto parça','Servislet'];
+const CMP = [
+  ['Birden fazla araç', 'y','n','y','y','y','n','u'],
+  ['Km + tarih bakım hatırlatması', 'y','p','y','y','y','n','n'],
+  ['Yakıt ve masraf analizi', 'y','n','y','y','p','n','n'],
+  ['Çok satıcılı parça pazarı', 'y','n','n','n','p','y','p'],
+  ['Araca göre doğrulanmış uyumluluk', 'y','n','n','n','u','p','n'],
+  ['Servis randevusu', 'y','y','n','n','n','n','y'],
+  ['Birden çok ustadan teklif karşılaştırma', 'y','u','n','n','n','n','u'],
+  ['Topluluk / forum', 'y','n','n','n','p','n','n'],
+  ['AI arıza asistanı', 'y','n','n','n','u','n','n'],
+  ['Türkiye takvimi (muayene, MTV, kış lastiği)', 'y','p','p','p','n','n','n'],
+  ['Satışta geçmişi paylaşma (Araç Pasaportu)', 'y','p','p','n','n','n','n'],
+];
+const MARK = {y:'●',p:'◐',n:'○',u:'?'};
+$('#cmp').innerHTML = `<thead><tr><th>Özellik</th>${CMP_COLS.map((c,i)=>`<th class="${i===0?'pg':''}">${c}</th>`).join('')}</tr></thead><tbody>${CMP.map(r=>`<tr><td>${r[0]}</td>${r.slice(1).map((v,i)=>`<td class="${i===0?'pg':''}"><span class="m ${v}" aria-label="${{y:'Var',p:'Kısmen',n:'Yok',u:'Doğrulanamadı'}[v]}">${MARK[v]}</span></td>`).join('')}</tr>`).join('')}</tbody>`;
+
+const EDGES = [
+  ['Kapalı döngü','Hatırlatma → uyumlu set → usta teklifi → fatura otomatik olarak geçmişe işlenir. Rakipler bu adımlardan yalnızca birini yapıyor.'],
+  ['Uyum Güvencesi','"Doğrulanmış uyumlu" etiketli parça uymazsa iade kargosunu platform öder. Trendyol ve Hepsiburada\'daki "yanlış parça" şikâyetlerine doğrudan yanıt.'],
+  ['Araç Pasaportu','Belgelenmiş bakım geçmişi satışta paylaşılabilir bağlantı olarak sunulur. Kullanıcıya para kazandırır ve Plus\'a geçmek için güçlü bir neden olur.'],
+  ['Şeffaf teklif','Tek talep, birden çok usta. İşçilik ve parça ayrı yazılır. Kullanıcı izin verirse usta aracın geçmişini görür.'],
+  ['Parçayı servise gönder','Pazardan alınan parça doğrudan seçilen ustaya gider. Kullanıcı yalnızca işçilik öder. Komisyon ve servis paketi gelirini birlikte büyütür.'],
+  ['Türkiye takvimi','Muayene, trafik sigortası, kasko, MTV taksitleri ve ticari araçlar için kış lastiği dönemi. Yabancı uygulamalarda bu yok.'],
+  ['Doğrulanmış sahip topluluğu','Ruhsat ya da şasi numarasıyla doğrulanmış rozet, model bazlı "Kronik sorunlar" rehberi ve gerçek tüketim ortalamaları.'],
+  ['Geçmişini bilen AI','Arıza yorumunda aracın kendi bakım kaydı kullanılır. Güven düzeyi ve güvenlik uyarısı her yanıtta yer alır.'],
+  ['Fiş ve fatura okuma','Yakıt fişi ve servis faturası fotoğrafından tutar, litre ve tarih otomatik okunur. Manuel girişi bitirir.'],
+  ['Esnaf ve küçük filo','Ticari araç sahibi esnaf için şoför paylaşımı, km başı maliyet ve KDV\'li fatura arşivi. Aşama 5\'teki filo yönetimine doğal geçiş sağlar.'],
+];
+$('#edges').innerHTML = EDGES.map(([t,d],i)=>`<div class="rc"><span class="who">Fark ${i+1}</span><h3>${t}</h3><p>${d}</p></div>`).join('');
+
+const ISSUES = [
+  ['Kritik','Premium ile Garaj çelişiyor','5. bölümde "kullanıcı birden fazla araç ekleyebilmeli", 12. bölümde ise "birden fazla araç yönetimi" Premium özelliği. Ayrıca "sınırsız bakım geçmişi" Premium\'da, yani ücretsiz kullanıcının geçmişi kısıtlanıyor.','Ücretsizde 2 araç ve sınırsız geçmiş. Geçmiş, kullanıcıyı uygulamada tutan ana değer; kısıtlanırsa kullanıcı Drivvo\'ya döner. Plus\'ın değeri: Araç Pasaportu, raporlar, aile paylaşımı, AI kotası, reklamsız kullanım.'],
+  ['Kritik','Gelir önceliği ile aşama sırası çelişiyor','13. bölüm "abonelik ve pazaryerine öncelik" diyor, ama Premium 4. aşamada.','Plus aboneliği 2. aşamaya alınsın. Yazılım maliyeti düşük, gelir hemen başlar. Pazaryeri, kullanıcı tabanı oluştuktan sonra pilot satıcılarla 3. aşamada açılsın.'],
+  ['Kritik','Uygulama içinden hesap silme yok','App Store kuralı 5.1.1(v) hesap oluşturulabilen her uygulamada uygulama içinden hesap silmeyi zorunlu tutuyor.','Profil > Gizlilik > Hesabımı sil akışı eklendi. Yasal saklama süresi olan sipariş ve fatura kayıtları ayrı tutulur.'],
+  ['Kritik','Yurt dışına veri aktarımı (KVKK md. 9)','Supabase, Sentry, PostHog ve Firebase sunucuları yurt dışında. 2024 değişikliğinden sonra yurt dışına aktarım için standart sözleşme ve Kurul\'a bildirim gerekiyor. Brifte bu konu yok.','AB bölgesi (ör. Frankfurt) seçilsin. Standart sözleşmeler imzalanıp süresinde bildirilsin. VERBİS kaydı, aydınlatma metni ve açık rıza kayıtları için consents tablosu kurulsun. Hukukçu teyidi alınsın.'],
+  ['Kritik','Fiziksel ürün ve uygulama içi satın alma','Brif, abonelik ile pazaryeri ödemesini ayırmıyor.','Plus yalnızca StoreKit / Play Billing (RevenueCat) ile satılır. Yedek parça ve servis ödemeleri mağaza ödemesiyle değil, lisanslı ödeme kuruluşu ile alınır. İşletme paketleri web panelden satılır.'],
+  ['Önemli','Garaj alt menüde yok','Garaj ana modül, ama beş sekmeden hiçbiri değil.','Ana Sayfa "Garajım" gibi davranıyor: araç değiştirici ve Garaj düğmesi üstte. Beş sekme korunuyor.'],
+  ['Önemli','Yakıt tüketimi hesabı yanlış çıkar','"Ortalama tüketim" her dolumda litre ÷ km ile hesaplanırsa kısmi dolumlarda sonuç yanlış çıkar.','Depo dolum yöntemi kullanılıyor: "Depo tamamen doldu" işareti var, kısmi dolumlar bir sonraki tam dolumda hesaba katılıyor. Kilometre geriye gidemiyor.'],
+  ['Önemli','Elektrikli, hibrit ve LPG eksik','Yakıt takibi yalnızca litre üzerine kurulu. Togg ve hibritler büyüyor, LPG Türkiye\'de yaygın.','Yakıt tipine LPG, hibrit ve elektrik eklendi. Şemada fuel_records.energy_unit (L / kWh) ve çift yakıt desteği var.'],
+  ['Önemli','Araç kataloğu tabloları yok','Uyumluluk "çok önemli" deniyor, ama şemada marka, model, kasa ve motor tabloları yok. Serbest metinle uyumluluk yapılamaz.','vehicle_makes, vehicle_models, vehicle_generations ve vehicle_variants tabloları eklendi. Kaynak olarak lisanslı katalog (ör. TecDoc) için bütçe ve sözleşme planlansın.'],
+  ['Önemli','Pazaryeri tabloları eksik','İade, para iadesi, satıcı hakedişi, komisyon, adres, favori ve ürün soruları tabloları yok.','returns, refunds, seller_payouts, commission_rates, addresses, favorites ve product_questions eklendi.'],
+  ['Önemli','Servis teklif ve randevu tabloları yok','Teklif talebi ve randevu isteniyor, ama şemada karşılıkları yok.','service_quote_requests, service_quotes ve appointments eklendi. Onaylı yorum, tamamlanan randevuya bağlanıyor.'],
+  ['Önemli','users tablosu Supabase Auth ile çakışıyor','Supabase kendi auth.users tablosunu yönetiyor. Ayrıca bir users tablosu açmak iki gerçek kaynak oluşturur.','auth.users + profiles (1:1). Roller için roles ve user_roles. RLS politikaları her tabloda.'],
+  ['Önemli','E-ticaret mevzuatı detayı','"Mesafeli satış" geçiyor ama aracı hizmet sağlayıcı yükümlülükleri (6563 sayılı Kanun ve 2022 değişiklikleri), ETBİS kaydı, ikinci el parça garanti kuralları ve sahte yorum yasağı yok.','Hukuk kontrol listesi Aşama 3\'ün çıkış kriteri olsun. İkinci el ürünler için ayrı garanti metni hazırlansın. Yorumlar yalnızca tamamlanan işlemlerden alınsın.'],
+  ['Önemli','AI maliyeti ve sorumluluğu','AI kullanım hakları Premium\'a bağlı, ama kota, maliyet ve güvenlik kuralları tanımlı değil.','AI çağrıları Edge Function üzerinden yapılsın, kota sunucuda sayılsın. Güvenlik kritik konularda (fren, yağ basıncı, direksiyon) sabit uyarı şablonu kullanılsın. Konuşmalar KVKK kapsamında saklansın veya silinsin.'],
+  ['Öneri','Ana Sayfa\'da 13 bileşen','Hepsi aynı anda gösterilirse ekran kalabalıklaşır ve "minimal" ilkesiyle çelişir.','Varsayılan sıra: araç, sıradaki işler, akıllı bakım seti, giderler. Gerisi "Ana ekranı düzenle" ile açılıp kapanır.'],
+  ['Öneri','Girişten önce değer göstermek','İlk ekranda kayıt zorunlu olursa indirme sonrası kayıp yüksek olur.','Forum ve pazar girişsiz gezilebilsin. Kayıt araç eklerken istensin. Push izni ilk hatırlatma kurulurken istensin.'],
+  ['Öneri','Kullanıcı tanımlı aralığın kaynağı','Brif doğru kuralı koymuş (doğrulanmamış aralık kesin gösterilmez), ama bunun arayüzde nasıl görüneceği belirtilmemiş.','Her bakım kaleminde "Kaynak: Sizin tanımınız / Servis önerisi / Üretici (doğrulanmış)" etiketi. Prototipte uygulandı.'],
+  ['Öneri','Bildirim altyapısı tekrar','Expo Notifications zaten APNs ve FCM\'i sarıyor. Üçü ayrı ayrı sayılmış.','Expo Push Service + device_tokens tablosu. Zamanlanmış hatırlatmalar Supabase cron ve Edge Function ile gönderilir.'],
+];
+const SEV = {Kritik:'bad', Önemli:'warn', Öneri:'info'};
+$('#issues').innerHTML = ISSUES.map(([s,t,p,f])=>`<div class="issue"><div><span class="pill ${SEV[s]}">${s}</span></div><div><h3>${t}</h3><p>${p}</p><p><b>Düzeltme:</b> ${f}</p></div></div>`).join('');
+
+const PHASES = [
+  ['Aşama 1','Garaj ve MVP · 8–10 hafta',['Tasarım sistemi (packages/ui), giriş (Apple, Google, telefon), KVKK izinleri, hesap silme','Garaj, araç ekleme (katalog tablolarıyla), km ve tarih hatırlatmaları, kaynak etiketleri, push bildirimleri','Yakıt (depo dolum yöntemi), masraf, grafikler','Forum, pazar ve servis arayüzleri yalnızca demo ortamında, "yakında" olarak','Sentry, PostHog (AB), TestFlight / iç test, birim testleri (core paketi)']],
+  ['Aşama 2','Plus ve servis ağı · 6–8 hafta',['PISTON Plus: RevenueCat, StoreKit, Play Billing, deneme süresi, geri yükleme','Araç Pasaportu (paylaşılabilir bağlantı), aile ve şoför paylaşımı','Servis arama, işletme profilleri, teklif talebi ve karşılaştırma, randevu; web işletme paneli (Next.js)','Fiş ve fatura okuma (OCR)']],
+  ['Aşama 3','Pazaryeri pilotu · 10–12 hafta',['10–20 pilot satıcı (filtre, yağ, fren gibi kolay uyumlanan kategoriler)','Katalog ve uyumluluk motoru, şasi numarasıyla doğrulama, Uyum Güvencesi','Lisanslı pazaryeri ödeme kuruluşu entegrasyonu, hakediş, iade, kargo takibi','Satıcı paneli, yönetici paneli; hukuk kontrol listesi çıkış kriteri']],
+  ['Aşama 4','Topluluk ve AI · 6–8 hafta',['Forum, marka ve model toplulukları, moderasyon kuyruğu, doğrulanmış sahip rozeti','PISTON AI (Edge Function proxy, kota, güvenlik şablonları), kronik sorunlar rehberi','Gelişmiş raporlar, analitik panoları']],
+  ['Aşama 5','Genişleme',['OBD-II (Bluetooth adaptör), motosiklet arayüzü','Esnaf ve filo paketi, sponsorlu ürünler, reklam alanları','Sigorta ve kasko teklif ortaklıkları']],
+];
+$('#phases').innerHTML = PHASES.map(([a,t,l])=>`<div class="phase"><div class="tag">${a}</div><div><h3 style="font-size:17px">${t}</h3><ul>${l.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`).join('');
+
+/* ---------- routing ---------- */
+const VIEWS = ['prototip','rakipler','brif','yol'];
+function route(){ const h = (location.hash||'#prototip').slice(1); const v = VIEWS.includes(h)?h:'prototip';
+  VIEWS.forEach(x=>{ $('#v-'+x).hidden = x!==v; });
+  document.querySelectorAll('.nav a').forEach(a=>a.setAttribute('aria-current', a.getAttribute('href')==='#'+v?'page':'false'));
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+route(); render();
+</script>

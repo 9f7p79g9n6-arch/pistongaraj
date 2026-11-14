@@ -1,0 +1,22 @@
+<title>Piston Garage Demo</title>
+<meta name="theme-color" content="#17191D">
+<style>
+  :root { color-scheme: dark; --bg: #17191D; --fg: #F4F5F6; --muted: #A3AAB4; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--fg); overflow: hidden; margin: 0; }
+  #root { display: flex; height: 100%; flex: 1; }
+  #boot { margin: auto; font: 600 14px system-ui, sans-serif; color: var(--muted); letter-spacing: .08em; }
+</style>
+<div id="root"><div id="boot">PISTON GARAGE yükleniyor…</div></div>
+<script>
+  // Paket dosyasının adresi, sayfanın gerçek yayın konumuna göre çözülür; ardından
+  // uygulama yönlendiricisi kök adresten ("/") başlatılır.
+  (function () {
+    var src = new URL('app/entry-aea18d505d034f73010b048d3705f94e.js', location.href).href;
+    try { if (location.pathname !== '/') history.replaceState(null, '', '/' + location.hash); } catch (e) {}
+    var s = document.createElement('script');
+    s.src = src;
+    s.onerror = function () { document.getElementById('boot').textContent = 'Uygulama yüklenemedi. Sayfayı yenile.'; };
+    document.body.appendChild(s);
+  })();
+</script>
