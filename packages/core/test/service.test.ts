@@ -7,7 +7,9 @@ import {
   formatKurus,
   formatPhoneTR,
   hasPermission,
+  itemsFromSimpleForm,
   needsCustomerAction,
+  simpleFormFromItems,
   nextServiceStatus,
   normalizeEmail,
   normalizePhoneTR,
@@ -55,6 +57,53 @@ describe('servis tutarları', () => {
 
   it('boş liste', () => {
     expect(computeServiceTotals([], 20).grandKurus).toBe(0);
+  });
+});
+
+describe('sade form: parça satırları ve işçilik', () => {
+  const rows = (...r: [string, string][]) => r.map(([name, price]) => ({ name, price }));
+
+  it('boş satırlar yok sayılır; parça ve işçilik ayrı toplanır', () => {
+    const f = itemsFromSimpleForm(rows(['Fren balatası', '1.250,50'], ['', ''], ['Motor yağı', '900'], ['', '']), '750');
+    expect(f.rowErrors).toEqual([null, null, null, null]);
+    expect(f.partsKurus).toBe(215_050);
+    expect(f.laborKurus).toBe(75_000);
+    const t = computeServiceTotals(f.items, null);
+    expect(t).toMatchObject({ partsKurus: 215_050, laborKurus: 75_000, grandKurus: 290_050 });
+    for (const i of f.items) expect(validateServiceItem(i)).toBeNull();
+  });
+
+  it('eksik ve hatalı satırlar yakalanır', () => {
+    const f = itemsFromSimpleForm(rows(['', '100'], ['Disk', ''], ['Filtre', 'abc'], ['Yağ', '-5'], ['Silecek', '0']), '');
+    expect(f.rowErrors[0]).toMatch(/adını/);
+    expect(f.rowErrors[1]).toMatch(/Fiyatı yaz/);
+    expect(f.rowErrors[2]).toMatch(/biçiminde/);
+    expect(f.rowErrors[3]).toMatch(/biçiminde/);
+    expect(f.rowErrors[4]).toBeNull(); // ücretsiz parça
+    expect(f.items).toHaveLength(1);
+  });
+
+  it('hatalı işçilik', () => {
+    expect(itemsFromSimpleForm([], '12,345').laborError).not.toBeNull();
+  });
+
+  it('indirim önce işçilikten düşülür, kalem tutarını aşmaz; KDV mantığı korunur', () => {
+    const f = itemsFromSimpleForm(rows(['Balata', '1000']), '300', '500');
+    expect(f.discountError).toBeNull();
+    expect(f.items.map((i) => i.discountKurus)).toEqual([30_000, 20_000]);
+    const t = computeServiceTotals(f.items, 20);
+    expect(t).toMatchObject({ subtotalKurus: 130_000, discountKurus: 50_000, netKurus: 80_000, vatKurus: 16_000, grandKurus: 96_000 });
+    for (const i of f.items) expect(validateServiceItem(i)).toBeNull();
+    expect(itemsFromSimpleForm(rows(['Balata', '10']), '', '11').discountError).not.toBeNull();
+  });
+
+  it('kalemlerden forma geri dönüş (düzeltme)', () => {
+    const f = itemsFromSimpleForm(rows(['Balata', '1.250,50'], ['Yağ', '900']), '750', '100');
+    const back = simpleFormFromItems(f.items);
+    expect(back).toEqual({ rows: [{ name: 'Balata', price: '1250,50' }, { name: 'Yağ', price: '900' }], laborKurus: 75_000, discountKurus: 10_000 });
+    // eski ayrıntılı kalem: adet ve kalem işçiliği
+    const old = simpleFormFromItems([item({ partName: 'Yağ', partQty: 4, partUnitKurus: 45_000, laborKurus: 60_000 })]);
+    expect(old).toEqual({ rows: [{ name: 'Yağ × 4', price: '1800' }], laborKurus: 60_000, discountKurus: 0 });
   });
 });
 

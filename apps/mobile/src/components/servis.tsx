@@ -7,7 +7,6 @@ import {
   formatKm,
   formatKurus,
   FUEL_LEVEL_LABEL,
-  itemGrossKurus,
   SERVICE_FILE_KIND_LABEL,
   SERVICE_STATUS_LABEL,
   type ServiceItemInput,
@@ -91,31 +90,40 @@ export function TotalsCard({ totals }: { totals: ServiceTotals }) {
   );
 }
 
-export function ItemsList({ items, onPress }: { items: (ServiceItemInput & { id?: string })[]; onPress?: (index: number) => void }) {
-  if (items.length === 0) return <Muted small>Henüz işlem eklenmedi.</Muted>;
+/**
+ * Değişen parçalar tek tek (ad ve fiyat), ardından işçilik. Müşteri ve işletme aynı listeyi görür.
+ * Eski ayrıntılı kayıtlardaki kalem işçilikleri de "İşçilik — işlem adı" olarak gösterilir.
+ */
+export function ItemsList({ items }: { items: ServiceItemInput[] }) {
+  const parts = items.filter((i) => i.partQty > 0);
+  const labor = items.filter((i) => i.laborKurus > 0);
+  if (parts.length === 0 && labor.length === 0) return <Muted small>Henüz parça ya da işçilik eklenmedi.</Muted>;
+  const partsTotal = parts.reduce((s, i) => s + i.partQty * i.partUnitKurus, 0);
   return (
-    <Stack gap={space.sm}>
-      {items.map((i, idx) => {
-        const parts = i.partQty * i.partUnitKurus;
-        const body = (
-          <Card style={{ gap: 4 }}>
-            <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Text v="bodyStrong" style={{ flex: 1 }}>{i.title}</Text>
-              <Text v="bodyStrong">{formatKurus(itemGrossKurus(i) - Math.min(i.discountKurus, itemGrossKurus(i)))}</Text>
-            </Row>
-            {i.description ? <Muted small>{i.description}</Muted> : null}
-            {i.partQty > 0 && <Muted small>{`Parça: ${i.partName} × ${i.partQty} = ${formatKurus(parts)}`}</Muted>}
-            {i.laborKurus > 0 && <Muted small>{`İşçilik: ${formatKurus(i.laborKurus)}`}</Muted>}
-            {i.discountKurus > 0 && <Text v="small" color={colors.warn}>{`İndirim: −${formatKurus(i.discountKurus)}`}</Text>}
-          </Card>
-        );
-        return onPress ? (
-          <Pressable key={i.id ?? idx} onPress={() => onPress(idx)} accessibilityRole="button" accessibilityLabel={`${i.title} işlemini düzenle`}>
-            {body}
-          </Pressable>
-        ) : <View key={i.id ?? idx}>{body}</View>;
-      })}
-    </Stack>
+    <Card style={{ gap: space.sm }}>
+      <Text v="smallStrong" color={colors.textMuted}>Değişen parçalar</Text>
+      {parts.length === 0 ? <Muted small>Parça değişmedi.</Muted> : parts.map((i, idx) => (
+        <Row key={`p${idx}`} style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Text style={{ flex: 1 }}>{i.partQty > 1 ? `${i.partName} × ${i.partQty}` : i.partName}</Text>
+          <Text style={{ fontVariant: ['tabular-nums'] }}>{formatKurus(i.partQty * i.partUnitKurus)}</Text>
+        </Row>
+      ))}
+      {parts.length > 0 && (
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text v="bodyStrong">Parça toplamı</Text>
+          <Text v="bodyStrong">{formatKurus(partsTotal)}</Text>
+        </Row>
+      )}
+      <Divider />
+      {labor.length === 0 ? (
+        <Row style={{ justifyContent: 'space-between' }}><Text>İşçilik ücreti</Text><Text>{formatKurus(0)}</Text></Row>
+      ) : labor.map((i, idx) => (
+        <Row key={`l${idx}`} style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Text style={{ flex: 1 }}>{i.title === 'İşçilik' ? 'İşçilik ücreti' : `İşçilik — ${i.title}`}</Text>
+          <Text style={{ fontVariant: ['tabular-nums'] }}>{formatKurus(i.laborKurus)}</Text>
+        </Row>
+      ))}
+    </Card>
   );
 }
 

@@ -82,7 +82,7 @@ export default function CustomerRecord() {
         <IntakeCard r={r} />
       </Stack>
 
-      <Section title="Yapılan işlemler ve değişen parçalar"><ItemsList items={r.items} /></Section>
+      <Section title="Değişen parçalar ve işçilik"><ItemsList items={r.items} /></Section>
       <Section title="Tutar"><TotalsCard totals={r.totals} /></Section>
       <Section title="Fotoğraf ve belgeler"><FilesGrid files={r.files} /></Section>
       <Section title="Yanıtların"><ResponsesList r={r} /></Section>

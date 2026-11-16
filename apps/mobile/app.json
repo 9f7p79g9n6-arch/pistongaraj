@@ -58,7 +58,8 @@
           "photosPermission": "Araç fotoğrafı ve fatura eklemek için galerine erişim gerekiyor.",
           "cameraPermission": "Araç fotoğrafı ve fiş çekmek için kameraya erişim gerekiyor."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -9,6 +9,7 @@ import { colors, space } from '@/constants/theme';
 import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
 import { confirm } from '@/lib/confirm';
+import { openWhatsApp, shareRecordPdf, whatsappMessage } from '@/lib/share-record';
 
 export default function RecordDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,6 +56,25 @@ export default function RecordDetail() {
     }
   };
 
+  const sendWhatsApp = async () => {
+    setErr(null);
+    const ok = await openWhatsApp(r.customerPhone, whatsappMessage(r));
+    if (!ok) setErr('WhatsApp açılamadı. Telefonunda WhatsApp yüklü mü?');
+  };
+  const sharePdf = async () => {
+    if (!biz.business) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await shareRecordPdf(r, biz.business);
+      if (res === 'unavailable') setErr('Bu cihazda paylaşım kullanılamıyor.');
+    } catch {
+      setErr('PDF oluşturulamadı. Tekrar dene.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <Screen title="Servis kaydı" back>
       <Stack gap={space.md}>
@@ -70,9 +90,15 @@ export default function RecordDetail() {
           <Card style={{ gap: 4 }}>
             <Text v="bodyStrong" color={colors.warn}>Müşteri onayı bekleniyor</Text>
             <Muted small>{`${r.customerName} kaydı PISTON GARAGE hesabında görüp onaylayabilir (e-posta eşleşirse). Sürüm ${r.approvalVersion}.`}</Muted>
-            <Muted small>WhatsApp paylaşım bağlantısı Aşama 2’de eklenecek; şu an gönderim yapılmıyor.</Muted>
           </Card>
         )}
+
+        <Card style={{ gap: space.sm }}>
+          <Text v="bodyStrong">Müşteriye gönder</Text>
+          <Button title="WhatsApp ile gönder" icon="forum" variant="primary" onPress={sendWhatsApp} />
+          <Button title="PDF olarak paylaş" icon="doc" onPress={sharePdf} loading={busy} />
+          <Muted small>WhatsApp, müşterinin numarasıyla mesaj hazır açılır; göndere sen basarsın. PDF’i paylaşım menüsünden WhatsApp’a ekleyebilirsin. Uygulamaya girmeden onay verilebilen güvenli bağlantı, sunucu bağlanınca eklenecek.</Muted>
+        </Card>
         {r.status === 'approved' && (
           <Card style={{ gap: 4 }}>
             <Text v="bodyStrong" color={colors.neon}>Müşteri onayladı</Text>
@@ -84,7 +110,7 @@ export default function RecordDetail() {
         <IntakeCard r={r} />
       </Stack>
 
-      <Section title="Yapılan işlemler"><ItemsList items={r.items} /></Section>
+      <Section title="Değişen parçalar ve işçilik"><ItemsList items={r.items} /></Section>
       <Section title="Tutar"><TotalsCard totals={r.totals} /></Section>
       <Section title="Fotoğraf ve belgeler"><FilesGrid files={r.files} /></Section>
       <Section title="Müşteri yanıtları"><ResponsesList r={r} /></Section>

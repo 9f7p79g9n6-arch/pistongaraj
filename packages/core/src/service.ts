@@ -273,6 +273,102 @@ export function formatKurus(kurus: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Sade form: "parça adı + fiyat" satırları ve tek işçilik ücreti
+// Kayıt yine kalemler (service_record_items) olarak saklanır; sunucu ve tutar hesabı değişmez:
+//   her parça satırı → { title: ad, partName: ad, partQty: 1, partUnitKurus: fiyat }
+//   işçilik ücreti    → { title: 'İşçilik', partQty: 0, laborKurus: ücret }
+// ---------------------------------------------------------------------------
+
+export const LABOR_ITEM_TITLE = 'İşçilik';
+
+export interface PartRow {
+  name: string;
+  /** Kullanıcının yazdığı fiyat metni ("1.250,50") */
+  price: string;
+}
+
+export interface SimpleFormResult {
+  items: ServiceItemInput[];
+  partsKurus: number;
+  laborKurus: number;
+  /** Satır sırasına göre hata (boş satırlar hata vermez) */
+  rowErrors: (string | null)[];
+  laborError: string | null;
+  discountError: string | null;
+}
+
+/**
+ * Parça satırlarını, işçilik ücretini ve isteğe bağlı toplam indirimi kayıt kalemlerine çevirir.
+ * Tamamen boş satırlar yok sayılır. Adı yazılıp fiyatı boş ya da hatalı satır hata verir (ücretsizse 0 yazılır).
+ * İndirim önce işçilikten, sonra parçalardan düşülür; hiçbir kalemin tutarını aşmaz (sunucu kuralı).
+ */
+export function itemsFromSimpleForm(rows: readonly PartRow[], laborText: string, discountText = ''): SimpleFormResult {
+  const rowErrors: (string | null)[] = [];
+  const parts: { name: string; kurus: number }[] = [];
+  for (const r of rows) {
+    const name = r.name.trim();
+    const priceRaw = r.price.trim();
+    if (!name && !priceRaw) { rowErrors.push(null); continue; }
+    if (!name) { rowErrors.push('Parça adını yaz.'); continue; }
+    if (name.length < 2) { rowErrors.push('Parça adı en az 2 karakter olmalı.'); continue; }
+    if (name.length > 120) { rowErrors.push('Parça adı en fazla 120 karakter olabilir.'); continue; }
+    if (!priceRaw) { rowErrors.push('Fiyatı yaz (ücretsizse 0).'); continue; }
+    const k = parseKurus(priceRaw);
+    if (k == null) { rowErrors.push('Fiyatı 1.250,50 biçiminde yaz.'); continue; }
+    if (k > 100_000_000) { rowErrors.push('Fiyat en fazla 1.000.000 ₺ olabilir.'); continue; }
+    rowErrors.push(null);
+    parts.push({ name, kurus: k });
+  }
+
+  let laborError: string | null = null;
+  let labor = laborText.trim() ? parseKurus(laborText) : 0;
+  if (labor == null) { laborError = 'İşçilik ücretini 1.250,50 biçiminde yaz.'; labor = 0; }
+  else if (labor > 100_000_000) { laborError = 'İşçilik en fazla 1.000.000 ₺ olabilir.'; labor = 0; }
+
+  const items: ServiceItemInput[] = parts.map((p) => ({
+    title: p.name, description: null, partName: p.name, partQty: 1, partUnitKurus: p.kurus, laborKurus: 0, discountKurus: 0,
+  }));
+  if (labor > 0) items.unshift({ title: LABOR_ITEM_TITLE, description: null, partName: null, partQty: 0, partUnitKurus: 0, laborKurus: labor, discountKurus: 0 });
+
+  let discountError: string | null = null;
+  let discount = discountText.trim() ? parseKurus(discountText) : 0;
+  const gross = items.reduce((s, i) => s + itemGrossKurus(i), 0);
+  if (discount == null) { discountError = 'İndirimi 1.250,50 biçiminde yaz.'; discount = 0; }
+  else if (discount > gross) { discountError = 'İndirim, parça ve işçilik toplamından büyük olamaz.'; discount = 0; }
+  for (const i of items) {
+    if (discount <= 0) break;
+    const d = Math.min(discount, itemGrossKurus(i));
+    i.discountKurus = d;
+    discount -= d;
+  }
+
+  return { items, partsKurus: parts.reduce((s, p) => s + p.kurus, 0), laborKurus: labor, rowErrors, laborError, discountError };
+}
+
+/** Kayıt kalemlerini sade forma geri çevirir (düzeltme ekranı). Eski ayrıntılı kalemler de anlamını kaybetmeden taşınır. */
+export function simpleFormFromItems(items: readonly ServiceItemInput[]): { rows: PartRow[]; laborKurus: number; discountKurus: number } {
+  const rows: PartRow[] = [];
+  let labor = 0;
+  let discount = 0;
+  for (const i of items) {
+    discount += Math.min(i.discountKurus, itemGrossKurus(i));
+    labor += i.laborKurus;
+    if (i.partQty > 0) {
+      const name = i.partQty > 1 ? `${i.partName} × ${i.partQty}` : (i.partName ?? i.title);
+      rows.push({ name, price: kurusToInput(i.partQty * i.partUnitKurus) });
+    }
+  }
+  return { rows, laborKurus: labor, discountKurus: discount };
+}
+
+/** Kuruşu düzenlenebilir metne çevirir: 125050 → "1250,50", 0 → "0" */
+export function kurusToInput(kurus: number): string {
+  const whole = Math.floor(kurus / 100);
+  const frac = kurus % 100;
+  return frac === 0 ? String(whole) : `${whole},${String(frac).padStart(2, '0')}`;
+}
+
+// ---------------------------------------------------------------------------
 // Telefon
 // ---------------------------------------------------------------------------
 

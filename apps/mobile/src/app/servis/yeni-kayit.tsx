@@ -1,7 +1,8 @@
 /**
- * Yeni servis kaydı (ve düzeltme). Adım adım: araç → müşteri → kabul → işlemler → fotoğraflar → özet.
- * Taslak her değişiklikte cihaza yazılır; internet kesilirse ya da uygulama kapanırsa kaldığı yerden devam edilir.
- * Kayıt kimliği (clientRequestId) taslakla birlikte saklandığı için tekrar gönderimde ikinci kayıt açılmaz.
+ * Yeni servis kaydı (ve düzeltme). Üç adım: araç ve müşteri → değişen parçalar ve fiyatları → kontrol et ve gönder.
+ * İsteğe bağlı alanlar "Ek bilgiler" altında kapalı durur. Taslak her değişiklikte cihaza yazılır; uygulama kapanırsa
+ * kaldığı yerden devam edilir. Kayıt kimliği (clientRequestId) taslakla saklandığı için tekrar gönderimde ikinci kayıt açılmaz.
+ * Parça satırları sunucuda yine service_record_items olarak saklanır (bkz. packages/core itemsFromSimpleForm).
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -11,29 +12,31 @@ import {
   formatKurus,
   formatPhoneTR,
   FUEL_LEVEL_LABEL,
+  itemsFromSimpleForm,
+  kurusToInput,
   normalizeEmail,
   normalizePhoneTR,
   normalizePlate,
-  parseKurus,
   parseNumberTR,
   SERVICE_FILE_KIND_LABEL,
+  simpleFormFromItems,
   validateCustomer,
   validateModelYear,
   validatePlate,
-  validateServiceItem,
   VAT_RATES,
   type FuelLevel,
+  type PartRow,
   type ServiceFileKind,
-  type ServiceItemInput,
 } from '@piston/core';
 import * as Crypto from 'expo-crypto';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Pressable, TextInput, View } from 'react-native';
 
+import { Icon } from '@/components/icons';
 import { CustomerEmailHint, ItemsList, TotalsCard } from '@/components/servis';
-import { Button, Card, Chip, ErrorText, Field, Muted, Progress, Row, Screen, Section, Segmented, Stack, Text } from '@/components/ui';
+import { Button, Card, ErrorText, Field, Muted, Progress, Row, s as ui, Screen, Segmented, Stack, Text, useAccent } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
@@ -41,9 +44,11 @@ import { MAX_FILE_BYTES, type PendingFile } from '@/data/service-repo';
 import { confirm } from '@/lib/confirm';
 import { pickServicePhoto } from '@/lib/photo';
 
-const STEPS = ['Araç', 'Müşteri', 'Kabul', 'İşlemler', 'Fotoğraflar', 'Özet'] as const;
+const STEPS = ['Araç ve müşteri', 'Değişen parçalar', 'Kontrol et ve gönder'] as const;
+const START_ROWS = 4;
 
 interface Draft {
+  v: 2;
   clientRequestId: string;
   editId: string | null;
   step: number;
@@ -60,16 +65,17 @@ interface Draft {
   custName: string;
   custPhone: string;
   custEmail: string;
-  // Kabul
-  intakeText: string;
   complaint: string;
+  // Parçalar ve ücret
+  rows: PartRow[];
+  labor: string;
+  discount: string;
+  vatRate: number | null;
+  // Ek bilgiler
+  intakeText: string;
   initialNote: string;
   fuelLevel: FuelLevel | null;
   existingDamage: string;
-  // İşlemler
-  items: ServiceItemInput[];
-  vatRate: number | null;
-  // Dosyalar (henüz yüklenmemiş)
   files: PendingFile[];
   savedRecordId: string | null;
 }
@@ -79,7 +85,7 @@ function nowText(d = new Date()) {
   return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-/** "16.11.2026 10:30" → ISO; geçersizse null. Gelecek tarih kabul edilmez (1 saat tolerans). */
+/** "16.11.2026 10:30" → ISO; geçersizse null. İleri tarih kabul edilmez (1 saat tolerans). */
 function parseIntake(t: string): string | null {
   const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{2})$/.exec(t.trim());
   if (!m) return null;
@@ -90,29 +96,30 @@ function parseIntake(t: string): string | null {
   return date.toISOString();
 }
 
-const blank = (): Draft => ({
-  clientRequestId: Crypto.randomUUID(), editId: null, step: 0,
-  vehicleId: null, plate: '', make: '', model: '', year: '', engine: '', km: '',
-  customerId: null, custName: '', custPhone: '', custEmail: '',
-  intakeText: nowText(), complaint: '', initialNote: '', fuelLevel: null, existingDamage: '',
-  items: [], vatRate: DEFAULT_VAT_RATE, files: [], savedRecordId: null,
-});
+const emptyRows = (n = START_ROWS): PartRow[] => Array.from({ length: n }, () => ({ name: '', price: '' }));
 
-const emptyItem = { title: '', description: '', partName: '', qty: '', unit: '', labor: '', discount: '' };
-type ItemForm = typeof emptyItem;
+const blank = (): Draft => ({
+  v: 2, clientRequestId: Crypto.randomUUID(), editId: null, step: 0,
+  vehicleId: null, plate: '', make: '', model: '', year: '', engine: '', km: '',
+  customerId: null, custName: '', custPhone: '', custEmail: '', complaint: '',
+  rows: emptyRows(), labor: '', discount: '', vatRate: DEFAULT_VAT_RATE,
+  intakeText: nowText(), initialNote: '', fuelLevel: null, existingDamage: '', files: [], savedRecordId: null,
+});
 
 export default function NewServiceRecord() {
   const biz = useBusiness();
+  const accent = useAccent();
   const params = useLocalSearchParams<{ arac?: string; musteri?: string; plaka?: string; duzenle?: string }>();
   const bid = biz.business?.id ?? '';
-  const draftKey = `piston-servis-taslak:${bid}`;
+  const draftKey = `piston-servis-taslak-v2:${bid}`;
   const [d, setD] = useState<Draft | null>(null);
   const [resume, setResume] = useState<Draft | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [showErrors, setShowErrors] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [itemForm, setItemForm] = useState<ItemForm | null>(null);
-  const [itemIndex, setItemIndex] = useState<number | null>(null);
-  const [custQuery, setCustQuery] = useState('');
+  const [extraVehicle, setExtraVehicle] = useState(false);
+  const [extraIntake, setExtraIntake] = useState(false);
+  const [showDiscount, setShowDiscount] = useState(false);
   const loaded = useRef(false);
   // Kayıt gönderildikten sonra taslak bir daha yazılmaz
   const finished = useRef(false);
@@ -127,26 +134,30 @@ export default function NewServiceRecord() {
         if (!r) { setErr('Kayıt bulunamadı.'); setD(blank()); return; }
         const v = biz.vehicles.find((x) => x.id === r.vehicleId);
         const c = biz.customers.find((x) => x.id === r.customerId);
-        const dt = new Date(r.intakeAt);
+        const f = simpleFormFromItems(r.items);
         setD({
-          ...blank(), editId: r.id, step: 2, vehicleId: r.vehicleId, plate: r.plate, make: v?.make ?? '', model: v?.model ?? '',
+          ...blank(), editId: r.id, step: 1, vehicleId: r.vehicleId, plate: r.plate, make: v?.make ?? '', model: v?.model ?? '',
           year: v?.modelYear ? String(v.modelYear) : '', engine: v?.engineLabel ?? '', km: String(r.odometerKm),
           customerId: r.customerId, custName: c?.fullName ?? r.customerName, custPhone: c?.phone ?? '', custEmail: c?.email ?? '',
-          intakeText: nowText(dt), complaint: r.complaint, initialNote: r.initialNote ?? '', fuelLevel: r.fuelLevel,
-          existingDamage: r.existingDamage ?? '', items: r.items.map(({ id: _id, ...i }) => i), vatRate: r.totals.vatRate,
+          complaint: r.complaint, rows: [...f.rows, ...emptyRows(Math.max(0, START_ROWS - f.rows.length))],
+          labor: f.laborKurus ? kurusToInput(f.laborKurus) : '', discount: f.discountKurus ? kurusToInput(f.discountKurus) : '',
+          vatRate: r.totals.vatRate, intakeText: nowText(new Date(r.intakeAt)), initialNote: r.initialNote ?? '',
+          fuelLevel: r.fuelLevel, existingDamage: r.existingDamage ?? '',
         });
+        if (f.discountKurus) setShowDiscount(true);
         return;
       }
       const fresh = blank();
       const v = params.arac ? biz.vehicles.find((x) => x.id === params.arac) : undefined;
-      if (v) Object.assign(fresh, { vehicleId: v.id, plate: v.plate, make: v.make, model: v.model, year: v.modelYear ? String(v.modelYear) : '', engine: v.engineLabel ?? '', customerId: v.customerId });
+      if (v) Object.assign(fresh, { vehicleId: v.id, plate: v.plate, make: v.make, model: v.model, customerId: v.customerId });
       else if (params.musteri) fresh.customerId = params.musteri;
       else if (params.plaka) fresh.plate = params.plaka;
       let saved: Draft | null = null;
       try { const raw = await AsyncStorage.getItem(draftKey); saved = raw ? (JSON.parse(raw) as Draft) : null; } catch { saved = null; }
+      if (saved && saved.v !== 2) saved = null;
       // Sunucuya ulaşmış (kimliği alınmış) taslak yeniden önerilmez
       if (saved?.savedRecordId && saved.files.length === 0) { AsyncStorage.removeItem(draftKey).catch(() => {}); saved = null; }
-      if (saved && !params.arac && !params.musteri && (saved.plate || saved.items.length > 0)) setResume(saved);
+      if (saved && !params.arac && !params.musteri && (saved.plate || saved.rows.some((r) => r.name || r.price))) setResume(saved);
       setD(fresh);
     })();
   }, [bid, biz.records, biz.vehicles, biz.customers, params, draftKey]);
@@ -161,11 +172,12 @@ export default function NewServiceRecord() {
 
   const plateNorm = d ? normalizePlate(d.plate) : '';
   const foundVehicle = useMemo(() => (d && !d.editId ? biz.vehicles.find((v) => v.plate === plateNorm) : undefined), [biz.vehicles, plateNorm, d]);
-  const vehicle = d?.vehicleId ? biz.vehicles.find((v) => v.id === d.vehicleId) : undefined;
-  const customer = d?.customerId ? biz.customers.find((c) => c.id === d.customerId) : undefined;
+  const vehicle = (d?.vehicleId ? biz.vehicles.find((v) => v.id === d.vehicleId) : undefined) ?? foundVehicle;
   const phoneNorm = d ? normalizePhoneTR(d.custPhone) : null;
-  const phoneMatch = phoneNorm && !d?.customerId ? biz.customers.find((c) => c.phone === phoneNorm) : undefined;
-  const totals = useMemo(() => computeServiceTotals(d?.items ?? [], d?.vatRate ?? null), [d?.items, d?.vatRate]);
+  const phoneMatch = phoneNorm ? biz.customers.find((c) => c.phone === phoneNorm) : undefined;
+  const customer = biz.customers.find((c) => c.id === (vehicle?.customerId ?? d?.customerId)) ?? (!vehicle ? phoneMatch : undefined);
+  const form = useMemo(() => itemsFromSimpleForm(d?.rows ?? [], d?.labor ?? '', showDiscount ? d?.discount ?? '' : ''), [d?.rows, d?.labor, d?.discount, showDiscount]);
+  const totals = useMemo(() => computeServiceTotals(form.items, d?.vatRate ?? null), [form.items, d?.vatRate]);
 
   if (!biz.business) return <Screen title="Yeni servis kaydı" back>{null}</Screen>;
   if (!d) return <Screen title="Yeni servis kaydı" back><Muted>Yükleniyor…</Muted></Screen>;
@@ -173,76 +185,48 @@ export default function NewServiceRecord() {
   // ---------------- Adım doğrulamaları ----------------
   const checkStep = (step: number): string | null => {
     if (step === 0) {
-      if (d.vehicleId) return null;
-      const pe = validatePlate(d.plate) ?? (d.plate.trim() ? null : 'Plakayı yaz.');
-      if (pe) return pe;
-      if (!d.make.trim() || !d.model.trim()) return 'Marka ve modeli yaz.';
-      if (d.year.trim()) { const ye = validateModelYear(Number(d.year)); if (ye) return ye; }
-    }
-    if (step === 0 || step === 2) {
+      if (!vehicle) {
+        const pe = validatePlate(d.plate) ?? (d.plate.trim() ? null : 'Plakayı yaz.');
+        if (pe) return pe;
+        if (!d.make.trim() || !d.model.trim()) return 'Marka ve modeli yaz.';
+        if (d.year.trim()) { const ye = validateModelYear(Number(d.year)); if (ye) return ye; }
+      }
       const k = parseNumberTR(d.km);
       if (k == null || k < 0 || k > 2_000_000) return 'Kilometreyi rakamla yaz.';
+      if (!customer) {
+        const e = validateCustomer({ fullName: d.custName, phone: d.custPhone, email: d.custEmail });
+        const first = e.fullName ?? e.phone ?? e.email;
+        if (first) return first;
+      }
+      if (d.complaint.trim().length < 2) return 'Müşterinin şikâyetini ya da istenen işi yaz.';
     }
     if (step === 1) {
-      if (d.customerId) return null;
-      if (phoneMatch) return 'Bu telefonla kayıtlı müşteri var. Listeden seç.';
-      const e = validateCustomer({ fullName: d.custName, phone: d.custPhone, email: d.custEmail });
-      const first = Object.values(e)[0];
-      if (first) return first;
+      if (form.rowErrors.some(Boolean)) return 'İşaretli parça satırlarını düzelt.';
+      if (form.laborError) return form.laborError;
+      if (form.discountError) return form.discountError;
+      if (form.items.length === 0) return 'En az bir parça ya da işçilik ücreti gir.';
     }
-    if (step === 2) {
-      if (!parseIntake(d.intakeText)) return 'Kabul tarihini 16.11.2026 10:30 biçiminde yaz (ileri tarih olamaz).';
-      if (d.complaint.trim().length < 2) return 'Müşterinin şikâyetini yaz.';
-    }
-    if (step === 3) {
-      if (d.items.length === 0) return 'En az bir işlem ekle.';
-      for (const i of d.items) { const e = validateServiceItem(i); if (e) return `${i.title || 'İşlem'}: ${e}`; }
-    }
+    if (step === 2 && !parseIntake(d.intakeText)) return 'Kabul tarihini 16.11.2026 10:30 biçiminde yaz (ileri tarih olamaz).';
     return null;
   };
 
   const next = () => {
     const e = checkStep(d.step);
     setErr(e);
+    setShowErrors(!!e);
     if (e) return;
-    // Plaka kayıtlı bir araçla eşleşiyorsa araç ve müşteri otomatik seçilir
-    if (d.step === 0 && !d.vehicleId && foundVehicle) {
-      up({ vehicleId: foundVehicle.id, customerId: foundVehicle.customerId, make: foundVehicle.make, model: foundVehicle.model, step: 1 });
-      return;
-    }
-    up({ step: Math.min(d.step + 1, STEPS.length - 1) });
+    setShowErrors(false);
+    up({ step: Math.min(d.step + 1, STEPS.length - 1), vehicleId: vehicle?.id ?? null, customerId: customer?.id ?? null });
   };
-  const prev = () => { setErr(null); up({ step: Math.max(d.step - (d.editId && d.step === 2 ? 0 : 1), 0) }); };
+  const firstStep = d.editId ? 1 : 0;
+  const prev = () => { setErr(null); setShowErrors(false); up({ step: Math.max(d.step - 1, firstStep) }); };
 
-  // ---------------- İşlem kalemi ----------------
-  const openItem = (index: number | null) => {
-    setItemIndex(index);
-    if (index == null) { setItemForm({ ...emptyItem }); return; }
-    const i = d.items[index]!;
-    const k = (n: number) => (n ? formatKurus(n).replace(' ₺', '') : '');
-    setItemForm({ title: i.title, description: i.description ?? '', partName: i.partName ?? '', qty: i.partQty ? String(i.partQty) : '', unit: k(i.partUnitKurus), labor: k(i.laborKurus), discount: k(i.discountKurus) });
-  };
-  const saveItem = () => {
-    if (!itemForm) return;
-    const unit = parseKurus(itemForm.unit), labor = parseKurus(itemForm.labor), discount = parseKurus(itemForm.discount);
-    const qty = itemForm.qty.trim() ? Number(itemForm.qty) : itemForm.partName.trim() ? 1 : 0;
-    if (unit == null || labor == null || discount == null) return setErr('Tutarları 1.250,50 biçiminde yaz.');
-    const item: ServiceItemInput = {
-      title: itemForm.title.trim(), description: itemForm.description.trim() || null, partName: itemForm.partName.trim() || null,
-      partQty: qty, partUnitKurus: unit, laborKurus: labor, discountKurus: discount,
-    };
-    const e = validateServiceItem(item);
-    if (e) return setErr(e);
-    setErr(null);
-    const items = [...d.items];
-    if (itemIndex == null) items.push(item); else items[itemIndex] = item;
-    up({ items });
-    setItemForm(null);
-  };
-  const removeItem = () => {
-    if (itemIndex == null) return;
-    up({ items: d.items.filter((_, i) => i !== itemIndex) });
-    setItemForm(null);
+  // ---------------- Parça satırları ----------------
+  const setRow = (i: number, patch: Partial<PartRow>) => up({ rows: d.rows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
+  const addRow = () => up({ rows: [...d.rows, { name: '', price: '' }] });
+  const removeRow = (i: number) => {
+    const rows = d.rows.filter((_, j) => j !== i);
+    up({ rows: rows.length > 0 ? rows : emptyRows(1) });
   };
 
   // ---------------- Fotoğraf ----------------
@@ -258,16 +242,18 @@ export default function NewServiceRecord() {
     setErr(null);
     up({ files: [...d.files, { uri: res.uri, kind, mimeType: 'image/jpeg', sizeBytes: res.sizeBytes }] });
   };
+  const removePhoto = (uri: string) => up({ files: d.files.filter((f) => f.uri !== uri) });
 
   // ---------------- Kaydet ----------------
   const submit = async () => {
-    for (const s of [0, 1, 2, 3]) {
-      const e = checkStep(s);
-      if (e) { setErr(e); up({ step: s }); return; }
+    for (const st of [0, 1, 2]) {
+      if (d.editId && st === 0) continue;
+      const e = checkStep(st);
+      if (e) { setErr(e); setShowErrors(true); up({ step: st }); return; }
     }
     setBusy(true);
     setErr(null);
-    let work = { ...d };
+    let work = { ...d, vehicleId: vehicle?.id ?? d.vehicleId, customerId: customer?.id ?? d.customerId };
     try {
       // 1) Müşteri ve araç (yeni ise). Oluşan kimlikler taslağa yazılır; tekrar denemede yeniden oluşturulmaz.
       if (!work.customerId) {
@@ -288,7 +274,7 @@ export default function NewServiceRecord() {
         id: work.editId ?? undefined, businessId: bid, customerId: work.customerId!, vehicleId: work.vehicleId!, clientRequestId: work.clientRequestId,
         intakeAt: parseIntake(work.intakeText)!, odometerKm: Math.round(parseNumberTR(work.km)!), complaint: work.complaint.trim(),
         initialNote: work.initialNote.trim() || null, fuelLevel: work.fuelLevel, existingDamage: work.existingDamage.trim() || null,
-        vatRate: work.vatRate, items: work.items,
+        vatRate: work.vatRate, items: form.items,
       });
       work = { ...work, savedRecordId: recordId };
       setD(work);
@@ -318,11 +304,12 @@ export default function NewServiceRecord() {
 
   // ---------------- Yarım kalan taslak ----------------
   if (resume) {
+    const parts = resume.rows.filter((r) => r.name.trim()).length;
     return (
       <Screen title="Yeni servis kaydı" back>
         <Card style={{ gap: space.sm }}>
           <Text v="bodyStrong">Yarım kalan bir kayıt var</Text>
-          <Muted small>{[resume.plate ? normalizePlate(resume.plate) : '', resume.custName, `${resume.items.length} işlem`].filter(Boolean).join(' · ')}</Muted>
+          <Muted small>{[resume.plate ? normalizePlate(resume.plate) : '', resume.custName, `${parts} parça`].filter(Boolean).join(' · ')}</Muted>
           <Button title="Kaldığım yerden devam et" variant="primary" onPress={() => { setD(resume); setResume(null); }} />
           <Button title="Yeni kayda başla" variant="ghost" onPress={() => { AsyncStorage.removeItem(draftKey).catch(() => {}); setResume(null); }} />
         </Card>
@@ -333,11 +320,17 @@ export default function NewServiceRecord() {
   const isLast = d.step === STEPS.length - 1;
   const footer = (
     <Stack gap={space.sm}>
+      {d.step === 1 && (
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text v="bodyStrong">Genel toplam</Text>
+          <Text v="bodyStrong" color={accent.text}>{formatKurus(totals.grandKurus)}</Text>
+        </Row>
+      )}
       <ErrorText>{err}</ErrorText>
       <Row gap={space.sm}>
-        {d.step > (d.editId ? 2 : 0) && <Button title="Geri" onPress={prev} style={{ flex: 1 }} />}
+        {d.step > firstStep && <Button title="Geri" onPress={prev} style={{ flex: 1 }} />}
         {isLast ? (
-          <Button title={d.editId ? 'Düzeltmeyi gönder' : 'Kaydı tamamla'} variant="primary" onPress={submit} loading={busy} style={{ flex: 2 }} />
+          <Button title={d.editId ? 'Düzeltmeyi gönder' : 'Müşteriye gönder'} variant="primary" onPress={submit} loading={busy} style={{ flex: 2 }} />
         ) : (
           <Button title="Devam" variant="primary" onPress={next} style={{ flex: 2 }} />
         )}
@@ -346,7 +339,7 @@ export default function NewServiceRecord() {
   );
 
   return (
-    <Screen title={d.editId ? 'Kaydı düzelt' : 'Yeni servis kaydı'} back footer={itemForm ? undefined : footer}>
+    <Screen title={d.editId ? 'Kaydı düzelt' : 'Yeni servis kaydı'} back footer={footer}>
       <Stack gap={6} style={{ marginBottom: space.md }}>
         <Row style={{ justifyContent: 'space-between' }}>
           <Text v="label">{`Adım ${d.step + 1} / ${STEPS.length}`}</Text>
@@ -355,164 +348,159 @@ export default function NewServiceRecord() {
         <Progress ratio={(d.step + 1) / STEPS.length} tone="bad" />
       </Stack>
 
-      {/* ADIM 1: ARAÇ */}
+      {/* ADIM 1: ARAÇ VE MÜŞTERİ */}
       {d.step === 0 && (
         <Stack gap={space.md}>
-          <Field label="Plaka" value={d.plate} autoCapitalize="characters" placeholder="34 ABC 123" autoFocus={!d.plate}
-            onChangeText={(t) => up({ plate: t, vehicleId: null })} />
-          {(vehicle ?? foundVehicle) ? (
-            <Card highlight style={{ gap: 4 }}>
-              <Text v="bodyStrong">Kayıtlı araç bulundu</Text>
-              <Muted small>{`${(vehicle ?? foundVehicle)!.make} ${(vehicle ?? foundVehicle)!.model} · ${biz.customers.find((c) => c.id === (vehicle ?? foundVehicle)!.customerId)?.fullName ?? ''}`}</Muted>
-              {(vehicle ?? foundVehicle)!.lastOdometerKm != null && <Muted small>{`Son kayıtlı kilometre: ${formatKm((vehicle ?? foundVehicle)!.lastOdometerKm!)}`}</Muted>}
-              <Muted small>Bilgileri tekrar girmen gerekmiyor.</Muted>
+          <Row>
+            <Field label="Plaka" value={d.plate} autoCapitalize="characters" placeholder="34 ABC 123" autoFocus={!d.plate}
+              onChangeText={(t) => up({ plate: t, vehicleId: null })} />
+            <Field label="Kilometre" value={d.km} onChangeText={(t) => up({ km: t })} keyboardType="number-pad" placeholder="148.760" />
+          </Row>
+
+          {vehicle ? (
+            <Card highlight style={{ gap: 2 }}>
+              <Text v="bodyStrong">{`${vehicle.make} ${vehicle.model}`}</Text>
+              <Muted small>{[customer?.fullName, customer ? formatPhoneTR(customer.phone) : null].filter(Boolean).join(' · ')}</Muted>
+              {vehicle.lastOdometerKm != null && <Muted small>{`Son kayıtlı kilometre: ${formatKm(vehicle.lastOdometerKm)}`}</Muted>}
             </Card>
           ) : (
             <>
-              <Muted small>Plaka yalnızca işletmenin kendi kayıtlarında aranır. Bulunamazsa aracı aşağıdan ekle.</Muted>
               <Row>
                 <Field label="Marka" value={d.make} onChangeText={(t) => up({ make: t })} />
                 <Field label="Model" value={d.model} onChangeText={(t) => up({ model: t })} />
               </Row>
+              {customer && d.customerId ? (
+                <Card style={{ gap: 2 }}>
+                  <Text v="bodyStrong">{customer.fullName}</Text>
+                  <Muted small>{formatPhoneTR(customer.phone)}</Muted>
+                  <Button title="Başka müşteri" small variant="ghost" onPress={() => up({ customerId: null })} />
+                </Card>
+              ) : (
+                <>
+                  <Row>
+                    <Field label="Müşteri adı soyadı" value={d.custName} onChangeText={(t) => up({ custName: t })} autoCapitalize="words" />
+                    <Field label="Telefon" value={d.custPhone} onChangeText={(t) => up({ custPhone: t })} keyboardType="phone-pad" placeholder="0532 123 45 67" />
+                  </Row>
+                  {phoneMatch && <Muted small>{`Kayıtlı müşteri: ${phoneMatch.fullName}. Bu kayıt ona eklenecek.`}</Muted>}
+                </>
+              )}
+            </>
+          )}
+
+          <Field label="Şikâyet / istenen iş" value={d.complaint} onChangeText={(t) => up({ complaint: t })} placeholder="Örn. Periyodik bakım, frenden ses geliyor" />
+
+          {!vehicle && (
+            <Expander title="Ek bilgiler (isteğe bağlı)" open={extraVehicle} onToggle={() => setExtraVehicle(!extraVehicle)}>
               <Row>
                 <Field label="Model yılı" value={d.year} onChangeText={(t) => up({ year: t })} keyboardType="number-pad" />
-                <Field label="Motor (isteğe bağlı)" value={d.engine} onChangeText={(t) => up({ engine: t })} placeholder="1.6 TDCi" />
+                <Field label="Motor" value={d.engine} onChangeText={(t) => up({ engine: t })} placeholder="1.6 TDCi" />
               </Row>
-            </>
+              {!customer && (
+                <>
+                  <Field label="Müşteri e-postası" value={d.custEmail} onChangeText={(t) => up({ custEmail: t })} keyboardType="email-address" autoCapitalize="none" />
+                  <CustomerEmailHint />
+                </>
+              )}
+            </Expander>
           )}
-          <Field label="Kilometre" value={d.km} onChangeText={(t) => up({ km: t })} keyboardType="number-pad" placeholder="148.760" />
         </Stack>
       )}
 
-      {/* ADIM 2: MÜŞTERİ */}
+      {/* ADIM 2: DEĞİŞEN PARÇALAR VE FİYATLARI */}
       {d.step === 1 && (
         <Stack gap={space.md}>
-          {customer ? (
-            <Card style={{ gap: 4 }}>
-              <Text v="bodyStrong">{customer.fullName}</Text>
-              <Muted small>{[formatPhoneTR(customer.phone), customer.email].filter(Boolean).join(' · ')}</Muted>
-              {d.vehicleId ? <Muted small>Kayıtlı aracın sahibi.</Muted> : <Button title="Başka müşteri seç" small variant="ghost" onPress={() => up({ customerId: null })} />}
-              {!customer.email && <Muted small>E-postası yok: kaydı uygulamada göremez. Müşteri sayfasından eklenebilir (Aşama 2: telefonla eşleştirme).</Muted>}
-            </Card>
-          ) : (
-            <>
-              <Field label="Kayıtlı müşteri ara" value={custQuery} onChangeText={setCustQuery} placeholder="Ad veya telefon" />
-              <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
-                {custQuery.trim().length >= 2 && biz.customers.filter((c) => c.fullName.toLocaleLowerCase('tr').includes(custQuery.trim().toLocaleLowerCase('tr'))
-                  || c.phone.includes(custQuery.replace(/\D/g, '').replace(/^0/, '') || '—')).slice(0, 6).map((c) => (
-                  <Chip key={c.id} label={`${c.fullName} · ${formatPhoneTR(c.phone)}`} onPress={() => up({ customerId: c.id })} />
-                ))}
-              </Row>
-              <Section title="Yeni müşteri">
-                <Field label="Adı soyadı" value={d.custName} onChangeText={(t) => up({ custName: t })} autoCapitalize="words" />
-                <Field label="Telefon" value={d.custPhone} onChangeText={(t) => up({ custPhone: t })} keyboardType="phone-pad" placeholder="0532 123 45 67" />
-                {phoneMatch && (
-                  <Card highlight onPress={() => up({ customerId: phoneMatch.id })} style={{ gap: 2 }}>
-                    <Text v="bodyStrong">{`Bu telefon ${phoneMatch.fullName} adına kayıtlı`}</Text>
-                    <Muted small>Tekrar kayıt açmamak için dokunup seç.</Muted>
-                  </Card>
-                )}
-                <Field label="E-posta (isteğe bağlı)" value={d.custEmail} onChangeText={(t) => up({ custEmail: t })} keyboardType="email-address" autoCapitalize="none" />
-                <CustomerEmailHint />
-              </Section>
-            </>
-          )}
-        </Stack>
-      )}
-
-      {/* ADIM 3: KABUL */}
-      {d.step === 2 && (
-        <Stack gap={space.md}>
-          <Row>
-            <Field label="Kabul tarihi ve saati" value={d.intakeText} onChangeText={(t) => up({ intakeText: t })} placeholder="16.11.2026 10:30" />
-            <Field label="Kilometre" value={d.km} onChangeText={(t) => up({ km: t })} keyboardType="number-pad" />
+          <Text v="section">Değişen parçalar ve fiyatları</Text>
+          <Stack gap={space.sm}>
+            {d.rows.map((r, i) => (
+              <Stack key={i} gap={4}>
+                <Row gap={space.sm}>
+                  <TextInput value={r.name} onChangeText={(t) => setRow(i, { name: t })} placeholder="Parça adı" placeholderTextColor="#6F7682"
+                    accessibilityLabel={`Parça ${i + 1} adı`} style={[ui.input, { flex: 2 }, showErrors && form.rowErrors[i] && { borderColor: colors.danger }]} />
+                  <TextInput value={r.price} onChangeText={(t) => setRow(i, { price: t })} placeholder="Fiyat ₺" placeholderTextColor="#6F7682"
+                    keyboardType="decimal-pad" accessibilityLabel={`Parça ${i + 1} fiyatı`} style={[ui.input, { flex: 1, textAlign: 'right' }, showErrors && form.rowErrors[i] && { borderColor: colors.danger }]} />
+                  <Pressable onPress={() => removeRow(i)} accessibilityRole="button" accessibilityLabel={`Parça ${i + 1} satırını sil`} hitSlop={8}
+                    style={{ width: 32, alignItems: 'center' }}>
+                    <Icon name="x" size={18} color={colors.textMuted} />
+                  </Pressable>
+                </Row>
+                {showErrors && form.rowErrors[i] ? <Text v="small" color={colors.danger}>{form.rowErrors[i]}</Text> : null}
+              </Stack>
+            ))}
+          </Stack>
+          <Button title="Yeni Parça Ekle" icon="plus" onPress={addRow} />
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Text v="bodyStrong">Parça Toplamı</Text>
+            <Text v="bodyStrong">{formatKurus(form.partsKurus)}</Text>
           </Row>
-          <Field label="Müşterinin bildirdiği şikâyet" value={d.complaint} onChangeText={(t) => up({ complaint: t })} multiline placeholder="Örn. Periyodik bakım, frenden ses geliyor" />
-          <Field label="İlk gözlem (isteğe bağlı)" value={d.initialNote} onChangeText={(t) => up({ initialNote: t })} multiline />
-          <Text v="smallStrong" color={colors.textMuted}>Yakıt seviyesi (isteğe bağlı)</Text>
-          <Segmented<FuelLevel | 'none'>
-            options={[{ value: 'none', label: '—' }, ...(Object.keys(FUEL_LEVEL_LABEL) as FuelLevel[]).map((k) => ({ value: k, label: FUEL_LEVEL_LABEL[k] }))]}
-            value={d.fuelLevel ?? 'none'} onChange={(v) => up({ fuelLevel: v === 'none' ? null : v })} />
-          <Field label="Teslimde görülen mevcut hasarlar (isteğe bağlı)" value={d.existingDamage} onChangeText={(t) => up({ existingDamage: t })} multiline placeholder="Örn. arka tamponda çizik" />
-          <PhotoRow kind="intake" files={d.files} onAdd={addPhoto} onRemove={(uri) => up({ files: d.files.filter((f) => f.uri !== uri) })} />
-        </Stack>
-      )}
 
-      {/* ADIM 4: İŞLEMLER */}
-      {d.step === 3 && !itemForm && (
-        <Stack gap={space.md}>
-          <ItemsList items={d.items} onPress={openItem} />
-          <Button title="İşlem ekle" icon="plus" onPress={() => openItem(null)} />
+          <Field label="İşçilik ücreti (₺)" value={d.labor} onChangeText={(t) => up({ labor: t })} keyboardType="decimal-pad" placeholder="0"
+            error={showErrors ? form.laborError : null} />
+
           <Text v="smallStrong" color={colors.textMuted}>KDV</Text>
           <Segmented<string>
             options={[...VAT_RATES.map((r) => ({ value: String(r), label: `%${r}` })), { value: 'none', label: 'KDV yok' }]}
             value={d.vatRate == null ? 'none' : String(d.vatRate)} onChange={(v) => up({ vatRate: v === 'none' ? null : Number(v) })} />
+          {showDiscount ? (
+            <Field label="İndirim (₺)" value={d.discount} onChangeText={(t) => up({ discount: t })} keyboardType="decimal-pad" placeholder="0"
+              error={form.discountError} />
+          ) : (
+            <Text v="smallStrong" color={accent.text} onPress={() => setShowDiscount(true)} accessibilityRole="button">+ İndirim ekle</Text>
+          )}
           <TotalsCard totals={totals} />
         </Stack>
       )}
-      {d.step === 3 && itemForm && (
-        <Stack gap={space.md}>
-          <Text v="section">{itemIndex == null ? 'İşlem ekle' : 'İşlemi düzenle'}</Text>
-          <Field label="İşlem adı" value={itemForm.title} onChangeText={(t) => setItemForm({ ...itemForm, title: t })} placeholder="Örn. Ön balata değişimi" autoFocus />
-          <Field label="Açıklama (isteğe bağlı)" value={itemForm.description} onChangeText={(t) => setItemForm({ ...itemForm, description: t })} multiline />
-          <Section title="Parça">
-            <Field label="Parça adı" value={itemForm.partName} onChangeText={(t) => setItemForm({ ...itemForm, partName: t })} placeholder="Boş bırakılırsa yalnızca işçilik" />
-            <Row>
-              <Field label="Adet" value={itemForm.qty} onChangeText={(t) => setItemForm({ ...itemForm, qty: t })} keyboardType="number-pad" placeholder="1" />
-              <Field label="Birim fiyat (₺)" value={itemForm.unit} onChangeText={(t) => setItemForm({ ...itemForm, unit: t })} keyboardType="decimal-pad" placeholder="0,00" />
-            </Row>
-          </Section>
-          <Section title="İşçilik ve indirim">
-            <Row>
-              <Field label="İşçilik (₺)" value={itemForm.labor} onChangeText={(t) => setItemForm({ ...itemForm, labor: t })} keyboardType="decimal-pad" placeholder="0,00" />
-              <Field label="İndirim (₺)" value={itemForm.discount} onChangeText={(t) => setItemForm({ ...itemForm, discount: t })} keyboardType="decimal-pad" placeholder="0,00" />
-            </Row>
-          </Section>
-          <ErrorText>{err}</ErrorText>
-          <Button title={itemIndex == null ? 'İşlemi ekle' : 'Kaydet'} variant="primary" onPress={saveItem} />
-          {itemIndex != null && <Button title="İşlemi sil" variant="ghost" onPress={removeItem} />}
-          <Button title="Vazgeç" variant="ghost" onPress={() => { setItemForm(null); setErr(null); }} />
-        </Stack>
-      )}
 
-      {/* ADIM 5: FOTOĞRAFLAR VE BELGELER */}
-      {d.step === 4 && (
-        <Stack gap={space.lg}>
-          <Muted small>İsteğe bağlı. Fotoğraflar küçültülerek eklenir (en fazla 10 MB, JPEG). Kayıtla birlikte müşteriye görünür.</Muted>
-          <PhotoRow kind="replaced_part" files={d.files} onAdd={addPhoto} onRemove={(uri) => up({ files: d.files.filter((f) => f.uri !== uri) })} />
-          <PhotoRow kind="work" files={d.files} onAdd={addPhoto} onRemove={(uri) => up({ files: d.files.filter((f) => f.uri !== uri) })} />
-          <PhotoRow kind="document" files={d.files} onAdd={addPhoto} onRemove={(uri) => up({ files: d.files.filter((f) => f.uri !== uri) })} />
-          <Muted small>PDF belge ekleme sonraki sürümde; şimdilik belgenin fotoğrafını çekebilirsin.</Muted>
-          {d.editId && <Muted small>Önceden eklenen fotoğraflar kayıtta kalır; burada yalnızca yenilerini eklersin.</Muted>}
-        </Stack>
-      )}
-
-      {/* ADIM 6: ÖZET */}
-      {d.step === 5 && (
+      {/* ADIM 3: KONTROL ET VE GÖNDER */}
+      {d.step === 2 && (
         <Stack gap={space.md}>
           <Card style={{ gap: 4 }}>
             <Text v="title" style={{ letterSpacing: 1 }}>{normalizePlate(d.plate)}</Text>
-            <Muted small>{`${d.make} ${d.model} · ${d.km} km`}</Muted>
+            <Muted small>{`${vehicle ? `${vehicle.make} ${vehicle.model}` : `${d.make} ${d.model}`} · ${formatKm(parseNumberTR(d.km) ?? 0)}`}</Muted>
             <Muted small>{customer ? customer.fullName : `${d.custName} (yeni müşteri)`}</Muted>
-            <Muted small>{`Kabul: ${d.intakeText}`}</Muted>
             <Text style={{ marginTop: 4 }}>{d.complaint}</Text>
           </Card>
-          <ItemsList items={d.items} />
+          <ItemsList items={form.items} />
           <TotalsCard totals={totals} />
-          {d.files.length > 0 && <Muted small>{`${d.files.length} fotoğraf eklenecek.`}</Muted>}
-          <Card style={{ gap: 4 }}>
-            <Text v="bodyStrong">Kaydedince ne olur?</Text>
-            <Muted small>
-              {d.editId
-                ? 'Düzeltme kaydedilir, eski ve yeni değerler denetim geçmişine yazılır. Kayıt yeniden "müşteri onayı bekliyor" durumuna geçer.'
-                : 'Kayıt "Müşteri onayı bekliyor" durumunda açılır. Müşteri PISTON GARAGE hesabıyla eşleşiyorsa kaydı uygulamasında görür.'}
-            </Muted>
-            <Muted small>WhatsApp ile paylaşım bağlantısı ve anlık bildirim bir sonraki aşamada eklenecek.</Muted>
-          </Card>
+
+          <Expander title="Ek bilgiler (isteğe bağlı)" open={extraIntake} onToggle={() => setExtraIntake(!extraIntake)}
+            hint="Kabul saati, yakıt, mevcut hasarlar, fotoğraflar">
+            <Field label="Kabul tarihi ve saati" value={d.intakeText} onChangeText={(t) => up({ intakeText: t })} placeholder="16.11.2026 10:30" />
+            <Field label="İlk gözlem" value={d.initialNote} onChangeText={(t) => up({ initialNote: t })} multiline />
+            <Text v="smallStrong" color={colors.textMuted}>Yakıt seviyesi</Text>
+            <Segmented<FuelLevel | 'none'>
+              options={[{ value: 'none', label: '—' }, ...(Object.keys(FUEL_LEVEL_LABEL) as FuelLevel[]).map((k) => ({ value: k, label: FUEL_LEVEL_LABEL[k] }))]}
+              value={d.fuelLevel ?? 'none'} onChange={(v) => up({ fuelLevel: v === 'none' ? null : v })} />
+            <Field label="Teslimde görülen mevcut hasarlar" value={d.existingDamage} onChangeText={(t) => up({ existingDamage: t })} multiline placeholder="Örn. arka tamponda çizik" />
+            <PhotoRow kind="intake" files={d.files} onAdd={addPhoto} onRemove={removePhoto} />
+            <PhotoRow kind="replaced_part" files={d.files} onAdd={addPhoto} onRemove={removePhoto} />
+            {d.editId && <Muted small>Önceden eklenen fotoğraflar kayıtta kalır; burada yalnızca yenilerini eklersin.</Muted>}
+          </Expander>
+
+          <Muted small>
+            {d.editId
+              ? 'Düzeltme kaydedilir, eski ve yeni değerler saklanır; müşteriden yeniden onay istenir.'
+              : 'Kayıt "Müşteri onayı bekliyor" durumunda açılır. Müşteri PISTON GARAGE hesabıyla eşleşiyorsa kaydı uygulamasında görür. Kaydettikten sonra WhatsApp ile ya da PDF olarak da gönderebilirsin.'}
+          </Muted>
           {!d.editId && <Button title="Taslağı sil" variant="ghost" small onPress={discard} />}
         </Stack>
       )}
     </Screen>
+  );
+}
+
+function Expander({ title, hint, open, onToggle, children }: { title: string; hint?: string; open: boolean; onToggle: () => void; children: ReactNode }) {
+  return (
+    <Card style={{ gap: space.md }}>
+      <Pressable onPress={onToggle} accessibilityRole="button" accessibilityState={{ expanded: open }}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ flex: 1 }}>
+          <Text v="bodyStrong">{title}</Text>
+          {hint && !open ? <Muted small>{hint}</Muted> : null}
+        </View>
+        <Text v="bodyStrong" color={colors.textMuted}>{open ? '−' : '+'}</Text>
+      </Pressable>
+      {open && <Stack gap={space.md}>{children}</Stack>}
+    </Card>
   );
 }
 
@@ -523,16 +511,18 @@ function PhotoRow({ kind, files, onAdd, onRemove }: {
   return (
     <Stack gap={space.sm}>
       <Text v="smallStrong" color={colors.textMuted}>{`${SERVICE_FILE_KIND_LABEL[kind]} fotoğrafları`}</Text>
-      <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
-        {mine.map((f) => (
-          <Pressable key={f.uri} onPress={() => onRemove(f.uri)} accessibilityRole="button" accessibilityLabel="Fotoğrafı kaldır">
-            <Image source={{ uri: f.uri }} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: colors.surface }} contentFit="cover" />
-            <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 8, paddingHorizontal: 5 }}>
-              <Text v="small" color="#fff">×</Text>
-            </View>
-          </Pressable>
-        ))}
-      </Row>
+      {mine.length > 0 && (
+        <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
+          {mine.map((f) => (
+            <Pressable key={f.uri} onPress={() => onRemove(f.uri)} accessibilityRole="button" accessibilityLabel="Fotoğrafı kaldır">
+              <Image source={{ uri: f.uri }} style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: colors.surface }} contentFit="cover" />
+              <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 8, paddingHorizontal: 5 }}>
+                <Text v="small" color="#fff">×</Text>
+              </View>
+            </Pressable>
+          ))}
+        </Row>
+      )}
       <Row gap={space.sm}>
         <Button title="Fotoğraf çek" icon="camera" small onPress={() => onAdd(kind, 'camera')} />
         <Button title="Galeriden" small onPress={() => onAdd(kind, 'library')} />
