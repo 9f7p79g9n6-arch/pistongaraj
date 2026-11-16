@@ -8,6 +8,7 @@ import type {
   BusinessCustomer,
   BusinessVehicle,
   FuelLevel,
+  PaymentMethod,
   ServiceFileKind,
   ServiceItemInput,
   ServiceRecord,
@@ -70,6 +71,17 @@ export interface ServiceRecordDraft {
   items: ServiceItemInput[];
 }
 
+export interface NewPayment {
+  recordId: string;
+  amountKurus: number;
+  method: PaymentMethod;
+  /** null: şimdi */
+  paidAt: string | null;
+  note: string | null;
+  /** Aynı ödeme iki kez gönderilirse ikinci kayıt açılmaz */
+  clientRequestId: string;
+}
+
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'application/pdf'] as const;
 
@@ -94,6 +106,10 @@ export interface ServiceRepo {
   saveRecord(draft: ServiceRecordDraft): Promise<string>;
   addFiles(businessId: string, recordId: string, files: PendingFile[]): Promise<void>;
   completeRecord(id: string): Promise<void>;
+
+  // Tahsilat (ödeme silinmez; yanlışsa sebebiyle iptal edilir)
+  addPayment(input: NewPayment): Promise<void>;
+  voidPayment(paymentId: string, reason: string): Promise<void>;
 
   // Müşteri tarafı (bireysel kullanıcı)
   myRecords(): Promise<ServiceRecord[]>;

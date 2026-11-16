@@ -23,6 +23,8 @@ export default function ServisLayout() {
           <Stack.Screen name="arac-ekle" options={{ presentation: 'modal' }} />
           <Stack.Screen name="arac/[id]" />
           <Stack.Screen name="profil" />
+          <Stack.Screen name="raporlar" />
+          <Stack.Screen name="borclular" />
         </Stack.Protected>
         <Stack.Screen name="isletme-ac" />
       </Stack>

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -181,9 +181,11 @@ describe('kayıt durumları', () => {
 
 describe('yetkiler: uygulama ve sunucu aynı tabloyu kullanır', () => {
   it('ROLE_PERMISSIONS = private.role_permissions (migration)', () => {
-    const sql = readFileSync(join(__dirname, '../../../supabase/migrations/20261116000001_piston_servis.sql'), 'utf8');
-    const block = /insert into private\.role_permissions \(role, permission\) values([\s\S]*?);/.exec(sql)?.[1] ?? '';
-    const fromSql = [...block.matchAll(/\('(\w+)', '([\w.]+)'\)/g)].map((m) => `${m[1]}:${m[2]}`).sort();
+    // Tüm migration'lardaki role_permissions eklemeleri toplanır (sonraki migration'lar yeni izin ekleyebilir)
+    const dir = join(__dirname, '../../../supabase/migrations');
+    const sql = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort().map((f) => readFileSync(join(dir, f), 'utf8')).join('\n');
+    const blocks = [...sql.matchAll(/insert into private\.role_permissions \(role, permission\) values([\s\S]*?);/g)].map((m) => m[1]).join('\n');
+    const fromSql = [...blocks.matchAll(/\('(\w+)', '([\w.]+)'\)/g)].map((m) => `${m[1]}:${m[2]}`).sort();
     const fromTs = Object.entries(ROLE_PERMISSIONS).flatMap(([role, perms]) => perms.map((p) => `${role}:${p}`)).sort();
     expect(fromSql.length).toBeGreaterThan(0);
     expect(fromSql).toEqual(fromTs);

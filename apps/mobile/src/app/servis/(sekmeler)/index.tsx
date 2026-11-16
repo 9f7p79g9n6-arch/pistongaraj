@@ -1,11 +1,11 @@
 /** PISTON SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
-import { BUSINESS_STATUS_LABEL, needsCustomerAction } from '@piston/core';
+import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus, needsCustomerAction } from '@piston/core';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 
 import { BigAction, CountTile, NextStageCard, RecordCard } from '@/components/servis';
 import { Button, Card, DemoBadge, Empty, ErrorText, Muted, Pill, Row, Screen, Section, Stack, Text } from '@/components/ui';
-import { space } from '@/constants/theme';
+import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 
 function isToday(iso: string) {
@@ -25,8 +25,11 @@ export default function Panel() {
       pending: records.filter((r) => needsCustomerAction(r.status)).length,
       objected: records.filter((r) => r.status === 'objected').length,
       approved: records.filter((r) => r.status === 'approved').length,
+      todayCollected: records.flatMap((r) => activePayments(r.payments)).filter((p) => isToday(p.paidAt)).reduce((s, p) => s + p.amountKurus, 0),
     };
   }, [records]);
+  const debt = useMemo(() => debtors(records), [records]);
+  const debtTotal = debt.reduce((s, d) => s + d.debtKurus, 0);
 
   if (!business) return <Screen title="PISTON SERVİS">{null}</Screen>;
   const toList = (filtre: string) => router.push({ pathname: '/servis/kayitlar', params: { filtre } });
@@ -59,6 +62,16 @@ export default function Panel() {
           <CountTile label="Onay bekleyen" value={c.pending} tone="warn" onPress={() => toList('bekleyen')} />
           <CountTile label="İtiraz edilen" value={c.objected} tone="bad" onPress={() => toList('itiraz')} />
         </Row>
+        <Row gap={space.sm}>
+          <Card onPress={() => router.push('/servis/raporlar')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Bugünkü tahsilat, raporlar">
+            <Text v="number">{formatKurus(c.todayCollected)}</Text>
+            <Muted small>Bugünkü tahsilat</Muted>
+          </Card>
+          <Card onPress={() => router.push('/servis/borclular')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Alacak, borçlu müşteriler">
+            <Text v="number" color={debtTotal > 0 ? colors.warn : colors.text}>{formatKurus(debtTotal)}</Text>
+            <Muted small>{`Alacak · ${debt.length} müşteri`}</Muted>
+          </Card>
+        </Row>
         {c.approved > 0 && (
           <Card onPress={() => toList('onayli')} style={{ gap: 2 }}>
             <Text v="bodyStrong">{`${c.approved} kayıt müşteri tarafından onaylandı`}</Text>
@@ -73,6 +86,8 @@ export default function Panel() {
           <Button title="Araç bul" icon="car" small onPress={() => router.push('/servis/araclar')} />
           <Button title="Servis geçmişi" icon="list" small onPress={() => toList('tumu')} />
           <Button title="Onay bekleyenler" icon="alert" small onPress={() => toList('bekleyen')} />
+          <Button title="Raporlar" icon="doc" small onPress={() => router.push('/servis/raporlar')} />
+          <Button title="Borçlu müşteriler" icon="users" small onPress={() => router.push('/servis/borclular')} />
         </Row>
       </Section>
 

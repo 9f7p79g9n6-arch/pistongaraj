@@ -16,6 +16,9 @@ export const SERVICE_MESSAGES: Record<string, string> = {
   RATE_LIMIT: 'Bugün çok fazla kayıt açıldı. Yarın tekrar dene ya da destek ile iletişime geç.',
   FORBIDDEN: 'Bu işlem için yetkin yok.',
   NOT_FOUND: 'Kayıt bulunamadı.',
+  OVERPAYMENT: 'Ödeme, kalan borçtan fazla olamaz.',
+  ALREADY_VOIDED: 'Bu ödeme zaten iptal edilmiş.',
+  PAID_AT_FUTURE: 'Ödeme tarihi ileri bir tarih olamaz.',
   FILE_TOO_LARGE: 'Dosya en fazla 10 MB olabilir.',
   FILE_TYPE: 'Yalnızca JPEG, PNG fotoğraf ve PDF belge eklenebilir.',
 };

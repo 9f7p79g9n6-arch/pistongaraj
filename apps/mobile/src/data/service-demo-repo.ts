@@ -12,12 +12,14 @@ import {
   computeServiceTotals,
   nextServiceStatus,
   normalizePlate,
+  paidKurus,
   validateServiceItem,
   type Business,
   type BusinessCustomer,
   type BusinessVehicle,
   type ServiceFile,
   type ServiceItem,
+  type ServicePayment,
   type ServiceRecord,
   type ServiceRecordStatus,
   type ServiceResponse,
@@ -26,7 +28,7 @@ import {
 
 import { RepoError } from './repo';
 import { serviceError } from './service-errors';
-import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
+import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
 
 export const DEMO_CUSTOMER_EMAIL = 'demo@pistongarage.app';
 const KEY = 'piston-servis-demo-v1';
@@ -50,6 +52,8 @@ interface StoredRecord {
   files: ServiceFile[];
   responses: ServiceResponse[];
   history: ServiceStatusChange[];
+  /** Eski demo verisinde yok olabilir */
+  payments?: (ServicePayment & { clientRequestId: string })[];
   createdAt: string;
   updatedAt: string;
   approvedAt: string | null;
@@ -129,6 +133,7 @@ export class ServiceDemoRepo implements ServiceRepo {
       complaint: r.complaint, initialNote: r.initialNote, fuelLevel: r.fuelLevel, existingDamage: r.existingDamage,
       items: r.items, files: r.files, totals: computeServiceTotals(r.items, r.vatRate),
       responses: r.responses, history: r.history, createdAt: r.createdAt, updatedAt: r.updatedAt, approvedAt: r.approvedAt,
+      payments: (r.payments ?? []).map(({ clientRequestId: _c, ...p }) => p),
     };
   }
 
@@ -277,6 +282,43 @@ export class ServiceDemoRepo implements ServiceRepo {
     r.updatedAt = now();
     r.history.push({ status: next, at: r.updatedAt, by: 'business' });
     await this.save();
+  }
+
+  // ---------------- Tahsilat ----------------
+
+  async addPayment(p: NewPayment) {
+    const s = await this.load();
+    const r = s.records.find((x) => x.id === p.recordId);
+    if (!r) throw serviceError('NOT_FOUND');
+    this.writable(s, r.businessId);
+    const list = (r.payments ??= []);
+    if (list.some((x) => x.clientRequestId === p.clientRequestId)) return;
+    if (p.paidAt && new Date(p.paidAt).getTime() > Date.now() + 3600_000) throw serviceError('PAID_AT_FUTURE');
+    const grand = computeServiceTotals(r.items, r.vatRate).grandKurus;
+    if (!Number.isInteger(p.amountKurus) || p.amountKurus <= 0 || paidKurus(list) + p.amountKurus > grand) throw serviceError('OVERPAYMENT');
+    list.push({
+      id: id(), amountKurus: p.amountKurus, method: p.method, paidAt: p.paidAt ?? now(), note: p.note?.trim() || null,
+      voidedAt: null, voidReason: null, clientRequestId: p.clientRequestId,
+    });
+    s.audit.push({ recordId: r.id, at: now(), before: null, after: { payment: list[list.length - 1] } });
+    await this.save();
+  }
+
+  async voidPayment(paymentId: string, reason: string) {
+    const s = await this.load();
+    for (const r of s.records) {
+      const p = r.payments?.find((x) => x.id === paymentId);
+      if (!p) continue;
+      if (p.voidedAt) throw serviceError('ALREADY_VOIDED');
+      if (reason.trim().length < 3) throw new RepoError('REASON_REQUIRED', 'İptal sebebini yaz.');
+      const before = { ...p };
+      p.voidedAt = now();
+      p.voidReason = reason.trim();
+      s.audit.push({ recordId: r.id, at: now(), before, after: { ...p } });
+      await this.save();
+      return;
+    }
+    throw serviceError('NOT_FOUND');
   }
 
   // ---------------- Müşteri tarafı ----------------

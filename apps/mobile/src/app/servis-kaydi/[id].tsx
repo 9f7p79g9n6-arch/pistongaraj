@@ -1,5 +1,7 @@
 /** Müşteri tarafı: servis kaydını incele, ONAYLA ya da İTİRAZ ET. */
-import { needsCustomerAction } from '@piston/core';
+import { isRevenue, needsCustomerAction } from '@piston/core';
+
+import { PaymentCard } from '@/components/payments';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
@@ -84,6 +86,7 @@ export default function CustomerRecord() {
 
       <Section title="Değişen parçalar ve işçilik"><ItemsList items={r.items} /></Section>
       <Section title="Tutar"><TotalsCard totals={r.totals} /></Section>
+      {r.payments.length > 0 || isRevenue(r.status) ? <Section title="Ödeme"><PaymentCard r={r} /></Section> : null}
       <Section title="Fotoğraf ve belgeler"><FilesGrid files={r.files} /></Section>
       <Section title="Yanıtların"><ResponsesList r={r} /></Section>
       <Section title="Durum geçmişi"><HistoryList r={r} /></Section>

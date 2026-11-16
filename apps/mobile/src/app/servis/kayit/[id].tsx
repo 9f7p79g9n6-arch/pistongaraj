@@ -3,6 +3,7 @@ import { needsCustomerAction, type ServiceRecord } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
+import { PaymentCard } from '@/components/payments';
 import { FilesGrid, HistoryList, IntakeCard, ItemsList, ResponsesList, TotalsCard } from '@/components/servis';
 import { Button, Card, Empty, ErrorText, Muted, Screen, Section, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
@@ -112,6 +113,11 @@ export default function RecordDetail() {
 
       <Section title="Değişen parçalar ve işçilik"><ItemsList items={r.items} /></Section>
       <Section title="Tutar"><TotalsCard totals={r.totals} /></Section>
+      <Section title="Tahsilat">
+        <PaymentCard r={r}
+          onAdd={async (p) => { await biz.run((x) => x.addPayment(p)); await load(); }}
+          onVoid={async (pid, reason) => { await biz.run((x) => x.voidPayment(pid, reason)); await load(); }} />
+      </Section>
       <Section title="Fotoğraf ve belgeler"><FilesGrid files={r.files} /></Section>
       <Section title="Müşteri yanıtları"><ResponsesList r={r} /></Section>
       <Section title="Durum geçmişi"><HistoryList r={r} /></Section>

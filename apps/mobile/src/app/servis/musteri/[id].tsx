@@ -1,10 +1,10 @@
-import { formatDate, formatPhoneTR, needsCustomerAction } from '@piston/core';
+import { customerDebtKurus, formatDate, formatKurus, formatPhoneTR, needsCustomerAction } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Linking } from 'react-native';
 
 import { RecordCard } from '@/components/servis';
 import { Button, Card, Divider, Empty, ListItem, Muted, Row, Screen, Section, Stack, Stat, Text } from '@/components/ui';
-import { space } from '@/constants/theme';
+import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 
 export default function CustomerDetail() {
@@ -17,6 +17,7 @@ export default function CustomerDetail() {
   const rs = records.filter((r) => r.customerId === c.id);
   const pending = rs.filter((r) => needsCustomerAction(r.status)).length;
   const last = rs[0];
+  const debt = customerDebtKurus(rs, c.id);
 
   return (
     <Screen title={c.fullName} back>
@@ -33,6 +34,12 @@ export default function CustomerDetail() {
         <Stat label="Son servis" value={last ? formatDate(last.intakeAt.slice(0, 10)) : '—'} />
         <Stat label="Onay bekleyen" value={String(pending)} />
       </Row>
+      {debt > 0 && (
+        <Card onPress={() => router.push('/servis/borclular')} style={{ marginTop: space.md, gap: 2, borderColor: colors.warn }}>
+          <Text v="bodyStrong" color={colors.warn}>{`Kalan borç: ${formatKurus(debt)}`}</Text>
+          <Muted small>Ödeme, ilgili servis kaydında “Ödeme al” ile girilir.</Muted>
+        </Card>
+      )}
 
       <Button title="Yeni servis kaydı" icon="plus" variant="primary" style={{ marginTop: space.lg }}
         onPress={() => router.push({ pathname: '/servis/yeni-kayit', params: vs.length === 1 ? { arac: vs[0]!.id } : { musteri: c.id } })} />

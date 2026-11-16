@@ -16,7 +16,7 @@ import {
 
 import { RepoError } from './repo';
 import { SERVICE_MESSAGES, serviceError } from './service-errors';
-import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
+import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
 
 type Row = Record<string, any>;
 const BUCKET = 'service-files';
@@ -75,6 +75,10 @@ export class ServiceSupabaseRepo implements ServiceRepo {
       files: await Promise.all((j.files as Row[]).map(async (f) => ({ id: f.id, kind: f.kind, url: await this.signed(f.storage_path), mimeType: f.mime_type, sizeBytes: f.size_bytes }))),
       responses: (j.responses as Row[]).map((a) => ({ id: a.id, version: a.version, action: a.action, reason: a.reason, via: a.via, at: a.created_at })),
       history: (j.history as Row[]).map((h) => ({ status: h.status, by: h.actor, at: h.created_at })),
+      payments: ((j.payments as Row[] | undefined) ?? []).map((p) => ({
+        id: p.id, amountKurus: Number(p.amount_kurus), method: p.method, paidAt: p.paid_at, note: p.note,
+        voidedAt: p.voided_at, voidReason: p.void_reason,
+      })),
       createdAt: j.created_at, updatedAt: j.updated_at, approvedAt: j.approved_at,
     };
   }
@@ -184,6 +188,19 @@ export class ServiceSupabaseRepo implements ServiceRepo {
 
   async completeRecord(id: string) {
     const { error } = await this.sb.rpc('complete_service_record', { p_record_id: id });
+    if (error) fail(error);
+  }
+
+  async addPayment(p: NewPayment) {
+    const { error } = await this.sb.rpc('add_service_payment', {
+      p_record_id: p.recordId, p_amount_kurus: p.amountKurus, p_method: p.method, p_paid_at: p.paidAt,
+      p_note: p.note, p_client_request_id: p.clientRequestId,
+    });
+    if (error) fail(error);
+  }
+
+  async voidPayment(paymentId: string, reason: string) {
+    const { error } = await this.sb.rpc('void_service_payment', { p_payment_id: paymentId, p_reason: reason });
     if (error) fail(error);
   }
 

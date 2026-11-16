@@ -50,14 +50,15 @@ export type BusinessPermission =
   | 'record.view'
   | 'record.create'
   | 'record.edit'
-  | 'record.complete';
+  | 'record.complete'
+  | 'payment.manage';
 
 /** Rol → izin tablosu. Sunucudaki private.role_permissions ile aynı olmalı (test kontrol eder). */
 export const ROLE_PERMISSIONS: Record<BusinessRole, BusinessPermission[]> = {
-  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete'],
-  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete'],
+  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage'],
+  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage'],
   technician: ['record.view', 'record.create', 'record.edit'],
-  front_desk: ['customer.manage', 'record.view', 'record.create'],
+  front_desk: ['customer.manage', 'record.view', 'record.create', 'payment.manage'],
 };
 
 export function hasPermission(role: BusinessRole, perm: BusinessPermission): boolean {
@@ -170,6 +171,25 @@ export interface ServiceTotals {
   grandKurus: number;
 }
 
+export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'other';
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  cash: 'Nakit',
+  card: 'Kart',
+  transfer: 'Havale/EFT',
+  other: 'Diğer',
+};
+
+export interface ServicePayment {
+  id: string;
+  amountKurus: number;
+  method: PaymentMethod;
+  paidAt: string;
+  note: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+}
+
 export interface ServiceResponse {
   id: string;
   version: number;
@@ -208,6 +228,8 @@ export interface ServiceRecord {
   files: ServiceFile[];
   totals: ServiceTotals;
   responses: ServiceResponse[];
+  /** Tahsilatlar (iptal edilenler dahil; iptal edilen tutar bakiyeye sayılmaz) */
+  payments: ServicePayment[];
   history: ServiceStatusChange[];
   createdAt: string;
   updatedAt: string;
