@@ -12,7 +12,6 @@ const ADVANCED: { title: string; stage: string; body: string }[] = [
   { title: 'Randevular', stage: 'Aşama 3', body: 'Günlük ve haftalık takvim, randevu durumları.' },
   { title: 'Personel', stage: 'Aşama 3', body: 'Çalışan ekleme, görev atama, yetkiye göre işlem.' },
   { title: 'Stok', stage: 'Aşama 4', body: 'Parça, stok kodu, barkod, minimum stok uyarısı, stok hareketleri.' },
-  { title: 'Giderler ve kâr', stage: 'Sonraki adım', body: 'Kira, maaş, parça alışı gibi giderler; aylık kâr.' },
 ];
 
 export default function Menu() {
@@ -52,13 +51,15 @@ export default function Menu() {
         </Card>
       </Section>
 
-      <Section title="Muhasebe">
-        <Card style={{ paddingVertical: 0 }}>
-          <ListItem icon="doc" title="Raporlar" subtitle="Ciro, tahsilat, alacak; PDF ve Excel" onPress={() => router.push('/servis/raporlar')} />
-          <Divider />
-          <ListItem icon="users" title="Borçlu müşteriler" subtitle="Ödenmemiş tutarlar ve hatırlatma" onPress={() => router.push('/servis/borclular')} />
-        </Card>
-      </Section>
+      {biz.canFinance && (
+        <Section title="Finans">
+          <Card style={{ paddingVertical: 0 }}>
+            <ListItem icon="doc" title="PISTON CİRO" subtitle="Ciro, gider, net kazanç, tahsilat; PDF ve Excel" onPress={() => router.push('/servis/ciro')} />
+            <Divider />
+            <ListItem icon="users" title="Borçlu müşteriler" subtitle="Ödenmemiş tutarlar ve hatırlatma" onPress={() => router.push('/servis/borclular')} />
+          </Card>
+        </Section>
+      )}
 
       <Section title="Kullanım">
         <Card>

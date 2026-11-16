@@ -15,7 +15,7 @@ function isToday(iso: string) {
 }
 
 export default function Panel() {
-  const { business, records, advanced, error, refresh } = useBusiness();
+  const { business, records, advanced, error, refresh, canFinance } = useBusiness();
 
   const c = useMemo(() => {
     const today = records.filter((r) => isToday(r.intakeAt));
@@ -62,16 +62,18 @@ export default function Panel() {
           <CountTile label="Onay bekleyen" value={c.pending} tone="warn" onPress={() => toList('bekleyen')} />
           <CountTile label="İtiraz edilen" value={c.objected} tone="bad" onPress={() => toList('itiraz')} />
         </Row>
-        <Row gap={space.sm}>
-          <Card onPress={() => router.push('/servis/raporlar')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Bugünkü tahsilat, raporlar">
-            <Text v="number">{formatKurus(c.todayCollected)}</Text>
-            <Muted small>Bugünkü tahsilat</Muted>
-          </Card>
-          <Card onPress={() => router.push('/servis/borclular')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Alacak, borçlu müşteriler">
-            <Text v="number" color={debtTotal > 0 ? colors.warn : colors.text}>{formatKurus(debtTotal)}</Text>
-            <Muted small>{`Alacak · ${debt.length} müşteri`}</Muted>
-          </Card>
-        </Row>
+        {canFinance && (
+          <Row gap={space.sm}>
+            <Card onPress={() => router.push('/servis/ciro')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Bugünkü tahsilat, PISTON CİRO">
+              <Text v="number">{formatKurus(c.todayCollected)}</Text>
+              <Muted small>Bugünkü tahsilat</Muted>
+            </Card>
+            <Card onPress={() => router.push('/servis/borclular')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Alacak, borçlu müşteriler">
+              <Text v="number" color={debtTotal > 0 ? colors.warn : colors.text}>{formatKurus(debtTotal)}</Text>
+              <Muted small>{`Alacak · ${debt.length} müşteri`}</Muted>
+            </Card>
+          </Row>
+        )}
         {c.approved > 0 && (
           <Card onPress={() => toList('onayli')} style={{ gap: 2 }}>
             <Text v="bodyStrong">{`${c.approved} kayıt müşteri tarafından onaylandı`}</Text>
@@ -86,8 +88,8 @@ export default function Panel() {
           <Button title="Araç bul" icon="car" small onPress={() => router.push('/servis/araclar')} />
           <Button title="Servis geçmişi" icon="list" small onPress={() => toList('tumu')} />
           <Button title="Onay bekleyenler" icon="alert" small onPress={() => toList('bekleyen')} />
-          <Button title="Raporlar" icon="doc" small onPress={() => router.push('/servis/raporlar')} />
-          <Button title="Borçlu müşteriler" icon="users" small onPress={() => router.push('/servis/borclular')} />
+          {canFinance && <Button title="PISTON CİRO" icon="doc" small onPress={() => router.push('/servis/ciro')} />}
+          {canFinance && <Button title="Borçlu müşteriler" icon="users" small onPress={() => router.push('/servis/borclular')} />}
         </Row>
       </Section>
 

@@ -51,12 +51,14 @@ export type BusinessPermission =
   | 'record.create'
   | 'record.edit'
   | 'record.complete'
-  | 'payment.manage';
+  | 'payment.manage'
+  | 'expense.manage'
+  | 'finance.view';
 
 /** Rol → izin tablosu. Sunucudaki private.role_permissions ile aynı olmalı (test kontrol eder). */
 export const ROLE_PERMISSIONS: Record<BusinessRole, BusinessPermission[]> = {
-  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage'],
-  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage'],
+  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage', 'expense.manage', 'finance.view'],
+  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage', 'expense.manage', 'finance.view'],
   technician: ['record.view', 'record.create', 'record.edit'],
   front_desk: ['customer.manage', 'record.view', 'record.create', 'payment.manage'],
 };
@@ -175,7 +177,7 @@ export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'other';
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   cash: 'Nakit',
-  card: 'Kart',
+  card: 'Kredi kartı',
   transfer: 'Havale/EFT',
   other: 'Diğer',
 };

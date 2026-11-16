@@ -32,11 +32,11 @@ export default function Debtors() {
       <Card style={{ gap: 2 }}>
         <Muted small>Toplam alacak</Muted>
         <Text v="display" color={total > 0 ? colors.warn : colors.text}>{formatKurus(total)}</Text>
-        <Muted small>{`${list.length} müşteri · onaylı ve tamamlanan kayıtlardan`}</Muted>
+        <Muted small>{`${list.length} müşteri · tamamlanan kayıtlardan`}</Muted>
       </Card>
       <Stack gap={space.sm} style={{ marginTop: space.lg }}>
         {list.length === 0 ? (
-          <Empty title="Borçlu müşteri yok" body="Onaylanan kayıtların hepsi ödenmiş. Ödeme, kayıt sayfasındaki 'Ödeme al' ile girilir." />
+          <Empty title="Borçlu müşteri yok" body="Tamamlanan kayıtların hepsi ödenmiş. Ödeme, kayıt sayfasındaki 'Ödeme al' ile girilir." />
         ) : list.map((d) => (
           <Card key={d.customerId} style={{ gap: 6 }} onPress={() => router.push(`/servis/musteri/${d.customerId}`)} accessibilityLabel={`${d.customerName}, borç ${formatKurus(d.debtKurus)}`}>
             <Row style={{ justifyContent: 'space-between' }}>

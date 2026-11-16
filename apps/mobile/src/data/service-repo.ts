@@ -4,6 +4,7 @@
  */
 import type {
   Business,
+  BusinessExpense,
   BusinessCategory,
   BusinessCustomer,
   BusinessVehicle,
@@ -82,6 +83,19 @@ export interface NewPayment {
   clientRequestId: string;
 }
 
+export interface ExpensePatch {
+  amountKurus: number;
+  description: string | null;
+  /** YYYY-MM-DD */
+  spentOn: string;
+}
+
+export interface NewExpense extends ExpensePatch {
+  businessId: string;
+  /** Aynı gider iki kez gönderilirse ikinci kayıt açılmaz */
+  clientRequestId: string;
+}
+
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 export const ALLOWED_MIME = ['image/jpeg', 'image/png', 'application/pdf'] as const;
 
@@ -110,6 +124,12 @@ export interface ServiceRepo {
   // Tahsilat (ödeme silinmez; yanlışsa sebebiyle iptal edilir)
   addPayment(input: NewPayment): Promise<void>;
   voidPayment(paymentId: string, reason: string): Promise<void>;
+
+  // Giderler (yalnızca tutar, açıklama, tarih). Düzenleme ve silmenin eski hâli denetim kaydında saklanır.
+  listExpenses(businessId: string): Promise<BusinessExpense[]>;
+  addExpense(input: NewExpense): Promise<void>;
+  updateExpense(id: string, input: ExpensePatch): Promise<void>;
+  deleteExpense(id: string): Promise<void>;
 
   // Müşteri tarafı (bireysel kullanıcı)
   myRecords(): Promise<ServiceRecord[]>;

@@ -3,7 +3,7 @@
  * müşteri tarafındaki servis kayıtları. Bireysel AppProvider'dan ayrıdır; onun verisini değiştirmez.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { needsCustomerAction, type Business, type BusinessCustomer, type BusinessVehicle, type ServiceRecord } from '@piston/core';
+import { hasPermission, needsCustomerAction, type Business, type BusinessCustomer, type BusinessExpense, type BusinessVehicle, type ServiceRecord } from '@piston/core';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { env } from '@/lib/env';
@@ -34,6 +34,10 @@ interface BusinessState {
   customers: BusinessCustomer[];
   vehicles: BusinessVehicle[];
   records: ServiceRecord[];
+  /** İşletme giderleri (yalnızca finans yetkisi olan rolde dolu) */
+  expenses: BusinessExpense[];
+  /** PISTON CİRO'yu görebilir mi (sahip, müdür) */
+  canFinance: boolean;
   /** Müşteri tarafı: bu hesaba gelen servis kayıtları */
   myRecords: ServiceRecord[];
   myPendingCount: number;
@@ -64,18 +68,23 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
   const [vehicles, setVehicles] = useState<BusinessVehicle[]>([]);
   const [records, setRecords] = useState<ServiceRecord[]>([]);
   const [myRecords, setMyRecords] = useState<ServiceRecord[]>([]);
+  const [expenses, setExpenses] = useState<BusinessExpense[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const loadBusinessData = useCallback(async (bid: string) => {
-    const [c, v, r] = await Promise.all([serviceRepo.listCustomers(bid), serviceRepo.listVehicles(bid), serviceRepo.listRecords(bid)]);
+    // Giderler yalnızca yetkili rolde döner (sunucu RLS); yetkisiz rolde boş liste gelir
+    const [c, v, r, x] = await Promise.all([
+      serviceRepo.listCustomers(bid), serviceRepo.listVehicles(bid), serviceRepo.listRecords(bid), serviceRepo.listExpenses(bid).catch(() => []),
+    ]);
     setCustomers(c);
     setVehicles(v);
     setRecords(r);
+    setExpenses(x);
   }, []);
 
   const refresh = useCallback(async () => {
     if (!account) {
-      setBusinesses([]); setCustomers([]); setVehicles([]); setRecords([]); setMyRecords([]);
+      setBusinesses([]); setCustomers([]); setVehicles([]); setRecords([]); setMyRecords([]); setExpenses([]);
       return;
     }
     try {
@@ -86,7 +95,7 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
       const next = list.find((b) => b.id === saved)?.id ?? list[0]?.id ?? null;
       setActiveId(next);
       if (next) await loadBusinessData(next);
-      else { setCustomers([]); setVehicles([]); setRecords([]); }
+      else { setCustomers([]); setVehicles([]); setRecords([]); setExpenses([]); }
       setError(null);
     } catch (e) {
       setError(e instanceof RepoError ? e.message : 'İşletme verileri yüklenemedi.');
@@ -129,10 +138,11 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
 
   const business = businesses.find((b) => b.id === activeId) ?? null;
   const myPendingCount = useMemo(() => myRecords.filter((r) => needsCustomerAction(r.status)).length, [myRecords]);
+  const canFinance = !!business && hasPermission(business.role, 'finance.view');
 
   const value: BusinessState = {
     ready, mode, setMode, businesses, business, selectBusiness, advanced, setAdvanced,
-    customers, vehicles, records, myRecords, myPendingCount, error, refresh, run,
+    customers, vehicles, records, expenses, canFinance, myRecords, myPendingCount, error, refresh, run,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

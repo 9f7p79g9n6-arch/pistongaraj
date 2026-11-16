@@ -10,13 +10,14 @@ import {
   normalizePlate,
   type Business,
   type BusinessCustomer,
+  type BusinessExpense,
   type BusinessVehicle,
   type ServiceRecord,
 } from '@piston/core';
 
 import { RepoError } from './repo';
 import { SERVICE_MESSAGES, serviceError } from './service-errors';
-import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
+import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type ExpensePatch, type NewCustomer, type NewExpense, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
 
 type Row = Record<string, any>;
 const BUCKET = 'service-files';
@@ -201,6 +202,31 @@ export class ServiceSupabaseRepo implements ServiceRepo {
 
   async voidPayment(paymentId: string, reason: string) {
     const { error } = await this.sb.rpc('void_service_payment', { p_payment_id: paymentId, p_reason: reason });
+    if (error) fail(error);
+  }
+
+  async listExpenses(businessId: string): Promise<BusinessExpense[]> {
+    const { data, error } = await this.sb.from('business_expenses').select('id, amount_kurus, description, spent_on, created_at')
+      .eq('business_id', businessId).order('spent_on', { ascending: false }).order('created_at', { ascending: false });
+    if (error) fail(error);
+    return (data ?? []).map((r: Row) => ({ id: r.id, amountKurus: Number(r.amount_kurus), description: r.description, spentOn: r.spent_on, createdAt: r.created_at }));
+  }
+
+  async addExpense(x: NewExpense) {
+    const { error } = await this.sb.from('business_expenses').insert({
+      business_id: x.businessId, amount_kurus: x.amountKurus, description: x.description, spent_on: x.spentOn, client_request_id: x.clientRequestId,
+    });
+    // Aynı istek ikinci kez gönderildiyse gider zaten kaydedilmiştir
+    if (error && !(error.code === '23505' && error.message.includes('client_request_id'))) fail(error);
+  }
+
+  async updateExpense(id: string, x: ExpensePatch) {
+    const { error } = await this.sb.from('business_expenses').update({ amount_kurus: x.amountKurus, description: x.description, spent_on: x.spentOn }).eq('id', id);
+    if (error) fail(error);
+  }
+
+  async deleteExpense(id: string) {
+    const { error } = await this.sb.from('business_expenses').delete().eq('id', id);
     if (error) fail(error);
   }
 

@@ -10,7 +10,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import {
   computeServiceTotals,
+  localDate,
   nextServiceStatus,
+  validateExpense,
+  type BusinessExpense,
   normalizePlate,
   paidKurus,
   validateServiceItem,
@@ -28,7 +31,7 @@ import {
 
 import { RepoError } from './repo';
 import { serviceError } from './service-errors';
-import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type NewCustomer, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
+import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle, type ExpensePatch, type NewCustomer, type NewExpense, type NewPayment, type PendingFile, type ServiceRecordDraft, type ServiceRepo } from './service-repo';
 
 export const DEMO_CUSTOMER_EMAIL = 'demo@pistongarage.app';
 const KEY = 'piston-servis-demo-v1';
@@ -72,9 +75,10 @@ interface State {
   vehicles: BusinessVehicle[];
   records: StoredRecord[];
   audit: AuditEntry[];
+  expenses: (BusinessExpense & { businessId: string; clientRequestId: string })[];
 }
 
-const empty = (): State => ({ businesses: [], customers: [], vehicles: [], records: [], audit: [] });
+const empty = (): State => ({ businesses: [], customers: [], vehicles: [], records: [], audit: [], expenses: [] });
 const id = () => Crypto.randomUUID();
 const now = () => new Date().toISOString();
 
@@ -319,6 +323,55 @@ export class ServiceDemoRepo implements ServiceRepo {
       return;
     }
     throw serviceError('NOT_FOUND');
+  }
+
+  // ---------------- Giderler ----------------
+
+  private checkExpense(x: ExpensePatch) {
+    const e = validateExpense(x.amountKurus, x.spentOn, x.description ?? '', localDate(new Date()));
+    if (e.date && x.spentOn > localDate(new Date())) throw serviceError('EXPENSE_DATE_FUTURE');
+    const first = e.amount ?? e.date ?? e.description;
+    if (first) throw new RepoError('INVALID', first);
+  }
+
+  async listExpenses(businessId: string): Promise<BusinessExpense[]> {
+    const s = await this.load();
+    this.biz(s, businessId);
+    return s.expenses.filter((x) => x.businessId === businessId)
+      .map(({ businessId: _b, clientRequestId: _c, ...x }) => ({ ...x }))
+      .sort((a, b) => b.spentOn.localeCompare(a.spentOn) || b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async addExpense(x: NewExpense) {
+    const s = await this.load();
+    this.writable(s, x.businessId);
+    if (s.expenses.some((e) => e.businessId === x.businessId && e.clientRequestId === x.clientRequestId)) return;
+    this.checkExpense(x);
+    const row = { id: id(), businessId: x.businessId, clientRequestId: x.clientRequestId, amountKurus: x.amountKurus, description: x.description?.trim() || null, spentOn: x.spentOn, createdAt: now() };
+    s.expenses.push(row);
+    s.audit.push({ recordId: row.id, at: now(), before: null, after: { expense: { ...row } } });
+    await this.save();
+  }
+
+  async updateExpense(expenseId: string, x: ExpensePatch) {
+    const s = await this.load();
+    const row = s.expenses.find((e) => e.id === expenseId);
+    if (!row) throw serviceError('NOT_FOUND');
+    this.writable(s, row.businessId);
+    this.checkExpense(x);
+    const before = { ...row };
+    Object.assign(row, { amountKurus: x.amountKurus, description: x.description?.trim() || null, spentOn: x.spentOn });
+    s.audit.push({ recordId: row.id, at: now(), before: { expense: before }, after: { expense: { ...row } } });
+    await this.save();
+  }
+
+  async deleteExpense(expenseId: string) {
+    const s = await this.load();
+    const i = s.expenses.findIndex((e) => e.id === expenseId);
+    if (i < 0) throw serviceError('NOT_FOUND');
+    const [row] = s.expenses.splice(i, 1);
+    s.audit.push({ recordId: expenseId, at: now(), before: { expense: row }, after: null });
+    await this.save();
   }
 
   // ---------------- Müşteri tarafı ----------------

@@ -8,6 +8,7 @@ import {
   PAYMENT_METHOD_LABEL,
   reportCsv,
   type Business,
+  type BusinessExpense,
   type Debtor,
   type PaymentMethod,
   type ServiceRecord,
@@ -36,17 +37,21 @@ export function reportHtml(rep: ServiceReport, b: Pick<Business, 'name' | 'phone
   .note { margin-top: 20px; font-size: 10px; color: #666; }
 </style></head><body>
 <div class="head"><div><h1>${esc(b.name)}</h1><div class="muted">${esc(b.district)} / ${esc(b.city)} · ${esc(formatPhoneTR(b.phone))}</div></div>
-<div style="text-align:right"><div class="muted">MUHASEBE RAPORU</div><b>${esc(rep.period.label)}</b><div class="muted">${esc(rep.period.from)} – ${esc(rep.period.to)}</div></div></div>
-<h2>Ciro (müşterinin onayladığı ve tamamlanan kayıtlar)</h2>
-<table>${row('Servis sayısı', String(r.count))}${row('Parça toplamı', formatKurus(r.partsKurus))}${row('İşçilik toplamı', formatKurus(r.laborKurus))}
-${row('İndirim', formatKurus(r.discountKurus))}${row('KDV', formatKurus(r.vatKurus))}${row('Genel ciro', formatKurus(r.grandKurus), true)}</table>
+<div style="text-align:right"><div class="muted">PISTON CİRO</div><b>${esc(rep.period.label)}</b><div class="muted">${esc(rep.period.from)} – ${esc(rep.period.to)}</div></div></div>
+<h2>Ciro (tamamlanan servisler, KDV hariç)</h2>
+<table>${row('Tamamlanan servis', String(r.count))}${row('Parça satış geliri', formatKurus(r.partsKurus))}${row('İşçilik geliri', formatKurus(r.laborKurus))}
+${row('Ortalama servis tutarı', formatKurus(r.averageKurus))}${row('Toplam ciro', formatKurus(r.ciroKurus), true)}</table>
+<h2>Gider ve işletme sonucu</h2>
+<table>${row(`Toplam gider (${rep.expenses.count})`, formatKurus(rep.expenses.totalKurus))}
+${row('Net kazanç (ciro − gider)', rep.netKurus < 0 ? `−${formatKurus(-rep.netKurus)}` : formatKurus(rep.netKurus), true)}</table>
+<div class="muted">İşletme içi takip rakamıdır; muhasebe anlamında kesin net kâr değildir. Dönemde müşterilere yansıyan KDV: ${esc(formatKurus(r.vatKurus))}.</div>
 <h2>Tahsilat (ödemenin alındığı tarihe göre)</h2>
 <table>${(Object.keys(rep.collected.byMethod) as PaymentMethod[]).map((m) => row(PAYMENT_METHOD_LABEL[m], formatKurus(rep.collected.byMethod[m]))).join('')}
 ${row('Toplam tahsilat', formatKurus(rep.collected.totalKurus), true)}</table>
 <h2>Alacak</h2>
 <table>${row('Bu dönemin cirosundan tahsil edilmeyen', formatKurus(rep.periodUnpaidKurus))}${row('Bugün itibarıyla toplam alacak', formatKurus(rep.receivableKurus), true)}</table>
 <h2>Ciroya sayılmayanlar</h2>
-<table>${row(`Müşteri onayı bekleyen (${rep.awaiting.count})`, formatKurus(rep.awaiting.grandKurus))}${row(`İtiraz edilen (${rep.objected.count})`, formatKurus(rep.objected.grandKurus))}</table>
+<table>${row(`Müşteri onayı bekleyen (${rep.awaiting.count})`, formatKurus(rep.awaiting.grandKurus))}${row(`Onaylandı, tamamlanmadı (${rep.approvedNotCompleted.count})`, formatKurus(rep.approvedNotCompleted.grandKurus))}${row(`İtiraz edilen (${rep.objected.count})`, formatKurus(rep.objected.grandKurus))}</table>
 ${debtorsList.length ? `<h2>Borçlu müşteriler</h2><table><tr><th>Müşteri</th><th>Telefon</th><th>En eski</th><th class="num">Borç</th></tr>
 ${debtorsList.map((d) => `<tr><td>${esc(d.customerName)}</td><td>${esc(formatPhoneTR(d.customerPhone))}</td><td>${esc(d.oldestDate)}</td><td class="num">${esc(formatKurus(d.debtKurus))}</td></tr>`).join('')}</table>` : ''}
 ${rep.topParts.length ? `<h2>En çok değişen parçalar</h2><table>${rep.topParts.map((p) => row(`${p.name} (${p.count} adet)`, formatKurus(p.totalKurus))).join('')}</table>` : ''}
@@ -66,8 +71,8 @@ export async function shareReportPdf(rep: ServiceReport, b: Business, debtorsLis
   return 'shared';
 }
 
-export async function shareReportCsv(records: readonly ServiceRecord[], rep: ServiceReport, b: Business): Promise<'shared' | 'downloaded' | 'unavailable'> {
-  const csv = reportCsv(records, rep.period);
+export async function shareReportCsv(records: readonly ServiceRecord[], rep: ServiceReport, b: Business, expenses: readonly BusinessExpense[] = []): Promise<'shared' | 'downloaded' | 'unavailable'> {
+  const csv = reportCsv(records, rep.period, expenses);
   const name = `piston-${fileSafe(b.name)}-${rep.period.from}-${rep.period.to}.csv`;
   if (Platform.OS === 'web') {
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));

@@ -101,7 +101,7 @@ export function PaymentCard({ r, onAdd, onVoid }: {
         <Text v="bodyStrong" color={balance > 0 ? colors.warn : colors.text}>{formatKurus(Math.abs(balance))}</Text>
       </Row>
       {balance < 0 && <Muted small>Kayıt düzeltildikten sonra tutar düştü. Fazla alınan tutarı iade et ya da ilgili ödemeyi iptal edip doğru tutarla yeniden gir.</Muted>}
-      {!isRevenue(r.status) && balance > 0 && <Muted small>Kayıt henüz müşteri tarafından onaylanmadığı için borç listesine ve ciroya sayılmıyor.</Muted>}
+      {!isRevenue(r.status) && balance > 0 && <Muted small>Kayıt henüz tamamlanmadığı için borç listesine ve ciroya sayılmıyor.</Muted>}
 
       {r.payments.length > 0 && <Divider />}
       {r.payments.map((p) => (

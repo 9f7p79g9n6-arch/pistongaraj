@@ -19,6 +19,7 @@ export const SERVICE_MESSAGES: Record<string, string> = {
   OVERPAYMENT: 'Ödeme, kalan borçtan fazla olamaz.',
   ALREADY_VOIDED: 'Bu ödeme zaten iptal edilmiş.',
   PAID_AT_FUTURE: 'Ödeme tarihi ileri bir tarih olamaz.',
+  EXPENSE_DATE_FUTURE: 'Gider tarihi ileri bir tarih olamaz.',
   FILE_TOO_LARGE: 'Dosya en fazla 10 MB olabilir.',
   FILE_TYPE: 'Yalnızca JPEG, PNG fotoğraf ve PDF belge eklenebilir.',
 };
