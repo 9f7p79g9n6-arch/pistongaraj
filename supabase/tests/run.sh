@@ -34,5 +34,7 @@ echo "→ Bakım hesabı: SQL ile TypeScript aynı sonucu veriyor mu"
 node "$ROOT/supabase/tests/due-parity.mjs" > "$TMP/parity.sql"
 "${PSQL[@]}" -o /dev/null -f "$TMP/parity.sql"
 
-echo "→ Erişim (RLS) testleri"
-"${PSQL[@]}" -o /dev/null -f "$ROOT/supabase/tests/rls.test.sql"
+for t in "$ROOT"/supabase/tests/*.test.sql; do
+  echo "→ Erişim (RLS) testleri: $(basename "$t")"
+  "${PSQL[@]}" -o /dev/null -f "$t"
+done

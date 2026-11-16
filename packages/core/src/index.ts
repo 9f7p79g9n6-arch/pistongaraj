@@ -11,3 +11,4 @@ export * from './warning-light-prompt';
 export * from './traffic-fines';
 export * from './inspection-checklist';
 export * from './accident-guide';
+export * from './service';
