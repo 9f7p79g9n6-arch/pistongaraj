@@ -167,10 +167,12 @@ describe('kayıt durumları', () => {
     expect(nextServiceStatus('awaiting_approval', 'edit')).toBe('awaiting_approval');
     expect(nextServiceStatus('completed', 'edit')).toBeNull();
   });
-  it('yalnızca onaylı kayıt tamamlanır', () => {
+  it('müşteri onayı olmadan da tamamlanır; tamamlanan kayıt yeniden tamamlanmaz', () => {
     expect(nextServiceStatus('approved', 'complete')).toBe('completed');
-    expect(nextServiceStatus('awaiting_approval', 'complete')).toBeNull();
-    expect(nextServiceStatus('objected', 'complete')).toBeNull();
+    expect(nextServiceStatus('awaiting_approval', 'complete')).toBe('completed');
+    expect(nextServiceStatus('revised', 'complete')).toBe('completed');
+    expect(nextServiceStatus('objected', 'complete')).toBe('completed');
+    expect(nextServiceStatus('completed', 'complete')).toBeNull();
   });
   it('müşteriden yanıt bekleyen durumlar', () => {
     expect(needsCustomerAction('awaiting_approval')).toBe(true);

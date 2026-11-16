@@ -77,7 +77,7 @@ export default function CustomerRecord() {
       <Stack gap={space.md} style={{ marginTop: space.md }}>
         {r.status === 'revised' && (
           <Card style={{ gap: 4 }}>
-            <Text v="bodyStrong" color={colors.warn}>İşletme kaydı düzeltti</Text>
+            <Text v="bodyStrong" color={colors.warnText}>İşletme kaydı düzeltti</Text>
             <Muted small>Önceki yanıtın aşağıda saklı. Güncel hâlini inceleyip yeniden karar ver.</Muted>
           </Card>
         )}

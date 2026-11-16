@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 
-import { Button, Card, Divider, ErrorText, ListItem, Muted, Pill, Row, Screen, Section, Text } from '@/components/ui';
-import { space } from '@/constants/theme';
+import { View } from 'react-native';
+
+import { SpecialCard } from '@/components/brand';
+import { Button, Card, Divider, ErrorText, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
+import { colors, space } from '@/constants/theme';
 import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
 import { ServiceDemoRepo } from '@/data/service-demo-repo';
@@ -53,24 +56,27 @@ export default function Profile() {
 
   return (
     <Screen title="Profil">
-      <Card>
-        <Row style={{ justifyContent: 'space-between' }}>
-          <Row gap={space.md} style={{ flex: 1 }}>
-            <Text v="title">{(account?.displayName ?? account?.email ?? 'P').slice(0, 1).toUpperCase()}</Text>
-            <Card style={{ padding: 0, flex: 1, backgroundColor: 'transparent' }}>
-              <Text v="bodyStrong" numberOfLines={1}>{account?.displayName ?? account?.email ?? 'Hesabım'}</Text>
-              <Muted small>{vehicles.length} araç</Muted>
-            </Card>
-          </Row>
-          <Pill tone={account?.plan === 'plus' ? 'ok' : 'neutral'}>{account?.plan === 'plus' ? 'Plus' : 'Ücretsiz'}</Pill>
-        </Row>
+      <Card style={{ alignItems: 'center', gap: space.sm, paddingVertical: space.xl }}>
+        <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: '#FDECEE', alignItems: 'center', justifyContent: 'center' }}
+          accessibilityElementsHidden importantForAccessibility="no">
+          <Text v="display" color={colors.brand}>{(account?.displayName ?? account?.email ?? 'P').slice(0, 1).toLocaleUpperCase('tr')}</Text>
+        </View>
+        <Text v="title" numberOfLines={1} style={{ textAlign: 'center' }}>{account?.displayName ?? account?.email ?? 'Hesabım'}</Text>
+        <Muted small>{`${vehicles.length} araç`}</Muted>
+        <View style={{ flexDirection: 'row' }}>
+          <Pill tone={account?.plan === 'plus' ? 'ok' : 'neutral'}>{account?.plan === 'plus' ? 'PISTON Plus üyesi' : 'Ücretsiz üyelik'}</Pill>
+        </View>
       </Card>
 
       {account?.plan !== 'plus' && (
-        <Card onPress={() => router.push('/premium')} style={{ marginTop: space.md, gap: 4 }} highlight>
-          <Text v="bodyStrong">PISTON Plus</Text>
-          <Muted small>Sınırsız araç, Araç Pasaportu, gelişmiş raporlar. Aşama 2’de açılıyor.</Muted>
-        </Card>
+        <SpecialCard style={{ marginTop: space.md, gap: space.md }}>
+          <View style={{ gap: 4 }}>
+            <Text v="label" color={colors.onSpecialMuted}>PREMIUM</Text>
+            <Text v="section" color={colors.onSpecial}>PISTON Plus</Text>
+            <Text v="small" color={colors.onSpecialMuted}>Sınırsız araç, Araç Pasaportu, gelişmiş raporlar. Aşama 2’de açılıyor.</Text>
+          </View>
+          <Button title="Plus’ı incele" variant="primary" onPress={() => router.push('/premium')} />
+        </SpecialCard>
       )}
 
       <Section title="Garaj">
@@ -81,7 +87,7 @@ export default function Profile() {
 
       <Section title="Servis">
         <Card style={{ paddingVertical: 0 }}>
-          <ListItem icon="doc" title="Servis kayıtlarım"
+          <ListItem icon="doc" title="Servis geçmişim"
             subtitle={biz.myPendingCount > 0 ? `${biz.myPendingCount} kayıt onayını bekliyor` : 'Servislerin senin için açtığı kayıtlar'}
             onPress={() => router.push('/servis-kayitlarim')} />
         </Card>
@@ -103,6 +109,12 @@ export default function Profile() {
         <Card style={{ paddingVertical: 0 }}>
           <ListItem icon="bell" title="Bakım bildirimlerini aç" subtitle="Bakım ve belge tarihleri yaklaşınca haber verir"
             onPress={push} right={busy === 'push' ? <Muted small>Açılıyor…</Muted> : undefined} />
+        </Card>
+      </Section>
+
+      <Section title="Topluluk">
+        <Card style={{ paddingVertical: 0 }}>
+          <ListItem icon="forum" title="Forum" subtitle="Marka ve model toplulukları · yakında" onPress={() => router.push('/forum')} />
         </Card>
       </Section>
 

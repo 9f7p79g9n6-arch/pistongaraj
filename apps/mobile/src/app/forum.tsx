@@ -3,6 +3,7 @@ import { ComingSoon } from '@/components/coming-soon';
 export default function Forum() {
   return (
     <ComingSoon
+      back
       title="Forum"
       stage="Aşama 4"
       lead="Marka ve model topluluklarında araç sahipleriyle deneyim paylaşacaksın."

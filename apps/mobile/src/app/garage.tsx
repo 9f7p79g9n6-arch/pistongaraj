@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { CarArt, TYPE_LABEL } from '@/components/vehicle';
 import { Button, Card, IconButton, Muted, Pill, Row, Screen, Stack, Text } from '@/components/ui';
 import { useApp } from '@/data/store';
+import { space } from '@/constants/theme';
 
 export default function Garage() {
   const { vehicles, active, selectVehicle, account } = useApp();
@@ -14,8 +15,7 @@ export default function Garage() {
     <Screen title="Garajım" back right={<IconButton icon="plus" label="Araç ekle" onPress={add} />}>
       <Stack>
         {vehicles.map((v) => (
-          <Card key={v.id} highlight={v.id === active?.id} onPress={() => { selectVehicle(v.id); router.back(); }}
-            accessibilityLabel={`${v.make} ${v.model} seç`}>
+          <Card key={v.id} highlight={v.id === active?.id}>
             <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Stack gap={2} style={{ flex: 1 }}>
                 <Text v="label">{TYPE_LABEL[v.vehicleType]}{v.plate ? ` · ${v.plate}` : ''}</Text>
@@ -25,7 +25,12 @@ export default function Garage() {
               {v.id === active?.id && <Pill tone="ok">Seçili</Pill>}
             </Row>
             <CarArt photoUrl={v.photoUrl} height={90} />
-            <Button title="Detay" small variant="ghost" onPress={() => router.push(`/vehicle/${v.id}`)} />
+            <Row gap={space.sm}>
+              {v.id !== active?.id && (
+                <Button title="Bu aracı seç" small variant="outline" style={{ flex: 1 }} onPress={() => { selectVehicle(v.id); router.back(); }} />
+              )}
+              <Button title="Detay" small variant="secondary" style={{ flex: 1 }} onPress={() => router.push(`/vehicle/${v.id}`)} />
+            </Row>
           </Card>
         ))}
         <Button title={canAdd ? 'Araç ekle' : 'Araç sınırına ulaştın · Plus'} icon="plus" variant={canAdd ? 'primary' : 'secondary'} onPress={add} />

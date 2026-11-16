@@ -10,6 +10,8 @@ export const SERVICE_MESSAGES: Record<string, string> = {
   ITEMS_TOO_MANY: 'Bir kayıtta en fazla 50 işlem olabilir.',
   VEHICLE_CUSTOMER_MISMATCH: 'Seçilen araç bu müşteriye ait değil.',
   RECORD_LOCKED: 'Tamamlanan kayıt değiştirilemez.',
+  RECORD_DELETED: 'Bu kayıt silinmiş.',
+  HAS_PAYMENTS: 'Bu kayıtta alınmış ödeme var. Önce ödemeyi iptal et, sonra kaydı sil.',
   STATUS_INVALID: 'Kaydın durumu değişmiş. Sayfayı yenileyip tekrar dene.',
   VERSION_CHANGED: 'İşletme kaydı sen bakarken güncelledi. Yeni hâlini görüp tekrar karar ver.',
   REASON_REQUIRED: 'İtiraz sebebini en az 5 karakterle yaz.',

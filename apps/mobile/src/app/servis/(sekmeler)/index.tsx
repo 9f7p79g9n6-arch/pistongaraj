@@ -1,5 +1,5 @@
 /** PISTON SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
-import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus, needsCustomerAction } from '@piston/core';
+import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus } from '@piston/core';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 
@@ -22,9 +22,8 @@ export default function Panel() {
     return {
       today: today.length,
       todayCustomers: new Set(today.map((r) => r.customerId)).size,
-      pending: records.filter((r) => needsCustomerAction(r.status)).length,
+      open: records.filter((r) => r.status !== 'completed').length,
       objected: records.filter((r) => r.status === 'objected').length,
-      approved: records.filter((r) => r.status === 'approved').length,
       todayCollected: records.flatMap((r) => activePayments(r.payments)).filter((p) => isToday(p.paidAt)).reduce((s, p) => s + p.amountKurus, 0),
     };
   }, [records]);
@@ -51,7 +50,7 @@ export default function Panel() {
       {error ? <Button title="Tekrar dene" small onPress={refresh} /> : null}
 
       <Stack gap={space.md}>
-        <BigAction primary icon="plus" title="YENİ SERVİS KAYDI" subtitle="Plaka yaz, işlemleri ekle, müşteriye gönder" onPress={() => router.push('/servis/yeni-kayit')} />
+        <BigAction primary icon="plus" title="YENİ SERVİS KAYDI" subtitle="Plaka yaz, işlemleri ekle, ücreti al" onPress={() => router.push('/servis/yeni-kayit')} />
         <BigAction icon="users" title="+ MÜŞTERİ EKLE" onPress={() => router.push('/servis/musteri-ekle')} />
       </Stack>
 
@@ -59,7 +58,7 @@ export default function Panel() {
         <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
           <CountTile label="Bugünkü servis" value={c.today} onPress={() => toList('bugun')} />
           <CountTile label="Bugünkü müşteri" value={c.todayCustomers} />
-          <CountTile label="Onay bekleyen" value={c.pending} tone="warn" onPress={() => toList('bekleyen')} />
+          <CountTile label="Açık kayıt" value={c.open} tone="warn" onPress={() => toList('acik')} />
           <CountTile label="İtiraz edilen" value={c.objected} tone="bad" onPress={() => toList('itiraz')} />
         </Row>
         {canFinance && (
@@ -69,16 +68,10 @@ export default function Panel() {
               <Muted small>Bugünkü tahsilat</Muted>
             </Card>
             <Card onPress={() => router.push('/servis/borclular')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Alacak, borçlu müşteriler">
-              <Text v="number" color={debtTotal > 0 ? colors.warn : colors.text}>{formatKurus(debtTotal)}</Text>
+              <Text v="number" color={debtTotal > 0 ? colors.warnText : colors.text}>{formatKurus(debtTotal)}</Text>
               <Muted small>{`Alacak · ${debt.length} müşteri`}</Muted>
             </Card>
           </Row>
-        )}
-        {c.approved > 0 && (
-          <Card onPress={() => toList('onayli')} style={{ gap: 2 }}>
-            <Text v="bodyStrong">{`${c.approved} kayıt müşteri tarafından onaylandı`}</Text>
-            <Muted small>Teslimden sonra kaydı tamamlayabilirsin.</Muted>
-          </Card>
         )}
       </Section>
 
@@ -87,7 +80,7 @@ export default function Panel() {
           <Button title="Müşteri bul" icon="search" small onPress={() => router.push('/servis/musteriler')} />
           <Button title="Araç bul" icon="car" small onPress={() => router.push('/servis/araclar')} />
           <Button title="Servis geçmişi" icon="list" small onPress={() => toList('tumu')} />
-          <Button title="Onay bekleyenler" icon="alert" small onPress={() => toList('bekleyen')} />
+          <Button title="Açık kayıtlar" icon="alert" small onPress={() => toList('acik')} />
           {canFinance && <Button title="PISTON CİRO" icon="doc" small onPress={() => router.push('/servis/ciro')} />}
           {canFinance && <Button title="Borçlu müşteriler" icon="users" small onPress={() => router.push('/servis/borclular')} />}
         </Row>
@@ -95,7 +88,7 @@ export default function Panel() {
 
       <Section title="Son kayıtlar" action={records.length > 5 ? 'Tümü' : undefined} onAction={() => toList('tumu')}>
         {records.length === 0 ? (
-          <Empty title="Henüz servis kaydı yok" body="İlk kaydı aç: plakayı yaz, yapılan işlemleri ekle, müşteriye onaya gönder." />
+          <Empty title="Henüz servis kaydı yok" body="İlk kaydı aç: plakayı yaz, yapılan işlemleri ekle; iş bitince “Ücret alındı” de." />
         ) : (
           <Stack gap={space.sm}>
             {records.slice(0, 5).map((r) => <RecordCard key={r.id} r={r} onPress={() => router.push(`/servis/kayit/${r.id}`)} />)}

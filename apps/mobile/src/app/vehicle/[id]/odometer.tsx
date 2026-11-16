@@ -44,7 +44,7 @@ export default function Odometer() {
         <Field label="Güncel kilometre" value={value} onChangeText={(t) => { setValue(t); setWarn(null); }}
           placeholder={formatNumber(vehicle.odometerKm)} keyboardType="number-pad" autoFocus />
         <ErrorText>{err}</ErrorText>
-        {warn && <Text v="smallStrong" color={colors.warn}>{warn} Eminsen tekrar Kaydet’e bas.</Text>}
+        {warn && <Text v="smallStrong" color={colors.warnText}>{warn} Eminsen tekrar Kaydet’e bas.</Text>}
         <Button title="Kaydet" variant="primary" onPress={save} loading={busy} />
       </Stack>
     </Screen>

@@ -51,14 +51,15 @@ export type BusinessPermission =
   | 'record.create'
   | 'record.edit'
   | 'record.complete'
+  | 'record.delete'
   | 'payment.manage'
   | 'expense.manage'
   | 'finance.view';
 
 /** Rol → izin tablosu. Sunucudaki private.role_permissions ile aynı olmalı (test kontrol eder). */
 export const ROLE_PERMISSIONS: Record<BusinessRole, BusinessPermission[]> = {
-  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage', 'expense.manage', 'finance.view'],
-  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'payment.manage', 'expense.manage', 'finance.view'],
+  owner: ['business.manage', 'member.manage', 'customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'record.delete', 'payment.manage', 'expense.manage', 'finance.view'],
+  manager: ['customer.manage', 'record.view', 'record.create', 'record.edit', 'record.complete', 'record.delete', 'payment.manage', 'expense.manage', 'finance.view'],
   technician: ['record.view', 'record.create', 'record.edit'],
   front_desk: ['customer.manage', 'record.view', 'record.create', 'payment.manage'],
 };
@@ -110,10 +111,10 @@ export interface BusinessVehicle {
 export type ServiceRecordStatus = 'awaiting_approval' | 'approved' | 'objected' | 'revised' | 'completed';
 
 export const SERVICE_STATUS_LABEL: Record<ServiceRecordStatus, string> = {
-  awaiting_approval: 'Müşteri onayı bekliyor',
+  awaiting_approval: 'Açık kayıt',
   approved: 'Müşteri onayladı',
   objected: 'Müşteri itiraz etti',
-  revised: 'Düzeltme gönderildi',
+  revised: 'Düzeltildi',
   completed: 'Kayıt tamamlandı',
 };
 
@@ -444,7 +445,8 @@ export type ServiceEvent = 'edit' | 'approve' | 'object' | 'complete';
  * - Müşteri yalnızca onay bekleyen ya da düzeltilmiş kaydı onaylar veya itiraz eder.
  * - İşletmenin düzenlemesi, onay bekleyen kaydı aynı durumda bırakır; onaylanmış ya da itiraz edilmiş kaydı
  *   "düzeltme gönderildi" durumuna alır ve yeniden onay ister.
- * - Kayıt yalnızca müşteri onayından sonra tamamlanır. Tamamlanan kayıt değiştirilemez.
+ * - Müşteri onayı zorunlu değil: işletme "Ücret alındı" deyince açık kayıt her durumdan tamamlanır
+ *   ve ciroya girer. Tamamlanan kayıt değiştirilemez.
  */
 export function nextServiceStatus(current: ServiceRecordStatus, event: ServiceEvent): ServiceRecordStatus | null {
   switch (event) {
@@ -457,7 +459,7 @@ export function nextServiceStatus(current: ServiceRecordStatus, event: ServiceEv
       if (current === 'approved' || current === 'objected') return 'revised';
       return null;
     case 'complete':
-      return current === 'approved' ? 'completed' : null;
+      return current === 'completed' ? null : 'completed';
   }
 }
 

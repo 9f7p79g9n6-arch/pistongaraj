@@ -38,6 +38,8 @@ interface BusinessState {
   expenses: BusinessExpense[];
   /** PISTON CİRO'yu görebilir mi (sahip, müdür) */
   canFinance: boolean;
+  /** Servis kaydı silebilir mi (sahip, müdür) */
+  canDelete: boolean;
   /** Müşteri tarafı: bu hesaba gelen servis kayıtları */
   myRecords: ServiceRecord[];
   myPendingCount: number;
@@ -139,10 +141,11 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
   const business = businesses.find((b) => b.id === activeId) ?? null;
   const myPendingCount = useMemo(() => myRecords.filter((r) => needsCustomerAction(r.status)).length, [myRecords]);
   const canFinance = !!business && hasPermission(business.role, 'finance.view');
+  const canDelete = !!business && hasPermission(business.role, 'record.delete');
 
   const value: BusinessState = {
     ready, mode, setMode, businesses, business, selectBusiness, advanced, setAdvanced,
-    customers, vehicles, records, expenses, canFinance, myRecords, myPendingCount, error, refresh, run,
+    customers, vehicles, records, expenses, canFinance, canDelete, myRecords, myPendingCount, error, refresh, run,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

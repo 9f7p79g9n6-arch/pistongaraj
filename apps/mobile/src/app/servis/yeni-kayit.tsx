@@ -389,6 +389,11 @@ export default function NewServiceRecord() {
 
           <Field label="Şikâyet / istenen iş" value={d.complaint} onChangeText={(t) => up({ complaint: t })} placeholder="Örn. Periyodik bakım, frenden ses geliyor" />
 
+          <Card style={{ gap: space.sm }}>
+            <PhotoRow kind="intake" files={d.files} onAdd={addPhoto} onRemove={removePhoto} title="Araç fotoğrafları (isteğe bağlı)" />
+            <Muted small>Aracın geliş hâlini, hasarları ya da kilometreyi çek. Fotoğrafa dokunarak kaldırabilirsin.</Muted>
+          </Card>
+
           {!vehicle && (
             <Expander title="Ek bilgiler (isteğe bağlı)" open={extraVehicle} onToggle={() => setExtraVehicle(!extraVehicle)}>
               <Row>
@@ -414,9 +419,9 @@ export default function NewServiceRecord() {
             {d.rows.map((r, i) => (
               <Stack key={i} gap={4}>
                 <Row gap={space.sm}>
-                  <TextInput value={r.name} onChangeText={(t) => setRow(i, { name: t })} placeholder="Parça adı" placeholderTextColor="#6F7682"
+                  <TextInput value={r.name} onChangeText={(t) => setRow(i, { name: t })} placeholder="Parça adı" placeholderTextColor={colors.iconMuted}
                     accessibilityLabel={`Parça ${i + 1} adı`} style={[ui.input, { flex: 2 }, showErrors && form.rowErrors[i] && { borderColor: colors.danger }]} />
-                  <TextInput value={r.price} onChangeText={(t) => setRow(i, { price: t })} placeholder="Fiyat ₺" placeholderTextColor="#6F7682"
+                  <TextInput value={r.price} onChangeText={(t) => setRow(i, { price: t })} placeholder="Fiyat ₺" placeholderTextColor={colors.iconMuted}
                     keyboardType="decimal-pad" accessibilityLabel={`Parça ${i + 1} fiyatı`} style={[ui.input, { flex: 1, textAlign: 'right' }, showErrors && form.rowErrors[i] && { borderColor: colors.danger }]} />
                   <Pressable onPress={() => removeRow(i)} accessibilityRole="button" accessibilityLabel={`Parça ${i + 1} satırını sil`} hitSlop={8}
                     style={{ width: 32, alignItems: 'center' }}>
@@ -463,7 +468,7 @@ export default function NewServiceRecord() {
           <TotalsCard totals={totals} />
 
           <Expander title="Ek bilgiler (isteğe bağlı)" open={extraIntake} onToggle={() => setExtraIntake(!extraIntake)}
-            hint="Kabul saati, yakıt, mevcut hasarlar, fotoğraflar">
+            hint="Kabul saati, yakıt, mevcut hasarlar, değişen parça fotoğrafları">
             <Field label="Kabul tarihi ve saati" value={d.intakeText} onChangeText={(t) => up({ intakeText: t })} placeholder="16.11.2026 10:30" />
             <Field label="İlk gözlem" value={d.initialNote} onChangeText={(t) => up({ initialNote: t })} multiline />
             <Text v="smallStrong" color={colors.textMuted}>Yakıt seviyesi</Text>
@@ -471,15 +476,14 @@ export default function NewServiceRecord() {
               options={[{ value: 'none', label: '—' }, ...(Object.keys(FUEL_LEVEL_LABEL) as FuelLevel[]).map((k) => ({ value: k, label: FUEL_LEVEL_LABEL[k] }))]}
               value={d.fuelLevel ?? 'none'} onChange={(v) => up({ fuelLevel: v === 'none' ? null : v })} />
             <Field label="Teslimde görülen mevcut hasarlar" value={d.existingDamage} onChangeText={(t) => up({ existingDamage: t })} multiline placeholder="Örn. arka tamponda çizik" />
-            <PhotoRow kind="intake" files={d.files} onAdd={addPhoto} onRemove={removePhoto} />
             <PhotoRow kind="replaced_part" files={d.files} onAdd={addPhoto} onRemove={removePhoto} />
             {d.editId && <Muted small>Önceden eklenen fotoğraflar kayıtta kalır; burada yalnızca yenilerini eklersin.</Muted>}
           </Expander>
 
           <Muted small>
             {d.editId
-              ? 'Düzeltme kaydedilir, eski ve yeni değerler saklanır; müşteriden yeniden onay istenir.'
-              : 'Kayıt "Müşteri onayı bekliyor" durumunda açılır. Müşteri PISTON GARAGE hesabıyla eşleşiyorsa kaydı uygulamasında görür. Kaydettikten sonra WhatsApp ile ya da PDF olarak da gönderebilirsin.'}
+              ? 'Düzeltme kaydedilir; eski ve yeni değerler saklanır.'
+              : 'Kayıt açık olarak kaydedilir. İş bitip ücreti aldığında kayıt sayfasında “Ücret alındı” de; kayıt tamamlanır ve ciroya girer. Müşteri onayı gerekmez.'}
           </Muted>
           {!d.editId && <Button title="Taslağı sil" variant="ghost" small onPress={discard} />}
         </Stack>
@@ -504,13 +508,13 @@ function Expander({ title, hint, open, onToggle, children }: { title: string; hi
   );
 }
 
-function PhotoRow({ kind, files, onAdd, onRemove }: {
-  kind: ServiceFileKind; files: PendingFile[]; onAdd: (k: ServiceFileKind, s: 'camera' | 'library') => void; onRemove: (uri: string) => void;
+function PhotoRow({ kind, files, onAdd, onRemove, title }: {
+  kind: ServiceFileKind; files: PendingFile[]; onAdd: (k: ServiceFileKind, s: 'camera' | 'library') => void; onRemove: (uri: string) => void; title?: string;
 }) {
   const mine = files.filter((f) => f.kind === kind);
   return (
     <Stack gap={space.sm}>
-      <Text v="smallStrong" color={colors.textMuted}>{`${SERVICE_FILE_KIND_LABEL[kind]} fotoğrafları`}</Text>
+      <Text v="smallStrong" color={title ? colors.text : colors.textMuted}>{title ?? `${SERVICE_FILE_KIND_LABEL[kind]} fotoğrafları`}</Text>
       {mine.length > 0 && (
         <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
           {mine.map((f) => (

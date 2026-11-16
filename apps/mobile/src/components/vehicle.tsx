@@ -26,7 +26,7 @@ export const TYPE_LABEL: Record<VehicleType, string> = { car: 'Otomobil', commer
 export const STATUS_TONE: Record<DueStatus, Tone> = { overdue: 'bad', due_soon: 'warn', ok: 'ok', unknown: 'neutral' };
 
 /** Araç fotoğrafı yoksa kullanılan çizim */
-export function CarArt({ accent = colors.neon, photoUrl, height = 110 }: { accent?: string; photoUrl?: string | null; height?: number }) {
+export function CarArt({ accent = colors.brand, photoUrl, height = 110 }: { accent?: string; photoUrl?: string | null; height?: number }) {
   if (photoUrl)
     return <Image source={{ uri: photoUrl }} style={{ width: '100%', height: height + 30, borderRadius: 14 }} contentFit="cover" accessibilityLabel="Araç fotoğrafı" />;
   return (
@@ -37,7 +37,7 @@ export function CarArt({ accent = colors.neon, photoUrl, height = 110 }: { accen
           <Stop offset="1" stopColor="#2a3039" />
         </LinearGradient>
       </Defs>
-      <Ellipse cx={160} cy={98} rx={140} ry={7} fill="#0d0f12" opacity={0.7} />
+      <Ellipse cx={160} cy={98} rx={140} ry={7} fill="#242930" opacity={0.12} />
       <Path d="M22 78 C22 66 30 60 46 57 L92 50 C108 34 128 24 160 22 L206 22 C230 23 246 32 262 48 L290 54 C302 57 306 64 306 74 L306 80 C306 84 303 86 299 86 L28 86 C24 86 22 83 22 78Z" fill="url(#body)" />
       <Path d="M104 50 C118 36 134 30 160 29 L200 29 C220 30 234 38 246 50Z" fill="#1b1f25" />
       <Path d="M176 29 L176 50" stroke="#2c323c" strokeWidth={3} />

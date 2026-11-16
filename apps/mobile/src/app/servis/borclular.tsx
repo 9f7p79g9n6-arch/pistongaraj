@@ -31,21 +31,22 @@ export default function Debtors() {
     <Screen title="Borçlu müşteriler" back>
       <Card style={{ gap: 2 }}>
         <Muted small>Toplam alacak</Muted>
-        <Text v="display" color={total > 0 ? colors.warn : colors.text}>{formatKurus(total)}</Text>
+        <Text v="display" color={total > 0 ? colors.warnText : colors.text}>{formatKurus(total)}</Text>
         <Muted small>{`${list.length} müşteri · tamamlanan kayıtlardan`}</Muted>
       </Card>
       <Stack gap={space.sm} style={{ marginTop: space.lg }}>
         {list.length === 0 ? (
           <Empty title="Borçlu müşteri yok" body="Tamamlanan kayıtların hepsi ödenmiş. Ödeme, kayıt sayfasındaki 'Ödeme al' ile girilir." />
         ) : list.map((d) => (
-          <Card key={d.customerId} style={{ gap: 6 }} onPress={() => router.push(`/servis/musteri/${d.customerId}`)} accessibilityLabel={`${d.customerName}, borç ${formatKurus(d.debtKurus)}`}>
+          <Card key={d.customerId} style={{ gap: 6 }}>
             <Row style={{ justifyContent: 'space-between' }}>
               <Text v="bodyStrong" style={{ flex: 1 }}>{d.customerName}</Text>
-              <Text v="bodyStrong" color={colors.warn}>{formatKurus(d.debtKurus)}</Text>
+              <Text v="bodyStrong" color={colors.warnText}>{formatKurus(d.debtKurus)}</Text>
             </Row>
             <Muted small>{`${formatPhoneTR(d.customerPhone)} · ${d.records.length} kayıt · en eski ${formatDate(d.oldestDate)}`}</Muted>
             <Row gap={space.sm}>
-              <Button title="WhatsApp ile hatırlat" icon="forum" small onPress={() => remind(d)} />
+              <Button title="WhatsApp ile hatırlat" icon="forum" small variant="outline" onPress={() => remind(d)} />
+              <Button title="Müşteriyi aç" small onPress={() => router.push(`/servis/musteri/${d.customerId}`)} />
             </Row>
           </Card>
         ))}

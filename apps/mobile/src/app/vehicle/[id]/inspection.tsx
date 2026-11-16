@@ -63,8 +63,8 @@ export default function Inspection() {
             {items.map((i) => (
               <Pressable key={i.id} onPress={() => toggle(i.id)} accessibilityRole="checkbox" accessibilityState={{ checked: !!done[i.id] }}
                 style={({ pressed }) => [{ flexDirection: 'row', gap: space.md, paddingVertical: space.sm, alignItems: 'flex-start' }, pressed && { opacity: 0.7 }]}>
-                <View style={{ width: 24, height: 24, borderRadius: 7, borderWidth: 2, borderColor: done[i.id] ? colors.neon : colors.line, backgroundColor: done[i.id] ? colors.neon : 'transparent', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
-                  {done[i.id] && <Icon name="check" size={16} color={colors.onNeon} />}
+                <View style={{ width: 24, height: 24, borderRadius: 7, borderWidth: 2, borderColor: done[i.id] ? colors.success : colors.line, backgroundColor: done[i.id] ? colors.success : 'transparent', alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
+                  {done[i.id] && <Icon name="check" size={16} color={colors.onBrand} />}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text v="bodyStrong" color={done[i.id] ? colors.textMuted : colors.text}>{i.title}</Text>

@@ -1,4 +1,4 @@
-import { formatPhoneTR, needsCustomerAction } from '@piston/core';
+import { formatPhoneTR } from '@piston/core';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 
@@ -26,12 +26,12 @@ export default function Customers() {
           <Empty title="Müşteri yok" body={customers.length === 0 ? 'İlk müşterini ekle ya da yeni servis kaydında oluştur.' : 'Aramaya uyan müşteri yok.'} />
         ) : list.map((c, i) => {
           const vs = vehicles.filter((v) => v.customerId === c.id);
-          const pending = records.filter((r) => r.customerId === c.id && needsCustomerAction(r.status)).length;
+          const pending = records.filter((r) => r.customerId === c.id && r.status !== 'completed').length;
           return (
             <ListItemWrap key={c.id} first={i === 0}>
               <ListItem icon="user" title={c.fullName}
                 subtitle={[formatPhoneTR(c.phone), vs.map((v) => v.plate).join(', ')].filter(Boolean).join(' · ')}
-                right={pending > 0 ? <Pill tone="warn">{`${pending} onay`}</Pill> : undefined}
+                right={pending > 0 ? <Pill tone="warn">{`${pending} açık`}</Pill> : undefined}
                 onPress={() => router.push(`/servis/musteri/${c.id}`)} />
             </ListItemWrap>
           );

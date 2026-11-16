@@ -26,6 +26,7 @@ const P: Record<string, string[]> = {
   trash: ['M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14'],
   logout: ['M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10'],
   // PISTON SERVİS
+  chart: ['M4 20h16', 'M7 20v-6M12 20V8M17 20v-10'],
   search: ['M20 20l-4.5-4.5'],
   users: ['M2 20a6 6 0 0 1 12 0M14 20a6 6 0 0 1 8-5.6'],
   list: ['M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01'],

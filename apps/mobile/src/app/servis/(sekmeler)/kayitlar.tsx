@@ -1,4 +1,4 @@
-import { needsCustomerAction, normalizePlate, type ServiceRecord } from '@piston/core';
+import { normalizePlate, type ServiceRecord } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 
@@ -7,14 +7,13 @@ import { Button, Chip, Empty, Field, Row, Screen, Stack } from '@/components/ui'
 import { space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 
-type Filter = 'tumu' | 'bugun' | 'bekleyen' | 'itiraz' | 'onayli' | 'tamam';
+type Filter = 'tumu' | 'bugun' | 'acik' | 'tamam' | 'itiraz';
 const FILTERS: { value: Filter; label: string; test: (r: ServiceRecord) => boolean }[] = [
   { value: 'tumu', label: 'Tümü', test: () => true },
   { value: 'bugun', label: 'Bugün', test: (r) => new Date(r.intakeAt).toDateString() === new Date().toDateString() },
-  { value: 'bekleyen', label: 'Onay bekleyen', test: (r) => needsCustomerAction(r.status) },
-  { value: 'itiraz', label: 'İtiraz', test: (r) => r.status === 'objected' },
-  { value: 'onayli', label: 'Onaylı', test: (r) => r.status === 'approved' },
+  { value: 'acik', label: 'Açık', test: (r) => r.status !== 'completed' },
   { value: 'tamam', label: 'Tamamlanan', test: (r) => r.status === 'completed' },
+  { value: 'itiraz', label: 'İtiraz', test: (r) => r.status === 'objected' },
 ];
 
 export default function Records() {

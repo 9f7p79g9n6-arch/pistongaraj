@@ -1,7 +1,7 @@
 /**
  * PISTON CİRO grafikleri. Sade, tek eksenli; değer bir sütuna dokununca görünür.
- * Renkler koyu zeminde renk körlüğü ve kontrast kontrolünden geçti (dataviz doğrulayıcı):
- *   SERIES_A #E0443F (ciro / parça / bu ay), SERIES_B #3D8BD9 (gider / işçilik / geçen ay).
+ * Renkler beyaz zeminde renk körlüğü ve kontrast kontrolünden geçti (dataviz doğrulayıcı):
+ *   SERIES_A (ciro / parça / bu ay), SERIES_B (gider / işçilik / geçen ay). Değerler theme.ts > chart.
  * Rakamlar her zaman metin rengiyle yazılır; renk yalnızca işaretin kimliğini taşır.
  */
 import { formatKurus, formatNumber, type SeriesPoint } from '@piston/core';
@@ -9,11 +9,11 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Svg, { G, Line, Path, Text as SvgText } from 'react-native-svg';
 
-import { colors, space } from '@/constants/theme';
+import { chart, colors, space } from '@/constants/theme';
 import { Muted, Row, Stack, Text } from './ui';
 
-export const SERIES_A = '#E0443F';
-export const SERIES_B = '#3D8BD9';
+export const SERIES_A = chart.a;
+export const SERIES_B = chart.b;
 
 function niceStep(max: number): number {
   const raw = max / 3;

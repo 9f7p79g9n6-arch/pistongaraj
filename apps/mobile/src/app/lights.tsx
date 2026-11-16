@@ -32,7 +32,7 @@ import { pickDashboardPhoto, type PhotoSource } from '@/lib/photo';
 const CONSENT_KEY = 'piston-ai-consent-v1';
 
 const LAMP: Record<LightColor, string> = {
-  red: colors.danger, amber: colors.warn, green: '#45D483', blue: '#4D9DFF', white: colors.text, unknown: colors.neutral,
+  red: colors.danger, amber: colors.warn, green: colors.success, blue: colors.info, white: colors.text, unknown: colors.neutral,
 };
 const SEVERITY_TONE: Record<LightSeverity, Tone> = { stop_now: 'bad', urgent: 'bad', soon: 'warn', info: 'info' };
 const CONFIDENCE_LABEL = { high: 'Eminiz', medium: 'Büyük olasılıkla', low: 'Emin değiliz' } as const;
@@ -162,7 +162,7 @@ export default function Lights() {
       {mode.kind === 'analyzing' && (
         <Stack gap={space.lg} style={{ alignItems: 'center', paddingTop: space.xl }}>
           <Image source={{ uri: mode.uri }} style={{ width: '100%', aspectRatio: 4 / 3, borderRadius: radius.lg }} contentFit="cover" />
-          <ActivityIndicator color={colors.neon} />
+          <ActivityIndicator color={colors.brand} />
           <Muted>Işıklar inceleniyor…</Muted>
         </Stack>
       )}
@@ -199,9 +199,9 @@ function ResultView({ mode, userBlinking, onRetry, onList }: {
       {mode.uri && <Image source={{ uri: mode.uri }} style={{ width: '100%', aspectRatio: 16 / 9, borderRadius: radius.lg }} contentFit="cover" accessibilityLabel="Çektiğin fotoğraf" />}
 
       {worst ? (
-        <View style={{ borderRadius: radius.lg, padding: space.lg, gap: 4, backgroundColor: worst === 'info' ? colors.card : worst === 'soon' ? 'rgba(255,181,71,0.12)' : 'rgba(255,107,94,0.14)', borderWidth: 1, borderColor: worst === 'info' ? colors.line : worst === 'soon' ? colors.warn : colors.danger }}
+        <View style={{ borderRadius: radius.lg, padding: space.lg, gap: 4, backgroundColor: worst === 'info' ? colors.card : worst === 'soon' ? '#FDF1DC' : '#FBE6E7', borderWidth: 1, borderColor: worst === 'info' ? colors.line : worst === 'soon' ? colors.warn : colors.danger }}
           accessibilityRole="alert">
-          <Text v="title" color={worst === 'info' ? colors.text : worst === 'soon' ? colors.warn : colors.danger}>{SEVERITY_VERDICT[worst].title}</Text>
+          <Text v="title" color={worst === 'info' ? colors.text : worst === 'soon' ? colors.warnText : colors.danger}>{SEVERITY_VERDICT[worst].title}</Text>
           <Text v="body">{SEVERITY_VERDICT[worst].body}</Text>
         </View>
       ) : (

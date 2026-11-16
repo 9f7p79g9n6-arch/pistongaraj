@@ -86,10 +86,10 @@ export default function Ciro() {
   const debt = useMemo(() => debtors(records), [records]);
   const periodExpenses = useMemo(() => expenses.filter((x) => x.spentOn >= period.from && x.spentOn <= period.to), [expenses, period]);
 
-  if (!business) return <Screen title="PISTON CİRO" back>{null}</Screen>;
+  if (!business) return <Screen title="PISTON CİRO">{null}</Screen>;
   if (!canFinance) {
     return (
-      <Screen title="PISTON CİRO" back>
+      <Screen title="PISTON CİRO">
         <Empty title="Yetkin yok" body="PISTON CİRO'yu yalnızca işletme sahibi ve yetki verilen personel görebilir." />
       </Screen>
     );
@@ -174,7 +174,7 @@ export default function Ciro() {
   );
 
   return (
-    <Screen title="PISTON CİRO" back>
+    <Screen title="PISTON CİRO">
       <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
         {PERIODS.map((p) => <Chip key={p.value} label={p.label} selected={kind === p.value} onPress={() => setKind(p.value)} />)}
       </Row>
@@ -190,7 +190,7 @@ export default function Ciro() {
         <Tile label="Tamamlanan servis" value={String(r.count)} />
         <Tile label="Ortalama servis tutarı" value={formatKurus(r.averageKurus)} />
         <Tile label="Tahsil edilen" value={formatKurus(rep.collected.totalKurus)} note="Bu dönemde alınan ödemeler" />
-        <Tile label="Bekleyen tahsilat" value={formatKurus(rep.periodUnpaidKurus)} color={rep.periodUnpaidKurus > 0 ? colors.warn : undefined}
+        <Tile label="Bekleyen tahsilat" value={formatKurus(rep.periodUnpaidKurus)} color={rep.periodUnpaidKurus > 0 ? colors.warnText : undefined}
           note={`Toplam alacak ${formatKurus(rep.receivableKurus)}`} />
       </Row>
       <Muted small style={{ marginTop: space.sm }}>

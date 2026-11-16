@@ -1,4 +1,4 @@
-import { customerDebtKurus, formatDate, formatKurus, formatPhoneTR, needsCustomerAction } from '@piston/core';
+import { customerDebtKurus, formatDate, formatKurus, formatPhoneTR } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Linking } from 'react-native';
 
@@ -15,7 +15,7 @@ export default function CustomerDetail() {
 
   const vs = vehicles.filter((v) => v.customerId === c.id);
   const rs = records.filter((r) => r.customerId === c.id);
-  const pending = rs.filter((r) => needsCustomerAction(r.status)).length;
+  const pending = rs.filter((r) => r.status !== 'completed').length;
   const last = rs[0];
   const debt = customerDebtKurus(rs, c.id);
 
@@ -32,11 +32,11 @@ export default function CustomerDetail() {
       <Row gap={space.sm} style={{ marginTop: space.md }}>
         <Stat label="Toplam servis" value={String(rs.length)} />
         <Stat label="Son servis" value={last ? formatDate(last.intakeAt.slice(0, 10)) : '—'} />
-        <Stat label="Onay bekleyen" value={String(pending)} />
+        <Stat label="Açık kayıt" value={String(pending)} />
       </Row>
       {debt > 0 && (
         <Card onPress={() => router.push('/servis/borclular')} style={{ marginTop: space.md, gap: 2, borderColor: colors.warn }}>
-          <Text v="bodyStrong" color={colors.warn}>{`Kalan borç: ${formatKurus(debt)}`}</Text>
+          <Text v="bodyStrong" color={colors.warnText}>{`Kalan borç: ${formatKurus(debt)}`}</Text>
           <Muted small>Ödeme, ilgili servis kaydında “Ödeme al” ile girilir.</Muted>
         </Card>
       )}

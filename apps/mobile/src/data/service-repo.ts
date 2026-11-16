@@ -119,7 +119,10 @@ export interface ServiceRepo {
   /** Kaydı ve kalemlerini tek işlemde yazar; tutarlar sunucuda hesaplanır. Kayıt kimliğini döndürür. */
   saveRecord(draft: ServiceRecordDraft): Promise<string>;
   addFiles(businessId: string, recordId: string, files: PendingFile[]): Promise<void>;
+  /** Müşteri onayı gerekmez; açık kayıt tamamlanır ve ciroya girer */
   completeRecord(id: string): Promise<void>;
+  /** Kayıt saklanır ama listelerden, müşteri görünümünden ve rapordan çıkar. Alınmış ödemesi varsa silinmez. */
+  deleteRecord(id: string, reason: string | null): Promise<void>;
 
   // Tahsilat (ödeme silinmez; yanlışsa sebebiyle iptal edilir)
   addPayment(input: NewPayment): Promise<void>;

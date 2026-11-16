@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "pistongarage",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.pistongarage.app",
       "supportsTablet": false,
@@ -40,7 +40,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#17191D",
+          "backgroundColor": "#F3F4F6",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -65,7 +65,7 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#17191D",
+    "backgroundColor": "#F3F4F6",
     "extra": {
       "eas": {
         "projectId": "34bd53e1-93c3-47a6-8c2b-d0d8e4e17335"

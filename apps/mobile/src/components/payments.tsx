@@ -98,7 +98,7 @@ export function PaymentCard({ r, onAdd, onVoid }: {
       <Row style={{ justifyContent: 'space-between' }}><Muted>Ödenen</Muted><Text>{formatKurus(paid)}</Text></Row>
       <Row style={{ justifyContent: 'space-between' }}>
         <Text v="bodyStrong">{balance < 0 ? 'Fazla ödeme' : 'Kalan borç'}</Text>
-        <Text v="bodyStrong" color={balance > 0 ? colors.warn : colors.text}>{formatKurus(Math.abs(balance))}</Text>
+        <Text v="bodyStrong" color={balance > 0 ? colors.warnText : colors.text}>{formatKurus(Math.abs(balance))}</Text>
       </Row>
       {balance < 0 && <Muted small>Kayıt düzeltildikten sonra tutar düştü. Fazla alınan tutarı iade et ya da ilgili ödemeyi iptal edip doğru tutarla yeniden gir.</Muted>}
       {!isRevenue(r.status) && balance > 0 && <Muted small>Kayıt henüz tamamlanmadığı için borç listesine ve ciroya sayılmıyor.</Muted>}

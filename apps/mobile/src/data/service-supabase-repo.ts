@@ -142,7 +142,7 @@ export class ServiceSupabaseRepo implements ServiceRepo {
   }
 
   async listRecords(businessId: string) {
-    const { data, error } = await this.sb.from('service_records').select('id').eq('business_id', businessId)
+    const { data, error } = await this.sb.from('service_records').select('id').eq('business_id', businessId).is('deleted_at', null)
       .order('created_at', { ascending: false }).limit(200);
     if (error) fail(error);
     return Promise.all((data ?? []).map((r: Row) => this.getRecord(r.id)));
@@ -189,6 +189,11 @@ export class ServiceSupabaseRepo implements ServiceRepo {
 
   async completeRecord(id: string) {
     const { error } = await this.sb.rpc('complete_service_record', { p_record_id: id });
+    if (error) fail(error);
+  }
+
+  async deleteRecord(id: string, reason: string | null) {
+    const { error } = await this.sb.rpc('delete_service_record', { p_record_id: id, p_reason: reason });
     if (error) fail(error);
   }
 

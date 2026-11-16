@@ -107,7 +107,7 @@ function FineCard({ fine }: { fine: TrafficFine }) {
           <Row gap={space.lg}>
             <View>
               <Muted small>İndirimli</Muted>
-              <Text v="number" color={info.status === 'discount' ? colors.neon : colors.textMuted}>{formatTL(info.discountedAmount)}</Text>
+              <Text v="number" color={info.status === 'discount' ? colors.success : colors.textMuted}>{formatTL(info.discountedAmount)}</Text>
             </View>
             <View>
               <Muted small>Normal</Muted>
@@ -115,7 +115,7 @@ function FineCard({ fine }: { fine: TrafficFine }) {
             </View>
           </Row>
           {info.status === 'discount' && (
-            <Text v="smallStrong" color={colors.warn}>
+            <Text v="smallStrong" color={colors.warnText}>
               {info.daysLeftForDiscount === 0 ? 'İndirimin bugün son günü' : `İndirime ${info.daysLeftForDiscount} gün kaldı`} · son gün {formatDate(info.discountUntil)}
             </Text>
           )}

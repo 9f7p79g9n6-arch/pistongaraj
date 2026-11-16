@@ -3,7 +3,7 @@ import { ComingSoon } from '@/components/coming-soon';
 export default function Market() {
   return (
     <ComingSoon
-      title="Parça Pazarı"
+      title="Parçalar"
       stage="Aşama 3 · pilot satıcılarla"
       lead="Aracına uyan parçaları onaylı satıcılardan alacaksın. Uyumluluk OEM numarası ve şasi numarasıyla doğrulanacak."
       items={[

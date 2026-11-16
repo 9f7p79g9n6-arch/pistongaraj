@@ -28,7 +28,7 @@ export default function Maintenance() {
         {(['overdue', 'due_soon', 'ok'] as const).map((s) => (
           <Card key={s} style={{ flex: 1, padding: space.md }}>
             <Muted small>{STATUS_LABEL[s]}</Muted>
-            <Text v="number" color={count(s) === 0 ? colors.text : s === 'overdue' ? colors.danger : s === 'due_soon' ? colors.warn : colors.text}>{count(s)}</Text>
+            <Text v="number" color={count(s) === 0 ? colors.text : s === 'overdue' ? colors.danger : s === 'due_soon' ? colors.warnText : colors.text}>{count(s)}</Text>
           </Card>
         ))}
       </Row>

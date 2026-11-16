@@ -53,7 +53,7 @@ export default function Accident() {
 
   return (
     <Screen title="Kaza asistanı" back>
-      <View style={{ borderRadius: radius.lg, padding: space.lg, gap: space.sm, backgroundColor: 'rgba(255,107,94,0.12)', borderWidth: 1, borderColor: colors.danger }}>
+      <View style={{ borderRadius: radius.lg, padding: space.lg, gap: space.sm, backgroundColor: '#FBE6E7', borderWidth: 1, borderColor: colors.danger }}>
         <Text v="bodyStrong">Yaralı varsa ya da tehlike sürüyorsa önce ara</Text>
         {EMERGENCY_NUMBERS.map((n) => (
           <Button key={n.number} title={`${n.number} · ${n.label}`} variant="danger" icon="alert"
@@ -68,8 +68,8 @@ export default function Accident() {
             return (
               <Card key={s.title} onPress={() => toggleIn('stepsDone', i as never)} accessibilityLabel={`${i + 1}. ${s.title}${isDone ? ', yapıldı' : ''}`}>
                 <Row style={{ alignItems: 'flex-start' }}>
-                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDone ? colors.neon : colors.surface, alignItems: 'center', justifyContent: 'center' }}>
-                    {isDone ? <Icon name="check" size={15} color={colors.onNeon} /> : <Text v="smallStrong">{i + 1}</Text>}
+                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: isDone ? colors.success : colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+                    {isDone ? <Icon name="check" size={15} color={colors.onBrand} /> : <Text v="smallStrong">{i + 1}</Text>}
                   </View>
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text v="bodyStrong" color={isDone ? colors.textMuted : colors.text}>{s.title}</Text>
@@ -89,8 +89,8 @@ export default function Accident() {
             return (
               <Pressable key={p.id} onPress={() => toggleIn('photosTaken', p.id as never)} accessibilityRole="checkbox" accessibilityState={{ checked: isDone }}
                 style={{ flexDirection: 'row', gap: space.md, paddingVertical: space.sm, alignItems: 'center' }}>
-                <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: isDone ? colors.neon : colors.line, backgroundColor: isDone ? colors.neon : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-                  {isDone && <Icon name="check" size={14} color={colors.onNeon} />}
+                <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: isDone ? colors.success : colors.line, backgroundColor: isDone ? colors.success : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+                  {isDone && <Icon name="check" size={14} color={colors.onBrand} />}
                 </View>
                 <Text v="small" style={{ flex: 1 }} color={isDone ? colors.textMuted : colors.text}>{p.title}</Text>
               </Pressable>

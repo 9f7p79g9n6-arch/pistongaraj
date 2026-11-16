@@ -57,6 +57,9 @@ interface StoredRecord {
   history: ServiceStatusChange[];
   /** Eski demo verisinde yok olabilir */
   payments?: (ServicePayment & { clientRequestId: string })[];
+  /** Silinen kayıt saklanır, listelerden çıkar */
+  deletedAt?: string | null;
+  deleteReason?: string | null;
   createdAt: string;
   updatedAt: string;
   approvedAt: string | null;
@@ -206,7 +209,7 @@ export class ServiceDemoRepo implements ServiceRepo {
   async listRecords(businessId: string) {
     const s = await this.load();
     this.biz(s, businessId);
-    return s.records.filter((r) => r.businessId === businessId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((r) => this.view(s, r));
+    return s.records.filter((r) => r.businessId === businessId && !r.deletedAt).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((r) => this.view(s, r));
   }
 
   async getRecord(recordId: string) {
@@ -249,6 +252,7 @@ export class ServiceDemoRepo implements ServiceRepo {
 
     const r = s.records.find((x) => x.id === d.id);
     if (!r) throw serviceError('NOT_FOUND');
+    if (r.deletedAt) throw serviceError('RECORD_DELETED');
     this.writable(s, r.businessId);
     const next = nextServiceStatus(r.status, 'edit');
     if (!next) throw serviceError('RECORD_LOCKED');
@@ -268,6 +272,7 @@ export class ServiceDemoRepo implements ServiceRepo {
     const s = await this.load();
     const r = s.records.find((x) => x.id === recordId && x.businessId === businessId);
     if (!r) throw serviceError('NOT_FOUND');
+    if (r.deletedAt) throw serviceError('RECORD_DELETED');
     for (const f of files) {
       if (f.sizeBytes > MAX_FILE_BYTES) throw serviceError('FILE_TOO_LARGE');
       if (!(ALLOWED_MIME as readonly string[]).includes(f.mimeType)) throw serviceError('FILE_TYPE');
@@ -280,11 +285,26 @@ export class ServiceDemoRepo implements ServiceRepo {
     const s = await this.load();
     const r = s.records.find((x) => x.id === recordId);
     if (!r) throw serviceError('NOT_FOUND');
+    if (r.deletedAt) throw serviceError('RECORD_DELETED');
     const next = nextServiceStatus(r.status, 'complete');
     if (!next) throw serviceError('STATUS_INVALID');
     r.status = next;
     r.updatedAt = now();
     r.history.push({ status: next, at: r.updatedAt, by: 'business' });
+    await this.save();
+  }
+
+  async deleteRecord(recordId: string, reason: string | null) {
+    const s = await this.load();
+    const r = s.records.find((x) => x.id === recordId);
+    if (!r) throw serviceError('NOT_FOUND');
+    if (r.deletedAt) return;
+    if ((r.payments ?? []).some((p) => !p.voidedAt)) throw serviceError('HAS_PAYMENTS');
+    const before = JSON.parse(JSON.stringify(r)) as StoredRecord;
+    r.deletedAt = now();
+    r.deleteReason = reason?.trim() || null;
+    r.updatedAt = r.deletedAt;
+    s.audit.push({ recordId: r.id, at: r.deletedAt, before, after: JSON.parse(JSON.stringify(r)) });
     await this.save();
   }
 
@@ -294,6 +314,7 @@ export class ServiceDemoRepo implements ServiceRepo {
     const s = await this.load();
     const r = s.records.find((x) => x.id === p.recordId);
     if (!r) throw serviceError('NOT_FOUND');
+    if (r.deletedAt) throw serviceError('RECORD_DELETED');
     this.writable(s, r.businessId);
     const list = (r.payments ??= []);
     if (list.some((x) => x.clientRequestId === p.clientRequestId)) return;
@@ -382,7 +403,7 @@ export class ServiceDemoRepo implements ServiceRepo {
 
   async myRecords() {
     const s = await this.load();
-    return s.records.filter((r) => this.isMine(s, r)).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((r) => this.view(s, r));
+    return s.records.filter((r) => this.isMine(s, r) && !r.deletedAt).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((r) => this.view(s, r));
   }
 
   async respond(recordId: string, version: number, action: 'approved' | 'objected', reason: string | null) {

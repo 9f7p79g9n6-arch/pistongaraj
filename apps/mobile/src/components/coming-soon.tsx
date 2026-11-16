@@ -2,9 +2,9 @@ import { Card, Muted, Pill, Screen, Stack, Text } from './ui';
 import { space } from '@/constants/theme';
 
 /** Sonraki aşamalarda açılacak sekmeler için bilgilendirme ekranı. Sahte ürün, servis ya da gönderi göstermez. */
-export function ComingSoon({ title, stage, lead, items }: { title: string; stage: string; lead: string; items: [string, string][] }) {
+export function ComingSoon({ title, stage, lead, items, back }: { title: string; stage: string; lead: string; items: [string, string][]; back?: boolean }) {
   return (
-    <Screen title={title}>
+    <Screen title={title} back={back}>
       <Stack gap={space.md}>
         <Pill tone="info">{stage}</Pill>
         <Muted>{lead}</Muted>

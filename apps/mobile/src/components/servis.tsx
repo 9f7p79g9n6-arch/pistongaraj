@@ -77,7 +77,7 @@ export function TotalsCard({ totals }: { totals: ServiceTotals }) {
       <Line label="Parça toplamı" value={formatKurus(totals.partsKurus)} />
       <Line label="İşçilik toplamı" value={formatKurus(totals.laborKurus)} />
       <Line label="Ara toplam" value={formatKurus(totals.subtotalKurus)} />
-      {totals.discountKurus > 0 && <Line label="İndirim" value={`−${formatKurus(totals.discountKurus)}`} color={colors.warn} />}
+      {totals.discountKurus > 0 && <Line label="İndirim" value={`−${formatKurus(totals.discountKurus)}`} color={colors.warnText} />}
       {totals.vatRate != null ? (
         <Line label={`KDV (%${totals.vatRate})`} value={formatKurus(totals.vatKurus)} />
       ) : (
@@ -220,7 +220,7 @@ export function BigAction({ title, subtitle, icon, onPress, primary }: { title: 
 
 /** Sayaç kutusu (dokunulabilir) */
 export function CountTile({ label, value, tone, onPress }: { label: string; value: number; tone?: 'warn' | 'bad' | 'ok'; onPress?: () => void }) {
-  const color = tone === 'warn' ? colors.warn : tone === 'bad' ? colors.danger : tone === 'ok' ? colors.neon : colors.text;
+  const color = tone === 'warn' ? colors.warnText : tone === 'bad' ? colors.danger : tone === 'ok' ? colors.success : colors.text;
   return (
     <Card onPress={onPress} style={{ flex: 1, minWidth: 140, gap: 2 }} accessibilityLabel={`${label}: ${value}`}>
       <Text v="number" color={value > 0 ? color : colors.text}>{String(value)}</Text>

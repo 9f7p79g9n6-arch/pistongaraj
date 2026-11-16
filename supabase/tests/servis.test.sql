@@ -222,7 +222,6 @@ do $$ declare r public.service_records; begin
     raise exception 'durum geçmişi yanlış';
   end if;
 end $$;
-select pg_temp.expect_error($$select public.complete_service_record(current_setting('test.rec')::uuid)$$, 'STATUS_INVALID');
 
 -- ---------------- Müşteri onaylar ----------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000e1","role":"authenticated"}', false) \g /dev/null

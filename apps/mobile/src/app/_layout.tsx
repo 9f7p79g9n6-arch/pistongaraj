@@ -1,4 +1,4 @@
-import { DarkTheme, router, Stack, ThemeProvider, usePathname } from 'expo-router';
+import { DefaultTheme, router, Stack, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
@@ -11,8 +11,8 @@ import { AppProvider, useApp } from '@/data/store';
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const theme = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: colors.bg, card: colors.bg, text: colors.text, primary: colors.neon, border: colors.line },
+  ...DefaultTheme,
+  colors: { ...DefaultTheme.colors, background: colors.bg, card: colors.card, text: colors.text, primary: colors.brand, border: colors.line },
 };
 
 function Routes() {
@@ -24,6 +24,8 @@ function Routes() {
   const pathname = usePathname();
   useEffect(() => {
     if (allReady) SplashScreen.hideAsync().catch(() => {});
+    // Çıkış yapılınca sıfırlanır: yeniden girişte giriş ekranında seçilen mod (Araç sahibi / İşletme) uygulanır
+    if (allReady && !signedIn) restored.current = false;
     // Uygulama en son işletme modunda kapatıldıysa ana ekran yerine PISTON SERVİS ile açılır
     // (belirli bir sayfa açılıyorsa, ör. bildirim bağlantısı, ona dokunulmaz)
     if (allReady && signedIn && !restored.current) {
@@ -58,6 +60,7 @@ function Routes() {
         <Stack.Screen name="servis" options={{ animation: 'fade' }} />
         <Stack.Screen name="servis-kayitlarim" />
         <Stack.Screen name="servis-kaydi/[id]" />
+        <Stack.Screen name="forum" />
       </Stack.Protected>
       <Stack.Screen name="legal/kvkk" />
     </Stack>
@@ -70,7 +73,7 @@ export default function RootLayout() {
       <ThemeProvider value={theme}>
         <AppProvider>
           <BusinessProvider>
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
             <Routes />
           </BusinessProvider>
         </AppProvider>

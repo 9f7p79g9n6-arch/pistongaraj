@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ACCENT_PERSONAL, colors, MAX_WIDTH, radius, space, type, type Accent } from '@/constants/theme';
+import { ACCENT_PERSONAL, brandShadow, colors, MAX_WIDTH, radius, shadow, space, type, type Accent } from '@/constants/theme';
 import { env } from '@/lib/env';
 import { Icon, type IconName } from './icons';
 
@@ -52,7 +52,7 @@ export function DemoBadge() {
   if (!env.isDemo) return null;
   return (
     <View style={s.demo} accessibilityLabel="Demo modu: veriler yalnızca bu cihazda">
-      <Text v="label" color={colors.onNeon}>Demo</Text>
+      <Text v="label" color={colors.text} style={{ fontSize: 11, fontWeight: '700' }}>DEMO</Text>
     </View>
   );
 }
@@ -99,7 +99,7 @@ export function Card({ children, style, onPress, highlight, accessibilityLabel }
   children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; highlight?: boolean; accessibilityLabel?: string;
 }) {
   const accent = useAccent();
-  const st = [s.card, highlight && { borderColor: accent.fill, borderWidth: 1 }, style];
+  const st = [s.card, highlight && { borderColor: accent.fill }, style];
   if (!onPress) return <View style={st}>{children}</View>;
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel} style={({ pressed }) => [st, pressed && s.pressed]}>
@@ -109,12 +109,12 @@ export function Card({ children, style, onPress, highlight, accessibilityLabel }
 }
 
 export function Button({ title, onPress, variant = 'secondary', loading, disabled, icon, small, style }: {
-  title: string; onPress: () => void; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; loading?: boolean;
+  title: string; onPress: () => void; variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'; loading?: boolean;
   disabled?: boolean; icon?: IconName; small?: boolean; style?: StyleProp<ViewStyle>;
 }) {
   const accent = useAccent();
-  const bg = { primary: accent.fill, secondary: colors.surface, ghost: 'transparent', danger: colors.danger }[variant];
-  const fg = variant === 'primary' ? accent.onFill : variant === 'danger' ? '#fff' : colors.text;
+  const bg = { primary: accent.fill, secondary: colors.surface, outline: colors.card, ghost: 'transparent', danger: colors.danger }[variant];
+  const fg = variant === 'primary' ? accent.onFill : variant === 'danger' ? colors.onBrand : variant === 'outline' ? accent.text : colors.text;
   return (
     <Pressable
       onPress={onPress}
@@ -125,15 +125,17 @@ export function Button({ title, onPress, variant = 'secondary', loading, disable
         s.btn,
         small && s.btnSmall,
         { backgroundColor: bg },
+        variant === 'primary' && !small && brandShadow,
+        variant === 'outline' && { borderWidth: 1, borderColor: accent.fill },
         variant === 'ghost' && { borderWidth: 1, borderColor: colors.line },
         (disabled || loading) && { opacity: 0.5 },
-        pressed && s.pressed,
+        pressed && (variant === 'primary' ? { backgroundColor: colors.brandDark } : s.pressed),
         style,
       ]}>
       {loading ? <ActivityIndicator color={fg} /> : (
         <View style={[s.row, { gap: space.sm }]}>
           {icon && <Icon name={icon} size={18} color={fg} />}
-          <Text v={small ? 'smallStrong' : 'bodyStrong'} color={fg}>{title}</Text>
+          <Text v={small ? 'smallStrong' : 'button'} color={fg}>{title}</Text>
         </View>
       )}
     </Pressable>
@@ -145,7 +147,7 @@ export function IconButton({ icon, label, onPress, accent, dot }: { icon: IconNa
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6}
       style={({ pressed }) => [s.iconBtn, accent && { backgroundColor: a.fill }, pressed && s.pressed]}>
-      <Icon name={icon} size={19} color={accent ? a.onFill : colors.text} />
+      <Icon name={icon} size={20} color={accent ? a.onFill : colors.text} />
       {dot && <View style={[s.dot, { backgroundColor: a.fill }]} />}
     </Pressable>
   );
@@ -156,9 +158,9 @@ export function Field({ label, error, hint, ...input }: { label: string; error?:
   const accent = useAccent();
   return (
     <View style={{ gap: 6, flex: 1 }}>
-      <Text v="smallStrong" color={colors.textMuted}>{label}</Text>
+      <Text v="smallStrong" color={colors.text}>{label}</Text>
       <TextInput
-        placeholderTextColor="#6F7682"
+        placeholderTextColor={colors.iconMuted}
         accessibilityLabel={label}
         {...input}
         onFocus={(e) => { setFocus(true); input.onFocus?.(e); }}
@@ -196,18 +198,18 @@ export function Section({ title, action, onAction, children }: { title: string; 
 }
 
 const PILL = {
-  ok: { bg: 'rgba(182,240,0,0.13)', fg: colors.neon },
-  warn: { bg: 'rgba(255,181,71,0.14)', fg: colors.warn },
-  bad: { bg: 'rgba(255,107,94,0.15)', fg: colors.danger },
-  info: { bg: 'rgba(124,196,255,0.13)', fg: colors.info },
-  neutral: { bg: colors.surface, fg: colors.textMuted },
+  ok: { bg: '#E3F3EB', fg: '#1E7D53', bar: colors.success },
+  warn: { bg: '#FDF1DC', fg: colors.warnText, bar: colors.warn },
+  bad: { bg: '#FBE6E7', fg: colors.danger, bar: colors.danger },
+  info: { bg: '#E3EDF8', fg: colors.info, bar: colors.info },
+  neutral: { bg: colors.surface, fg: colors.textMuted, bar: colors.iconMuted },
 };
 export type Tone = keyof typeof PILL;
 
 export function Pill({ tone, children }: { tone: Tone; children: ReactNode }) {
   return (
     <View style={[s.pill, { backgroundColor: PILL[tone].bg }]}>
-      <Text v="smallStrong" color={PILL[tone].fg} style={{ fontSize: 11 }}>{children}</Text>
+      <Text v="label" color={PILL[tone].fg} style={{ fontWeight: '600' }}>{children}</Text>
     </View>
   );
 }
@@ -216,7 +218,7 @@ export function Progress({ ratio, tone }: { ratio: number; tone: Tone }) {
   const pct = Math.max(0, Math.min(1, ratio)) * 100;
   return (
     <View style={s.bar} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: Math.round(pct) }}>
-      <View style={[s.barFill, { width: `${pct}%`, backgroundColor: PILL[tone].fg }]} />
+      <View style={[s.barFill, { width: `${pct}%`, backgroundColor: PILL[tone].bar }]} />
     </View>
   );
 }
@@ -225,7 +227,7 @@ export function Chip({ label, selected, onPress }: { label: string; selected?: b
   const accent = useAccent();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => [s.chip, selected && { borderColor: accent.fill }, pressed && s.pressed]}>
+      style={({ pressed }) => [s.chip, selected && { borderColor: accent.fill, backgroundColor: '#FDECEE' }, pressed && s.pressed]}>
       <Text v="smallStrong" color={selected ? accent.text : colors.text}>{label}</Text>
     </Pressable>
   );
@@ -237,7 +239,7 @@ export function Segmented<T extends string>({ options, value, onChange }: { opti
       {options.map((o) => (
         <Pressable key={o.value} disabled={o.disabled} onPress={() => onChange(o.value)} accessibilityRole="radio"
           accessibilityState={{ checked: value === o.value, disabled: !!o.disabled }}
-          style={[s.segItem, value === o.value && { backgroundColor: colors.card }, o.disabled && { opacity: 0.4 }]}>
+          style={[s.segItem, value === o.value && [{ backgroundColor: colors.card }, shadow], o.disabled && { opacity: 0.4 }]}>
           <Text v="smallStrong" color={value === o.value ? colors.text : colors.textMuted} style={{ textAlign: 'center' }}>{o.label}</Text>
         </Pressable>
       ))}
@@ -254,8 +256,8 @@ export function Toggle({ label, hint, value, onChange }: { label: string; hint?:
         {hint ? <Muted small>{hint}</Muted> : null}
       </View>
       <RNSwitch value={value} onValueChange={onChange} accessibilityLabel={label}
-        trackColor={{ false: colors.surface, true: accent.fill }} thumbColor={value ? accent.onFill : colors.textMuted}
-        ios_backgroundColor={colors.surface}
+        trackColor={{ false: '#D5D9DF', true: accent.fill }} thumbColor="#FFFFFF"
+        ios_backgroundColor="#D5D9DF"
         {...({ activeThumbColor: accent.onFill, activeTrackColor: accent.fill } as object)} />
     </View>
   );
@@ -271,7 +273,7 @@ export function ListItem({ icon, title, subtitle, right, onPress, danger }: {
         <Text v="bodyStrong" color={danger ? colors.danger : colors.text} numberOfLines={1}>{title}</Text>
         {subtitle ? <Muted small>{subtitle}</Muted> : null}
       </View>
-      {right ?? (onPress ? <Icon name="chev" size={16} color={colors.textMuted} /> : null)}
+      {right ?? (onPress ? <Icon name="chev" size={16} color={colors.iconMuted} /> : null)}
     </View>
   );
   if (!onPress) return content;
@@ -314,19 +316,19 @@ export const s = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg, paddingBottom: 40 },
   footer: { paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.lg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, borderWidth: 1, borderColor: 'transparent' },
-  pressed: { opacity: 0.75 },
-  btn: { minHeight: 48, borderRadius: radius.md, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center' },
-  btnSmall: { minHeight: 38, paddingHorizontal: space.md, borderRadius: radius.sm },
-  iconBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center' },
-  dot: { position: 'absolute', top: 8, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.neon },
-  input: { backgroundColor: colors.surface, borderRadius: radius.sm, paddingHorizontal: space.md, paddingVertical: 12, color: colors.text, fontSize: 16, borderWidth: 1, borderColor: 'transparent' },
-  pill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, alignSelf: 'flex-start' },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 18, borderWidth: 1, borderColor: colors.line, ...shadow },
+  pressed: { opacity: 0.7 },
+  btn: { minHeight: 50, borderRadius: radius.md, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center' },
+  btnSmall: { minHeight: 38, paddingHorizontal: space.md, borderRadius: 11 },
+  iconBtn: { width: 42, height: 42, borderRadius: 13, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+  dot: { position: 'absolute', top: 8, right: 9, width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: colors.surface, backgroundColor: colors.brand },
+  input: { backgroundColor: colors.card, borderRadius: radius.sm, paddingHorizontal: 14, paddingVertical: 13, color: colors.text, fontSize: 16, borderWidth: 1, borderColor: '#D5D9DF' },
+  pill: { paddingHorizontal: 9, paddingVertical: 3, borderRadius: radius.pill, alignSelf: 'flex-start' },
   bar: { height: 6, borderRadius: 6, backgroundColor: colors.surface, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 6 },
-  chip: { borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 7 },
+  chip: { borderWidth: 1, borderColor: colors.line, backgroundColor: colors.card, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },
   seg: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.sm, padding: 3 },
-  segItem: { flex: 1, paddingVertical: 9, borderRadius: 8 },
-  ic: { width: 38, height: 38, borderRadius: 11, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
-  demo: { backgroundColor: colors.warn, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 },
+  segItem: { flex: 1, paddingVertical: 9, borderRadius: 9 },
+  ic: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  demo: { backgroundColor: '#FDF1DC', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 },
 });

@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, G, Line, Polygon, Polyline, Rect, Text as SvgText } from 'react-native-svg';
 
-import { colors, space } from '@/constants/theme';
+import { chart, colors, space } from '@/constants/theme';
 import { Muted, Row, Text } from './ui';
 
 const SERIES = [
-  { key: 'fuel' as const, label: 'Yakıt', color: colors.neon },
-  { key: 'maintenance' as const, label: 'Bakım', color: colors.info },
-  { key: 'other' as const, label: 'Diğer', color: colors.neutral },
+  { key: 'fuel' as const, label: 'Yakıt', color: chart.a },
+  { key: 'maintenance' as const, label: 'Bakım', color: chart.b },
+  { key: 'other' as const, label: 'Diğer', color: chart.other },
 ];
 
 function niceStep(max: number): number {
@@ -101,11 +101,11 @@ export function ConsumptionLine({ points, unit }: { points: ConsumptionPoint[]; 
         {ticks.map((t) => (
           <SvgText key={`t${t}`} x={pl - 6} y={y(t) + 4} fill={colors.textMuted} fontSize={10} textAnchor="end">{formatNumber(t, 1)}</SvgText>
         ))}
-        <Polygon points={area} fill="rgba(182,240,0,0.08)" />
-        <Polyline points={line} fill="none" stroke={colors.neon} strokeWidth={2} />
+        <Polygon points={area} fill="rgba(214,58,69,0.08)" />
+        <Polyline points={line} fill="none" stroke={chart.a} strokeWidth={2} />
         {pts.map((p, i) => (
           <Circle key={i} cx={x(i)} cy={y(p.per100)} r={i === pts.length - 1 ? 4 : 2.5}
-            fill={i === pts.length - 1 ? colors.neon : colors.card} stroke={colors.neon} strokeWidth={1.5} />
+            fill={i === pts.length - 1 ? chart.a : colors.card} stroke={chart.a} strokeWidth={1.5} />
         ))}
         <SvgText x={x(pts.length - 1)} y={y(last.per100) - 9} fill={colors.text} fontSize={11} fontWeight="700" textAnchor="end">
           {formatNumber(last.per100, 2)}
