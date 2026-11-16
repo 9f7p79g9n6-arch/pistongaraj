@@ -297,3 +297,20 @@ Aşama 1 raporundan sonra eklenenler:
 6. **Küçük eksikler:** işletme logosu, PDF belge ekleme, tarih seçici.
 7. **KVKK:** aydınlatma metni hukuk incelemesinden geçmeli.
 8. **Güvenlik uyarıları:** `npm audit` 11 uyarı veriyor (test araçları). `npm audit fix --force` ÇALIŞTIRMA: Expo'yu SDK 52'ye düşürür.
+
+## 10. Durum (2026-11-16 gece) — yarın buradan devam
+
+Bugün eklenenler (commit c1af1c6, `ozellik/piston-servis`):
+- **Onaysız tamamlama (9. bölüm 1. madde yapıldı):** kayıt sayfasında "Ücret alındı · Kaydı tamamla" (ödeme + tamamlama) ve "Ödeme sonra · borç olarak tamamla". Yeni kayıt "Açık kayıt" olarak açılır.
+- **Kayıt silme (9. bölüm 4. madde yapıldı):** yumuşak silme (`deleted_at`); listelerden, müşteri ekranından ve cirodan çıkar. Alınmış ödemesi varsa önce ödeme iptal edilmeli. Yetki: sahip, müdür.
+- **Ciro** PISTON SERVİS alt menüsünde ayrı sekme.
+- **Araç fotoğrafı:** yeni kaydın 1. adımında ve kayıt sayfasında.
+- **Yeni tasarım:** açık tema (beyaz/açık gri, kırmızı #E53945), ortak bileşenler `constants/theme.ts`, `components/ui.tsx`, `components/brand.tsx`. Logo (yeşil P) aynı kaldı.
+  - Alt menü 4 sekme: Ana Sayfa, Servisler, Parçalar, Profil. Forum, Profil'den açılır.
+  - Giriş iki seçenekli: "Araç sahibiyim" / "İşletmeyim".
+- Migration `20261119000001_onaysiz_tamamlama_silme.sql` + `supabase/tests/zsilme.test.sql`.
+- TestFlight: build 7 gönderildi (bulutta derleniyor, otomatik TestFlight'a yüklenecek).
+
+Henüz olmayanlar (tasarım talimatında geçen): gerçek parça listesi ve sepet, Ekspertiz, Ayarlar, Yardım ve destek ekranları. Android/web için Inter yazı tipi eklenmedi.
+
+Sıradaki işler: 9. bölümdeki 2, 3, 5, 6, 7, 8. maddeler (en önemlisi gerçek sunucu bağlantısı).
