@@ -270,3 +270,30 @@ Kriter 2, 3, 8 ve 13 (çalışanlar, push, WhatsApp) kendi aşamalarında test e
 3. **Demo fotoğrafları (web):** Web demosunda fotoğraflar sayfa yenilenince kaybolabilir. Telefonda (Expo Go) sorun yok.
 4. **Renklerin görsel kontrolü:** Bu bilgisayarda Windows kontrast teması açık olduğu için tarayıcıda renkler görsel olarak doğrulanamadı. Kırmızı vurgunun telefonda bir kez kontrol edilmesi gerekiyor.
 5. **Önceden var olan uyarı:** Bireysel ana sayfada web'de "iç içe düğme" uyarısı var. PISTON SERVİS ile ilgisi yok.
+
+---
+
+## 9. Durum ve yapılacaklar (2026-11-16 akşamı)
+
+Aşama 1 raporundan sonra eklenenler:
+- Servis kaydı 3 adıma indirildi; parçalar "ad + fiyat" satırlarıyla, işçilik ayrı giriliyor.
+- Kayıt WhatsApp mesajı ya da PDF olarak müşteriye gönderiliyor.
+- Tahsilat var: nakit, kredi kartı, havale/EFT, diğer. Kısmi ödeme alınabiliyor; yanlış ödeme sebebiyle iptal ediliyor. Borçlu müşteriler listeleniyor ve WhatsApp'tan hatırlatılabiliyor.
+- **PISTON CİRO:** ciro, gider, net kazanç, tahsilat ve grafikler.
+  - Dönemler: bugün, bu hafta, bu ay, geçen ay, bu yıl.
+  - Sade gider girişi: tutar, açıklama, tarih.
+  - PDF ve Excel ile dışa aktarma.
+  - Ciroya yalnızca tamamlanan kayıtlar girer.
+- TestFlight'ta son sürüm: 1.0.0 (build 6), demo modunda.
+- Testler: 100 birim testi ve 4 veritabanı test dosyası geçiyor (`npm test`, `npm run db:test:local`).
+
+### Sıradaki işler (önem sırasıyla)
+
+1. **Müşteri onayı olmadan tamamlama.** Yüz yüze ya da telefonla onay alındığında kullanılacak; nasıl onaylandığı ve kim tamamladığı kayda yazılır. Şu an müşteri uygulamadan onaylamazsa kayıt hiç tamamlanamıyor, bu yüzden ciroya ve borca da girmiyor.
+2. **Gerçek sunucu (Supabase) bağlantısı.** Şu an veriler yalnızca telefonda duruyor. Sunucu kodu yazıldı ve testten geçti, ama gerçek sunucuda hiç çalışmadı. Bu işle birlikte sunucudaki kayıt listesi tek sorguya indirilmeli; şu an her kayıt için ayrı istek atıyor.
+3. **Müşteri eşleşmesini güvenli yapmak.** Şu an eşleşme yalnızca e-postayla. Müşteri "bu kayıt benim" diye onay vermeli ya da telefon doğrulaması yapılmalı.
+4. **Servis kaydını iptal etme.** İptal edilen kayıt ciroya girmemeli.
+5. **Güvenli WhatsApp onay bağlantısı** (sunucu gerekir), bildirimler, çalışan ekleme ekranı.
+6. **Küçük eksikler:** işletme logosu, PDF belge ekleme, tarih seçici.
+7. **KVKK:** aydınlatma metni hukuk incelemesinden geçmeli.
+8. **Güvenlik uyarıları:** `npm audit` 11 uyarı veriyor (test araçları). `npm audit fix --force` ÇALIŞTIRMA: Expo'yu SDK 52'ye düşürür.
