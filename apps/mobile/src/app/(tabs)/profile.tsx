@@ -3,7 +3,9 @@ import { useState } from 'react';
 
 import { Button, Card, Divider, ErrorText, ListItem, Muted, Pill, Row, Screen, Section, Text } from '@/components/ui';
 import { space } from '@/constants/theme';
+import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
+import { ServiceDemoRepo } from '@/data/service-demo-repo';
 import { repo, useApp } from '@/data/store';
 import { confirm, notify } from '@/lib/confirm';
 import { env } from '@/lib/env';
@@ -11,6 +13,7 @@ import { enablePush } from '@/lib/notifications';
 
 export default function Profile() {
   const { account, vehicles } = useApp();
+  const biz = useBusiness();
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -40,6 +43,8 @@ export default function Profile() {
     setErr(null);
     try {
       await repo.deleteAccount();
+      // Demo: işletme verisi de bu cihazdan silinir. Gerçek sürümde işletme kayıtları işletmeye aittir (bkz. KVKK notu).
+      if (serviceRepo instanceof ServiceDemoRepo) await serviceRepo.reset();
     } catch (e) {
       setErr(e instanceof RepoError ? e.message : 'Hesap silinemedi.');
       setBusy(null);
@@ -71,6 +76,26 @@ export default function Profile() {
       <Section title="Garaj">
         <Card style={{ paddingVertical: 0 }}>
           <ListItem icon="car" title="Araçlarım" subtitle={`${vehicles.length} araç`} onPress={() => router.push('/garage')} />
+        </Card>
+      </Section>
+
+      <Section title="Servis">
+        <Card style={{ paddingVertical: 0 }}>
+          <ListItem icon="doc" title="Servis kayıtlarım"
+            subtitle={biz.myPendingCount > 0 ? `${biz.myPendingCount} kayıt onayını bekliyor` : 'Servislerin senin için açtığı kayıtlar'}
+            onPress={() => router.push('/servis-kayitlarim')} />
+        </Card>
+      </Section>
+
+      <Section title="PISTON SERVİS">
+        <Card style={{ paddingVertical: 0 }}>
+          {biz.businesses.length > 0 ? (
+            <ListItem icon="store" title="İşletme moduna geç" subtitle={biz.business?.name ?? ''}
+              onPress={() => { biz.setMode('business'); router.replace('/servis'); }} />
+          ) : (
+            <ListItem icon="store" title="İşletme hesabı aç" subtitle="Servis, usta ve oto sanayi işletmeleri için. Şimdilik ücretsiz."
+              onPress={() => { biz.setMode('business'); router.push('/servis/isletme-ac'); }} />
+          )}
         </Card>
       </Section>
 

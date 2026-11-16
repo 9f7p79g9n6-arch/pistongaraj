@@ -21,6 +21,15 @@ export const colors = {
   neutral: '#6B7380',
 } as const;
 
+/**
+ * Vurgu rengi. Bireysel mod neon yeşil; PISTON SERVİS (işletme modu) kırmızı.
+ * fill: düğme zemini (üzerindeki metin `onFill`), text: koyu zemin üzerinde vurgu metni.
+ */
+export interface Accent { fill: string; onFill: string; text: string }
+export const ACCENT_PERSONAL: Accent = { fill: colors.neon, onFill: colors.onNeon, text: colors.neon };
+// #D32F2F üzerinde beyaz: 4,98:1; #FF6B6B koyu zeminde (#17191D): 6,1:1
+export const ACCENT_SERVIS: Accent = { fill: '#D32F2F', onFill: '#FFFFFF', text: '#FF6B6B' };
+
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 export const radius = { sm: 10, md: 14, lg: 18, pill: 999 } as const;
 

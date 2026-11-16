@@ -11,7 +11,21 @@ export type PhotoSource = 'camera' | 'library';
 export type PreparedPhoto = { uri: string; base64: string; mediaType: 'image/jpeg' };
 export type PickResult = { ok: true; photo: PreparedPhoto } | { ok: false; reason: 'cancelled' | 'denied' | 'failed' };
 
-export async function pickDashboardPhoto(source: PhotoSource): Promise<PickResult> {
+export function pickDashboardPhoto(source: PhotoSource): Promise<PickResult> {
+  return pickPhoto(source);
+}
+
+/**
+ * Servis fotoğrafı: aynı küçültme (en fazla 1568 px, JPEG %80). Boyut base64 uzunluğundan hesaplanır;
+ * sunucu ayrıca 10 MB sınırını ve dosya türünü kontrol eder.
+ */
+export async function pickServicePhoto(source: PhotoSource): Promise<{ ok: true; uri: string; sizeBytes: number } | { ok: false; reason: 'cancelled' | 'denied' | 'failed' }> {
+  const res = await pickPhoto(source);
+  if (!res.ok) return res;
+  return { ok: true, uri: res.photo.uri, sizeBytes: Math.floor((res.photo.base64.length * 3) / 4) };
+}
+
+async function pickPhoto(source: PhotoSource): Promise<PickResult> {
   try {
     if (source === 'camera') {
       const perm = await ImagePicker.requestCameraPermissionsAsync();

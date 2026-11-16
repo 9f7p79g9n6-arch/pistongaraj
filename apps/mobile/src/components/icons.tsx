@@ -25,6 +25,13 @@ const P: Record<string, string[]> = {
   camera: ['M4 8h3l2-3h6l2 3h3v11H4z'],
   trash: ['M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14'],
   logout: ['M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10'],
+  // PISTON SERVİS
+  search: ['M20 20l-4.5-4.5'],
+  users: ['M2 20a6 6 0 0 1 12 0M14 20a6 6 0 0 1 8-5.6'],
+  list: ['M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01'],
+  store: ['M3 9l2-5h14l2 5M4 9v11h16V9M3 9h18M9 20v-6h6v6'],
+  swap: ['M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7'],
+  menu: ['M4 7h16M4 12h16M4 17h16'],
 };
 
 export type IconName = keyof typeof P;
@@ -37,6 +44,8 @@ export function Icon({ name, size = 20, color = colors.text }: { name: IconName;
       {name === 'user' && <Circle cx={12} cy={8} r={4} />}
       {name === 'gear' && <Circle cx={12} cy={12} r={3} />}
       {name === 'camera' && <Circle cx={12} cy={13} r={3.5} />}
+      {name === 'search' && <Circle cx={10.5} cy={10.5} r={6.5} />}
+      {name === 'users' && (<><Circle cx={8} cy={8} r={3.5} /><Circle cx={17} cy={9} r={2.8} /></>)}
       {name === 'lock' && <Rect x={5} y={11} width={14} height={10} rx={2} />}
       {name === 'car' && (<><Circle cx={7.5} cy={16.5} r={1.8} /><Circle cx={16.5} cy={16.5} r={1.8} /></>)}
     </Svg>

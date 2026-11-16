@@ -2,7 +2,7 @@
  * Ortak arayüz bileşenleri. Ekranlar renk ve ölçüyü doğrudan değil, bu bileşenler üzerinden kullanır.
  */
 import { router } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -21,11 +21,20 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, MAX_WIDTH, radius, space, type } from '@/constants/theme';
+import { ACCENT_PERSONAL, colors, MAX_WIDTH, radius, space, type, type Accent } from '@/constants/theme';
 import { env } from '@/lib/env';
 import { Icon, type IconName } from './icons';
 
 type Variant = keyof typeof type;
+
+/** Vurgu rengi bağlamı. Varsayılan bireysel mod (yeşil); PISTON SERVİS kendi bölümünü kırmızı ile sarar. */
+const AccentCtx = createContext<Accent>(ACCENT_PERSONAL);
+export function AccentProvider({ value, children }: { value: Accent; children: ReactNode }) {
+  return <AccentCtx.Provider value={value}>{children}</AccentCtx.Provider>;
+}
+export function useAccent(): Accent {
+  return useContext(AccentCtx);
+}
 
 export function Text({ v = 'body', color, style, children, ...rest }: { v?: Variant; color?: string; style?: StyleProp<TextStyle>; children: ReactNode } & React.ComponentProps<typeof RNText>) {
   return (
@@ -89,7 +98,8 @@ export function Screen({ title, back, right, children, scroll = true, footer }: 
 export function Card({ children, style, onPress, highlight, accessibilityLabel }: {
   children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; highlight?: boolean; accessibilityLabel?: string;
 }) {
-  const st = [s.card, highlight && { borderColor: colors.neon, borderWidth: 1 }, style];
+  const accent = useAccent();
+  const st = [s.card, highlight && { borderColor: accent.fill, borderWidth: 1 }, style];
   if (!onPress) return <View style={st}>{children}</View>;
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel} style={({ pressed }) => [st, pressed && s.pressed]}>
@@ -102,8 +112,9 @@ export function Button({ title, onPress, variant = 'secondary', loading, disable
   title: string; onPress: () => void; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; loading?: boolean;
   disabled?: boolean; icon?: IconName; small?: boolean; style?: StyleProp<ViewStyle>;
 }) {
-  const bg = { primary: colors.neon, secondary: colors.surface, ghost: 'transparent', danger: colors.danger }[variant];
-  const fg = variant === 'primary' ? colors.onNeon : variant === 'danger' ? '#fff' : colors.text;
+  const accent = useAccent();
+  const bg = { primary: accent.fill, secondary: colors.surface, ghost: 'transparent', danger: colors.danger }[variant];
+  const fg = variant === 'primary' ? accent.onFill : variant === 'danger' ? '#fff' : colors.text;
   return (
     <Pressable
       onPress={onPress}
@@ -130,17 +141,19 @@ export function Button({ title, onPress, variant = 'secondary', loading, disable
 }
 
 export function IconButton({ icon, label, onPress, accent, dot }: { icon: IconName; label: string; onPress: () => void; accent?: boolean; dot?: boolean }) {
+  const a = useAccent();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6}
-      style={({ pressed }) => [s.iconBtn, accent && { backgroundColor: colors.neon }, pressed && s.pressed]}>
-      <Icon name={icon} size={19} color={accent ? colors.onNeon : colors.text} />
-      {dot && <View style={s.dot} />}
+      style={({ pressed }) => [s.iconBtn, accent && { backgroundColor: a.fill }, pressed && s.pressed]}>
+      <Icon name={icon} size={19} color={accent ? a.onFill : colors.text} />
+      {dot && <View style={[s.dot, { backgroundColor: a.fill }]} />}
     </Pressable>
   );
 }
 
 export function Field({ label, error, hint, ...input }: { label: string; error?: string | null; hint?: string } & TextInputProps) {
   const [focus, setFocus] = useState(false);
+  const accent = useAccent();
   return (
     <View style={{ gap: 6, flex: 1 }}>
       <Text v="smallStrong" color={colors.textMuted}>{label}</Text>
@@ -150,7 +163,7 @@ export function Field({ label, error, hint, ...input }: { label: string; error?:
         {...input}
         onFocus={(e) => { setFocus(true); input.onFocus?.(e); }}
         onBlur={(e) => { setFocus(false); input.onBlur?.(e); }}
-        style={[s.input, focus && { borderColor: colors.neon }, !!error && { borderColor: colors.danger }, input.style]}
+        style={[s.input, focus && { borderColor: accent.fill }, !!error && { borderColor: colors.danger }, input.style]}
       />
       {error ? <Text v="small" color={colors.danger}>{error}</Text> : hint ? <Muted small>{hint}</Muted> : null}
     </View>
@@ -166,13 +179,14 @@ export function Stack({ children, gap = space.md, style }: { children: ReactNode
 }
 
 export function Section({ title, action, onAction, children }: { title: string; action?: string; onAction?: () => void; children: ReactNode }) {
+  const accent = useAccent();
   return (
     <View style={{ gap: space.md, marginTop: space.xl }}>
       <View style={[s.row, { justifyContent: 'space-between' }]}>
         <Text v="section" accessibilityRole="header">{title}</Text>
         {action && onAction && (
           <Pressable onPress={onAction} hitSlop={8} accessibilityRole="button">
-            <Text v="smallStrong" color={colors.neon}>{action}</Text>
+            <Text v="smallStrong" color={accent.text}>{action}</Text>
           </Pressable>
         )}
       </View>
@@ -208,10 +222,11 @@ export function Progress({ ratio, tone }: { ratio: number; tone: Tone }) {
 }
 
 export function Chip({ label, selected, onPress }: { label: string; selected?: boolean; onPress: () => void }) {
+  const accent = useAccent();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => [s.chip, selected && { borderColor: colors.neon }, pressed && s.pressed]}>
-      <Text v="smallStrong" color={selected ? colors.neon : colors.text}>{label}</Text>
+      style={({ pressed }) => [s.chip, selected && { borderColor: accent.fill }, pressed && s.pressed]}>
+      <Text v="smallStrong" color={selected ? accent.text : colors.text}>{label}</Text>
     </Pressable>
   );
 }
@@ -231,6 +246,7 @@ export function Segmented<T extends string>({ options, value, onChange }: { opti
 }
 
 export function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
+  const accent = useAccent();
   return (
     <View style={[s.row, { justifyContent: 'space-between', paddingVertical: space.sm }]}>
       <View style={{ flex: 1, paddingRight: space.md }}>
@@ -238,9 +254,9 @@ export function Toggle({ label, hint, value, onChange }: { label: string; hint?:
         {hint ? <Muted small>{hint}</Muted> : null}
       </View>
       <RNSwitch value={value} onValueChange={onChange} accessibilityLabel={label}
-        trackColor={{ false: colors.surface, true: colors.neon }} thumbColor={value ? colors.onNeon : colors.textMuted}
+        trackColor={{ false: colors.surface, true: accent.fill }} thumbColor={value ? accent.onFill : colors.textMuted}
         ios_backgroundColor={colors.surface}
-        {...({ activeThumbColor: colors.onNeon, activeTrackColor: colors.neon } as object)} />
+        {...({ activeThumbColor: accent.onFill, activeTrackColor: accent.fill } as object)} />
     </View>
   );
 }

@@ -8,10 +8,12 @@ import { Icon } from '@/components/icons';
 import { CarArt, FUEL_LABEL, GEAR_LABEL, MaintenanceCard, TYPE_LABEL } from '@/components/vehicle';
 import { Button, Card, Empty, ErrorText, IconButton, Muted, Row, Screen, Section, Stack, Text } from '@/components/ui';
 import { colors, radius, space } from '@/constants/theme';
+import { useBusiness } from '@/data/business-store';
 import { useApp } from '@/data/store';
 
 export default function Home() {
   const { active, bundle, rulesByUrgency, today, error, vehicles, refresh } = useApp();
+  const { myPendingCount } = useBusiness();
 
   const stats = useMemo(() => {
     const months = monthlyTotals(today, 6, bundle.fuel, bundle.expenses, bundle.events);
@@ -64,6 +66,13 @@ export default function Home() {
         <QuickAction icon="shield" tint={colors.danger} label="Kaza asistanı" onPress={() => router.push('/accident')} />
         <QuickAction icon="doc" tint={colors.info} label="Cezalar" onPress={() => router.push(`/vehicle/${vid}/fines`)} />
       </Row>
+
+      {myPendingCount > 0 && (
+        <Card onPress={() => router.push('/servis-kayitlarim')} highlight style={{ marginTop: space.md, gap: 4 }} accessibilityLabel="Onay bekleyen servis kaydı">
+          <Text v="bodyStrong" color={colors.warn}>{myPendingCount === 1 ? 'Onayını bekleyen bir servis kaydı var' : `Onayını bekleyen ${myPendingCount} servis kaydı var`}</Text>
+          <Muted small>Yapılan işlemleri ve tutarları incele; onayla ya da itiraz et.</Muted>
+        </Card>
+      )}
 
       {urgentFine && (
         <Card onPress={() => router.push(`/vehicle/${vid}/fines`)} highlight style={{ marginTop: space.md, gap: 4 }} accessibilityLabel="Ceza indirimi">

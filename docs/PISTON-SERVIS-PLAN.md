@@ -1,6 +1,8 @@
 # PISTON SERVİS: analiz ve Aşama 1 planı
 
-Durum: **plan, onay bekliyor** · Dal: `ozellik/piston-servis` · Tarih: 2026-11-16
+Durum: **Aşama 1 kodlandı ve demo modunda test edildi; gerçek Supabase'de denenmedi** · Dal: `ozellik/piston-servis` · Tarih: 2026-11-16
+
+Aşama 1 raporu belgenin sonunda (8. bölüm).
 
 Bu belge, isterlerin 16. bölümündeki ilk dört adımı karşılar: mevcut mimari raporu, ekran listesi, veritabanı planı ve yetkilendirme tasarımı. Aşama 1'in kodlanmasına bu plan onaylandıktan sonra başlanacak.
 
@@ -173,3 +175,98 @@ Kriter 2, 3, 8 ve 13 (çalışanlar, push, WhatsApp) kendi aşamalarında test e
 3. **Windows'ta veritabanı testi:** `@electric-sql/pglite`, kök `devDependencies`'e eklenecek. Bu paket uygulamaya girmez; yalnızca test aracıdır.
 4. **KDV:** Varsayılan oran %20, kayıt başına değiştirilebilir ya da "KDV yok" seçilebilir. Ekranda "Bu belge fatura yerine geçmez." notu yer alır.
 5. **KVKK:** Müşteri adı, telefon ve plaka işletmenin kendi müşteri verisidir; veri sorumlusu işletmedir. Aydınlatma metni taslağı eklenecek ama hukuki inceleme gerektiği belirtilecek.
+
+---
+
+## 8. Aşama 1 raporu (2026-11-16)
+
+### Yapılanlar
+
+- **İşletme hesabı:** Profil → "İşletme hesabı aç". Kayıt formu sunucuda da doğrulanıyor. Açan kişi sahip (owner) oluyor, durum "Doğrulama bekliyor". Bir hesap en fazla 3 işletme açabiliyor.
+- **Ayrı işletme alanı:** Kırmızı vurgu rengi ve kendi alt sekmeleri var: Panel, Kayıtlar, Müşteriler, Araçlar, Menü. Menü'den bireysel moda dönülüyor. Uygulama en son işletme modunda kapatıldıysa o modda açılıyor.
+- **Panel:** "+ YENİ SERVİS KAYDI" ve "+ MÜŞTERİ EKLE" düğmeleri en üstte. Altında bugünkü servis, bugünkü müşteri, onay bekleyen ve itiraz edilen sayıları, hızlı erişim ve son kayıtlar var. Grafik yok.
+- **Basit / gelişmiş mod:** Menü'deki düğmeyle seçiliyor. Gelişmiş bölümler "Aşama 3 / 4" etiketiyle görünüyor; içlerinde sahte veri yok.
+- **Müşteri ve araç:**
+  - Ekleme, listeleme, arama ve detay sayfaları.
+  - Aynı telefon ya da plaka ikinci kez eklenemiyor; numara farklı yazılmış olsa da (+90 / 0 / boşluklu) yakalanıyor.
+  - Plaka araması yalnızca işletmenin kendi kayıtlarında yapılıyor.
+- **6 adımlı servis kaydı:**
+  - Adımlar: araç → müşteri → kabul → işlemler → fotoğraflar → özet.
+  - Kayıtlı plaka bulunursa araç ve müşteri bilgisi otomatik geliyor.
+  - Parça ile işçilik ayrı gösteriliyor; indirim ve KDV seçilebiliyor (%20 / %10 / %1 / yok).
+  - Taslak cihaza kaydediliyor; uygulama kapanınca "kaldığın yerden devam et" sunuluyor.
+  - Tekrar gönderimde ikinci kayıt açılmıyor.
+- **Müşteri onayı:**
+  - Bireysel tarafta yeni "Servis kayıtlarım" ekranı var; ana sayfada "onayını bekleyen kayıt" kartı çıkıyor.
+  - Müşteri ONAYLA ya da İTİRAZ ET diyebiliyor; itirazda sebep zorunlu.
+  - İşletme itirazı görüyor ve düzeltme gönderiyor. Bu durumda sürüm artıyor ve yeniden onay isteniyor.
+  - Onaylanan kayıt tamamlanabiliyor; tamamlanan kayıt kilitleniyor.
+  - İtiraz, onay ve durum geçmişi silinmiyor.
+- **Sunucu (Supabase migration):**
+  - Tablolar, RLS, rol ve izin tablosu.
+  - Tutarlar sunucuda hesaplanıyor.
+  - Denetim kaydı tutuluyor: eski ve yeni değerler.
+  - Silme yasağı, günlük kayıt üst sınırı ve askıya alınan işletme kontrolü var.
+  - Fotoğraflar için storage kuralları var.
+- **Windows'ta veritabanı testi:** `npm run db:test:local` (PGlite).
+
+### Değiştirilen ve eklenen dosyalar
+
+| Tür | Dosyalar |
+| --- | --- |
+| İş kuralları | `packages/core/src/service.ts` (yeni), `packages/core/src/index.ts`, `packages/core/test/service.test.ts` (yeni) |
+| Veritabanı | `supabase/migrations/20261116000001_piston_servis.sql` (yeni), `supabase/tests/servis.test.sql` (yeni), `supabase/tests/run-pglite.mjs` (yeni), `supabase/tests/run.sh` (tüm `*.test.sql` dosyalarını çalıştırır) |
+| Veri katmanı | `src/data/service-repo.ts`, `service-demo-repo.ts`, `service-supabase-repo.ts`, `service-errors.ts`, `business-store.tsx` (hepsi yeni) |
+| Ekranlar (yeni) | `src/app/servis/**` (12 ekran), `src/app/servis-kayitlarim.tsx`, `src/app/servis-kaydi/[id].tsx` |
+| Bileşenler | `src/components/servis.tsx`, `business-form.tsx` (yeni); `ui.tsx` (vurgu rengi bağlamı, varsayılan yeşil); `icons.tsx` (6 yeni simge) |
+| Mevcut ekranlara ekleme | `src/app/_layout.tsx`, `(tabs)/profile.tsx`, `(tabs)/index.tsx`, `src/constants/theme.ts`, `src/lib/photo.ts` |
+| Diğer | Kök `package.json` (`@electric-sql/pglite` geliştirme bağımlılığı, `db:test:local`), `.claude/launch.json` |
+
+### Test sonuçları
+
+- **Birim testleri:** 76 testin hepsi geçti. 23'ü yeni: tutar hesabı, telefon, durum geçişleri, doğrulama, rol izinlerinin sunucuyla aynı olması.
+- **Veritabanı testleri (PGlite):**
+  - Mevcut 17 RLS testi ve yeni 19 PISTON SERVİS testi geçti.
+  - Testlerin hatayı gerçekten yakaladığı, bir beklenti kasıtlı bozularak doğrulandı.
+- **Tür kontrolü ve lint:** temiz.
+- **Tarayıcıda demo akışı** (expo web, 390 px genişlik):
+  - İşletme açma (boş formda doğrulama dahil)
+  - Hatalı plakanın reddi
+  - Yeni müşteri ve aracın oluşturulması
+  - İki işlem ekleme ve tutar kontrolü: 3.050,50 + 1.350 − 100 + %20 KDV = 5.160,60 ₺
+  - Sayfa yenilenince taslağın geri gelmesi
+  - Kaydetme
+  - Aynı plakayla yeni kayıtta aracın bulunması
+  - Müşteri olarak sebepsiz itirazın reddi ve sebepli itiraz
+  - İşletmenin düzeltmesi: sürüm 2, toplam 2.880 ₺
+  - Müşteri onayı
+  - Tamamlama ve kilit
+  - Aynı telefonun farklı yazımla tekrar eklenememesi
+  - Bireysel moda dönüş
+
+**Kabul kriterleri:**
+
+| # | Durum |
+| --- | --- |
+| 1, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 18 | Geçti (demo + SQL testleri) |
+| 14 | Geçti (SQL testleri; demo tek cihazda olduğu için anlamlı değil) |
+| 17 | Kısmen: tekrar gönderimde çift kayıt yok (SQL + demo) ve taslak saklanıyor. Gerçek ağ kesintisi Supabase bağlanınca denenecek. |
+| 2, 3 (çalışanlar), 8 (bildirim), 13 (WhatsApp) | Planlandığı gibi sonraki aşamalarda |
+
+### Tamamlanmayanlar
+
+- Gerçek Supabase projesinde deneme: `service-supabase-repo.ts` yazıldı, ama uçtan uca hiç çalıştırılmadı. Migration yalnızca PGlite'ta test edildi.
+- Logo/fotoğraf yükleme (işletme profili).
+- PDF belge ekleme. `expo-document-picker` gerekiyor; şimdilik belgenin fotoğrafı çekiliyor.
+- Kabul tarihi için tarih seçici yok; tarih "16.11.2026 10:30" biçiminde yazılıyor.
+- Push bildirim ve WhatsApp bağlantısı (Aşama 2).
+- Çalışan ekleme ekranı (Aşama 3). Tablolar ve izinler hazır.
+- KVKK aydınlatma metni: yalnızca kısa not var, hukuki inceleme gerekli.
+
+### Bilinen sorunlar ve riskler
+
+1. **E-postayla eşleşme riski:** Müşteri, işletmenin yazdığı e-postayla eşleşiyor. İşletme yanlış e-posta yazarsa kayıt (ad, plaka, tutar) başka bir kişinin "Servis kayıtlarım" ekranında görünür. Aşama 2'de müşterinin eşleşmeyi onaylaması (ya da telefon doğrulaması) eklenmeli.
+2. **Sahibin hesabını silmesi:** İşletme sahibi bireysel hesabını silerse sunucuda işletme sahipsiz kalır; servis kayıtları korunur. Bu durumda ne olacağına (devir, kapatma, saklama süresi) karar verilmeli. Demo modunda hesap silinince işletme verisi de silinir.
+3. **Demo fotoğrafları (web):** Web demosunda fotoğraflar sayfa yenilenince kaybolabilir. Telefonda (Expo Go) sorun yok.
+4. **Renklerin görsel kontrolü:** Bu bilgisayarda Windows kontrast teması açık olduğu için tarayıcıda renkler görsel olarak doğrulanamadı. Kırmızı vurgunun telefonda bir kez kontrol edilmesi gerekiyor.
+5. **Önceden var olan uyarı:** Bireysel ana sayfada web'de "iç içe düğme" uyarısı var. PISTON SERVİS ile ilgisi yok.

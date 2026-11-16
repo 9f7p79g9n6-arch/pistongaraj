@@ -1,10 +1,11 @@
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, router, Stack, ThemeProvider, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/constants/theme';
+import { BusinessProvider, useBusiness } from '@/data/business-store';
 import { AppProvider, useApp } from '@/data/store';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -16,11 +17,21 @@ const theme = {
 
 function Routes() {
   const { ready, account } = useApp();
-  useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => {});
-  }, [ready]);
-  if (!ready) return null;
+  const biz = useBusiness();
   const signedIn = !!account;
+  const allReady = ready && (!signedIn || biz.ready);
+  const restored = useRef(false);
+  const pathname = usePathname();
+  useEffect(() => {
+    if (allReady) SplashScreen.hideAsync().catch(() => {});
+    // Uygulama en son işletme modunda kapatıldıysa ana ekran yerine PISTON SERVİS ile açılır
+    // (belirli bir sayfa açılıyorsa, ör. bildirim bağlantısı, ona dokunulmaz)
+    if (allReady && signedIn && !restored.current) {
+      restored.current = true;
+      if (biz.mode === 'business' && (pathname === '/' || pathname === '/sign-in')) setTimeout(() => router.replace('/servis'), 0);
+    }
+  }, [allReady, signedIn, biz.mode, pathname]);
+  if (!allReady) return null;
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Protected guard={!signedIn}>
@@ -43,6 +54,10 @@ function Routes() {
         <Stack.Screen name="vehicle/[id]/add-fuel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="vehicle/[id]/add-expense" options={{ presentation: 'modal' }} />
         <Stack.Screen name="vehicle/[id]/odometer" options={{ presentation: 'modal' }} />
+        {/* PISTON SERVİS: işletme modu (kendi navigasyonu) ve müşteri tarafı ekranları */}
+        <Stack.Screen name="servis" options={{ animation: 'fade' }} />
+        <Stack.Screen name="servis-kayitlarim" />
+        <Stack.Screen name="servis-kaydi/[id]" />
       </Stack.Protected>
       <Stack.Screen name="legal/kvkk" />
     </Stack>
@@ -54,8 +69,10 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider value={theme}>
         <AppProvider>
-          <StatusBar style="light" />
-          <Routes />
+          <BusinessProvider>
+            <StatusBar style="light" />
+            <Routes />
+          </BusinessProvider>
         </AppProvider>
       </ThemeProvider>
     </SafeAreaProvider>
