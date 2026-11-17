@@ -1,4 +1,4 @@
-# Supabase CLI yapılandırması (yerel geliştirme). Ayrıntı: README.md > Kurulum
+# Supabase CLI yapılandırması. Uzak projeye göndermek: npx.cmd supabase config push --remote
 project_id = "piston-garage"
 
 [api]
@@ -10,10 +10,21 @@ additional_redirect_urls = ["pistongarage://auth-callback"]
 enable_signup = true
 
 [auth.email]
-enable_signup = true
+enabled = true
 enable_confirmations = true
 otp_length = 6
 otp_expiry = 600
+
+# Giriş e-postası bağlantı değil 6 haneli kod gönderir (uygulama kodu ister).
+# Gönderici: kendi SMTP (pistondestek@gmail.com, Supabase panelinde tanımlı; şifre panelde, burada değil).
+# Yeni kullanıcıya "confirmation", kayıtlı kullanıcıya "magic_link" şablonu gider; ikisi de aynı kodu içerir.
+[auth.email.template.confirmation]
+subject = "PISTON GARAGE giriş kodun"
+content_path = "./supabase/templates/giris-kodu.html"
+
+[auth.email.template.magic_link]
+subject = "PISTON GARAGE giriş kodun"
+content_path = "./supabase/templates/giris-kodu.html"
 
 [functions.send-reminders]
 verify_jwt = false # cron çağırır; içeride gizli başlık kontrol edilir

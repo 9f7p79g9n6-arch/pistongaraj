@@ -330,7 +330,7 @@ export default function NewServiceRecord() {
       <Row gap={space.sm}>
         {d.step > firstStep && <Button title="Geri" onPress={prev} style={{ flex: 1 }} />}
         {isLast ? (
-          <Button title={d.editId ? 'Düzeltmeyi gönder' : 'Müşteriye gönder'} variant="primary" onPress={submit} loading={busy} style={{ flex: 2 }} />
+          <Button title={d.editId ? 'Düzeltmeyi kaydet' : 'Kaydı aç'} variant="primary" onPress={submit} loading={busy} style={{ flex: 2 }} />
         ) : (
           <Button title="Devam" variant="primary" onPress={next} style={{ flex: 2 }} />
         )}
