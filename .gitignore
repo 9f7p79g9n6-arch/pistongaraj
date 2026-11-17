@@ -9,3 +9,7 @@ apps/mobile/ios/
 apps/mobile/android/
 coverage/
 apps/mobile/e2e/shots/*.png
+
+# Supabase CLI geçici dosyaları
+supabase/.temp/
+supabase/.branches/
