@@ -24,6 +24,10 @@ export default function ServisLayout() {
           <Stack.Screen name="arac/[id]" />
           <Stack.Screen name="profil" />
           <Stack.Screen name="borclular" />
+          <Stack.Screen name="musteriler" />
+          <Stack.Screen name="araclar" />
+          <Stack.Screen name="forum/yeni" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="forum/[id]" />
         </Stack.Protected>
         <Stack.Screen name="isletme-ac" />
       </Stack>

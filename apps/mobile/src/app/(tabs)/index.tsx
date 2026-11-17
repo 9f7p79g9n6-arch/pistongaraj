@@ -36,9 +36,9 @@ export default function Home() {
 
   const firstName = account?.displayName?.trim().split(/\s+/)[0] ?? null;
   const header = (
-    <Row style={{ justifyContent: 'space-between', marginBottom: space.lg }}>
+    <Row style={{ justifyContent: 'space-between' }}>
       <IconButton icon="user" label="Profil" onPress={() => router.push('/profile')} />
-      <Logo size={28} />
+      <Logo size={28} onGreen />
       {active ? (
         <IconButton icon="bell" label="Bildirimler" onPress={() => router.push(`/vehicle/${active.id}/maintenance`)}
           dot={rulesByUrgency.some((r) => r.due.status !== 'ok') || myPendingCount > 0} />
@@ -48,8 +48,7 @@ export default function Home() {
 
   if (!active) {
     return (
-      <Screen>
-        {header}
+      <Screen band={header}>
         <Greeting name={firstName} line="İlk aracını ekleyerek başla." />
         <ErrorText>{error}</ErrorText>
         {error ? <Button title="Tekrar dene" onPress={refresh} /> : null}
@@ -70,8 +69,7 @@ export default function Home() {
   const inspectionSoon = insp && insp.due.daysLeft != null && insp.due.daysLeft >= 0 && insp.due.daysLeft <= 30 ? insp.due.daysLeft : null;
 
   return (
-    <Screen>
-      {header}
+    <Screen band={header}>
       <Greeting name={firstName} line={overdue ? 'Aracının bakım zamanı geldi.' : 'Aracın güvende.'} />
 
       {/* Bakım hatırlatma kartı */}
@@ -190,7 +188,7 @@ export default function Home() {
 
 function Greeting({ name, line }: { name: string | null; line: string }) {
   return (
-    <View style={{ gap: 2, marginBottom: space.lg }}>
+    <View style={{ gap: 2, marginTop: space.lg, marginBottom: space.lg }}>
       <Text v="display" accessibilityRole="header">{name ? `Merhaba, ${name}` : 'Merhaba'}</Text>
       <Muted>{line}</Muted>
     </View>

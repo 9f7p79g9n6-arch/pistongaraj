@@ -134,7 +134,7 @@ export function periodOf(kind: PeriodKind, now: Date = new Date()): Period {
   return { kind, from: localDate(first), to: localDate(last), label: `${MONTHS[first.getMonth()]} ${first.getFullYear()}` };
 }
 
-const inPeriod = (date: string, p: Period) => date >= p.from && date <= p.to;
+export const inPeriod = (date: string, p: Period) => date >= p.from && date <= p.to;
 
 // ---------------------------------------------------------------------------
 // Giderler (sade: tutar, açıklama, tarih)
@@ -379,22 +379,37 @@ export interface Debtor {
   customerName: string;
   customerPhone: string;
   debtKurus: number;
-  /** Borcu olan kayıtlar (en eskisi önce) */
-  records: { id: string; plate: string; date: string; balanceKurus: number }[];
+  /** Borcu olan kayıtlar (en eskisi önce). open: kayıt henüz tamamlanmadı ama eksik ödeme alındı */
+  records: { id: string; plate: string; date: string; balanceKurus: number; open: boolean }[];
   oldestDate: string;
 }
 
-/** Tamamlanmış kayıtlarda kalan borcu olan müşteriler; en çok borçlu önce. */
+/**
+ * Kayıt borç sayılır mı: tamamlanmış kayıt ya da tamamlanmamış ama eksik ödeme alınmış kayıt.
+ * Hiç ödeme alınmamış açık kayıt borç sayılmaz (iş sürüyor, para alışverişi yok).
+ */
+export function countsAsDebt(r: Pick<ServiceRecord, 'status' | 'payments'>): boolean {
+  return isRevenue(r.status) || activePayments(r.payments).length > 0;
+}
+
+/** Borç tarihi: tamamlanan kayıtta tamamlanma günü, açık kayıtta ilk ödemenin günü */
+function debtDateOf(r: ServiceRecord): string {
+  if (isRevenue(r.status)) return revenueDateOf(r);
+  const first = activePayments(r.payments).map((p) => p.paidAt).sort()[0];
+  return localDateOf(first ?? r.intakeAt);
+}
+
+/** Kalan borcu olan müşteriler (tamamlanan ya da eksik ödeme alınmış kayıtlar); en çok borçlu önce. */
 export function debtors(allRecords: readonly ServiceRecord[]): Debtor[] {
   const map = new Map<string, Debtor>();
   for (const r of unique(allRecords)) {
-    if (!isRevenue(r.status)) continue;
+    if (!countsAsDebt(r)) continue;
     const bal = balanceKurus(r);
     if (bal <= 0) continue;
-    const date = revenueDateOf(r);
+    const date = debtDateOf(r);
     const d = map.get(r.customerId) ?? { customerId: r.customerId, customerName: r.customerName, customerPhone: r.customerPhone, debtKurus: 0, records: [], oldestDate: date };
     d.debtKurus += bal;
-    d.records.push({ id: r.id, plate: r.plate, date, balanceKurus: bal });
+    d.records.push({ id: r.id, plate: r.plate, date, balanceKurus: bal, open: !isRevenue(r.status) });
     if (date < d.oldestDate) d.oldestDate = date;
     map.set(r.customerId, d);
   }

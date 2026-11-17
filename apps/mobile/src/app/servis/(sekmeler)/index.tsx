@@ -1,32 +1,44 @@
 /** PISTON SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
-import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus } from '@piston/core';
+import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus, inPeriod, localDateOf, periodOf } from '@piston/core';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { BigAction, CountTile, NextStageCard, RecordCard } from '@/components/servis';
-import { Button, Card, DemoBadge, Empty, ErrorText, Muted, Pill, Row, Screen, Section, Stack, Text } from '@/components/ui';
+import { Button, Card, DemoBadge, Empty, ErrorText, Muted, Pill, Row, Screen, Section, Segmented, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 
-function isToday(iso: string) {
-  const d = new Date(iso);
-  const n = new Date();
-  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
-}
+
+type Span = 'today' | 'week' | 'month';
+const SPANS: { value: Span; label: string }[] = [
+  { value: 'today', label: 'Bugün' },
+  { value: 'week', label: 'Bu hafta' },
+  { value: 'month', label: 'Bu ay' },
+];
+/** Kutu başlıkları ve kayıt listesinde açılacak süzgeç */
+const SPAN_LABEL: Record<Span, { title: string; adj: string; filter: string }> = {
+  today: { title: 'Bugün', adj: 'Bugünkü', filter: 'bugun' },
+  week: { title: 'Bu hafta', adj: 'Bu haftaki', filter: 'hafta' },
+  month: { title: 'Bu ay', adj: 'Bu ayki', filter: 'ay' },
+};
 
 export default function Panel() {
   const { business, records, advanced, error, refresh, canFinance } = useBusiness();
 
+  const [span, setSpan] = useState<Span>('today');
   const c = useMemo(() => {
-    const today = records.filter((r) => isToday(r.intakeAt));
+    const p = periodOf(span);
+    const inSpan = (iso: string) => inPeriod(localDateOf(iso), p);
+    const opened = records.filter((r) => inSpan(r.intakeAt));
     return {
-      today: today.length,
-      todayCustomers: new Set(today.map((r) => r.customerId)).size,
+      services: opened.length,
+      customers: new Set(opened.map((r) => r.customerId)).size,
       open: records.filter((r) => r.status !== 'completed').length,
       objected: records.filter((r) => r.status === 'objected').length,
-      todayCollected: records.flatMap((r) => activePayments(r.payments)).filter((p) => isToday(p.paidAt)).reduce((s, p) => s + p.amountKurus, 0),
+      collected: records.flatMap((r) => activePayments(r.payments)).filter((x) => inSpan(x.paidAt)).reduce((s, x) => s + x.amountKurus, 0),
     };
-  }, [records]);
+  }, [records, span]);
+  const L = SPAN_LABEL[span];
   const debt = useMemo(() => debtors(records), [records]);
   const debtTotal = debt.reduce((s, d) => s + d.debtKurus, 0);
 
@@ -54,18 +66,19 @@ export default function Panel() {
         <BigAction icon="users" title="+ MÜŞTERİ EKLE" onPress={() => router.push('/servis/musteri-ekle')} />
       </Stack>
 
-      <Section title="Bugün">
+      <Section title={L.title}>
+        <Segmented<Span> options={SPANS} value={span} onChange={setSpan} />
         <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
-          <CountTile label="Bugünkü servis" value={c.today} onPress={() => toList('bugun')} />
-          <CountTile label="Bugünkü müşteri" value={c.todayCustomers} />
+          <CountTile label={`${L.adj} servis`} value={c.services} onPress={() => toList(L.filter)} />
+          <CountTile label={`${L.adj} müşteri`} value={c.customers} onPress={() => toList(L.filter)} />
           <CountTile label="Açık kayıt" value={c.open} tone="warn" onPress={() => toList('acik')} />
           <CountTile label="İtiraz edilen" value={c.objected} tone="bad" onPress={() => toList('itiraz')} />
         </Row>
         {canFinance && (
           <Row gap={space.sm}>
-            <Card onPress={() => router.push('/servis/ciro')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Bugünkü tahsilat, PISTON CİRO">
-              <Text v="number">{formatKurus(c.todayCollected)}</Text>
-              <Muted small>Bugünkü tahsilat</Muted>
+            <Card onPress={() => router.push('/servis/ciro')} style={{ flex: 1, gap: 2 }} accessibilityLabel={`${L.adj} tahsilat, PISTON CİRO`}>
+              <Text v="number">{formatKurus(c.collected)}</Text>
+              <Muted small>{`${L.adj} tahsilat`}</Muted>
             </Card>
             <Card onPress={() => router.push('/servis/borclular')} style={{ flex: 1, gap: 2 }} accessibilityLabel="Alacak, borçlu müşteriler">
               <Text v="number" color={debtTotal > 0 ? colors.warnText : colors.text}>{formatKurus(debtTotal)}</Text>

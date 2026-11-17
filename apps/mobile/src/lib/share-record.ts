@@ -1,7 +1,8 @@
 /**
  * Servis kaydını müşteriye gönderme: WhatsApp mesajı (özet metin) ve PDF.
- * Gönderimi kullanıcı kendisi yapar: WhatsApp sohbeti mesaj hazır açılır, PDF paylaşım menüsüyle seçilen uygulamaya gider.
- * Güvenli onay bağlantısı (tek kullanımlık, süreli) gerçek sunucu gerektirir; Aşama 2'de eklenecek. Burada bağlantı üretilmez.
+ * WhatsApp, bir uygulamanın belirli bir numaraya dosya eklemesine izin vermez. Bu yüzden PDF sunucuya yüklenir ve
+ * 30 gün geçerli bağlantısı, müşterinin numarasıyla açılan hazır mesaja eklenir; Gönder tuşuna kullanıcı basar.
+ * Demo sürümde sunucu olmadığı için mesaj bağlantısız gider; PDF paylaşım menüsüyle ayrıca gönderilir.
  */
 import {
   formatDate,
@@ -31,8 +32,8 @@ function lines(r: ServiceRecord) {
   return { parts, labor };
 }
 
-/** WhatsApp mesajı: kısa özet. Sahte bağlantı içermez. */
-export function whatsappMessage(r: ServiceRecord): string {
+/** WhatsApp mesajı: kısa özet; varsa PDF bağlantısı. Sahte bağlantı içermez. */
+export function whatsappMessage(r: ServiceRecord, pdfUrl: string | null = null): string {
   const { parts, labor } = lines(r);
   const t = r.totals;
   const out = [
@@ -48,8 +49,9 @@ export function whatsappMessage(r: ServiceRecord): string {
     ...(t.discountKurus > 0 ? [`İndirim: −${formatKurus(t.discountKurus)}`] : []),
     ...(t.vatRate != null ? [`KDV (%${t.vatRate}): ${formatKurus(t.vatKurus)}`] : []),
     `Genel toplam: ${formatKurus(t.grandKurus)}`,
+    ...(pdfUrl ? ['', 'Servis kaydının PDF belgesi (30 gün açılabilir):', pdfUrl] : []),
     '',
-    'Kaydı PISTON GARAGE uygulamasında "Servis kayıtlarım" bölümünden görüp onaylayabilir ya da itiraz edebilirsiniz.',
+    'Kaydı PISTON GARAGE uygulamasında "Servis kayıtlarım" bölümünden de görebilirsiniz.',
   ];
   return out.join('\n');
 }
@@ -73,8 +75,8 @@ export function recordHtml(r: ServiceRecord, b: Pick<Business, 'name' | 'phone' 
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Servis kaydı ${esc(r.plate)}</title>
 <style>
   body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #111; margin: 32px; font-size: 13px; }
-  h1 { font-size: 20px; margin: 0; } h2 { font-size: 14px; margin: 20px 0 6px; color: #D32F2F; text-transform: uppercase; letter-spacing: .5px; }
-  .muted { color: #555; } .head { display: flex; justify-content: space-between; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; }
+  h1 { font-size: 20px; margin: 0; } h2 { font-size: 14px; margin: 20px 0 6px; color: #C62835; text-transform: uppercase; letter-spacing: .5px; }
+  .muted { color: #555; } .head { display: flex; justify-content: space-between; border-bottom: 3px solid #E53945; padding-bottom: 10px; }
   table { width: 100%; border-collapse: collapse; } td { padding: 6px 0; border-bottom: 1px solid #eee; }
   .num { text-align: right; white-space: nowrap; } .strong td { font-weight: 700; font-size: 15px; border-top: 2px solid #111; }
   .plate { font-size: 18px; font-weight: 700; letter-spacing: 1px; } .note { margin-top: 24px; font-size: 11px; color: #666; }
@@ -95,6 +97,13 @@ ${t.vatRate != null ? row(`KDV (%${t.vatRate})`, formatKurus(t.vatKurus)) : row(
 ${row('Genel toplam', formatKurus(t.grandKurus), true)}</table>
 <div class="note">Bu belge bilgilendirme amaçlıdır; fatura veya vergi belgesi yerine geçmez. PISTON SERVİS ile oluşturuldu.</div>
 </body></html>`;
+}
+
+/** PDF dosyasını telefonda oluşturur ve yolunu döner. Web'de dosya üretilemez: null. */
+export async function recordPdfFile(r: ServiceRecord, b: Parameters<typeof recordHtml>[1]): Promise<string | null> {
+  if (Platform.OS === 'web') return null;
+  const { uri } = await Print.printToFileAsync({ html: recordHtml(r, b) });
+  return uri;
 }
 
 /** PDF oluşturur ve paylaşım menüsünü açar (WhatsApp seçilebilir). Web'de yazdırma penceresi açılır. */

@@ -119,6 +119,11 @@ export interface ServiceRepo {
   /** Kaydı ve kalemlerini tek işlemde yazar; tutarlar sunucuda hesaplanır. Kayıt kimliğini döndürür. */
   saveRecord(draft: ServiceRecordDraft): Promise<string>;
   addFiles(businessId: string, recordId: string, files: PendingFile[]): Promise<void>;
+  /**
+   * Kaydın PDF'ini sunucuya yükler ve müşteriye gönderilecek süreli (30 gün), tahmin edilemez bağlantıyı döner.
+   * Demo sürümde sunucu olmadığı için null döner.
+   */
+  recordPdfLink(businessId: string, recordId: string, pdfUri: string): Promise<string | null>;
   /** Müşteri onayı gerekmez; açık kayıt tamamlanır ve ciroya girer */
   completeRecord(id: string): Promise<void>;
   /** Kayıt saklanır ama listelerden, müşteri görünümünden ve rapordan çıkar. Alınmış ödemesi varsa silinmez. */

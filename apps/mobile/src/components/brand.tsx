@@ -8,11 +8,12 @@ import { colors, radius, shadow, space } from '@/constants/theme';
 import { Icon, type IconName } from './icons';
 import { Pill, Text } from './ui';
 
-/** PISTON GARAGE logosu. Logo rengi markanın kendisidir; açık temada da aynen kalır. */
-export function Logo({ size = 30, wordmark = true, sub }: { size?: number; wordmark?: boolean; sub?: string }) {
+/** PISTON GARAGE logosu. Logo rengi markanın kendisidir; açık temada da aynen kalır.
+ *  onGreen: logo yeşili zemin üzerinde; yeşil kare kaybolmasın diye ince koyu çerçeve alır. */
+export function Logo({ size = 30, wordmark = true, sub, onGreen }: { size?: number; wordmark?: boolean; sub?: string; onGreen?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} accessible accessibilityRole="image" accessibilityLabel={sub ? `PISTON GARAGE ${sub}` : 'PISTON GARAGE'}>
-      <View style={{ width: size, height: size, borderRadius: size * 0.27, backgroundColor: colors.logo, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: size, height: size, borderRadius: size * 0.27, backgroundColor: colors.logo, alignItems: 'center', justifyContent: 'center', ...(onGreen ? { borderWidth: 1.5, borderColor: colors.onLogo } : null) }}>
         <Text v="title" color={colors.onLogo} style={{ fontSize: size * 0.62, lineHeight: size * 0.8, fontWeight: '800' }}>P</Text>
       </View>
       {wordmark && (

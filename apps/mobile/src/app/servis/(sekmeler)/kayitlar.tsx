@@ -1,4 +1,4 @@
-import { normalizePlate, type ServiceRecord } from '@piston/core';
+import { inPeriod, localDateOf, normalizePlate, periodOf, type ServiceRecord } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 
@@ -7,10 +7,12 @@ import { Button, Chip, Empty, Field, Row, Screen, Stack } from '@/components/ui'
 import { space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 
-type Filter = 'tumu' | 'bugun' | 'acik' | 'tamam' | 'itiraz';
+type Filter = 'tumu' | 'bugun' | 'hafta' | 'ay' | 'acik' | 'tamam' | 'itiraz';
 const FILTERS: { value: Filter; label: string; test: (r: ServiceRecord) => boolean }[] = [
   { value: 'tumu', label: 'Tümü', test: () => true },
-  { value: 'bugun', label: 'Bugün', test: (r) => new Date(r.intakeAt).toDateString() === new Date().toDateString() },
+  { value: 'bugun', label: 'Bugün', test: (r) => inPeriod(localDateOf(r.intakeAt), periodOf('today')) },
+  { value: 'hafta', label: 'Bu hafta', test: (r) => inPeriod(localDateOf(r.intakeAt), periodOf('week')) },
+  { value: 'ay', label: 'Bu ay', test: (r) => inPeriod(localDateOf(r.intakeAt), periodOf('month')) },
   { value: 'acik', label: 'Açık', test: (r) => r.status !== 'completed' },
   { value: 'tamam', label: 'Tamamlanan', test: (r) => r.status === 'completed' },
   { value: 'itiraz', label: 'İtiraz', test: (r) => r.status === 'objected' },

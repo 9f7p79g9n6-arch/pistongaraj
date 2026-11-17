@@ -57,12 +57,15 @@ export function DemoBadge() {
   );
 }
 
-/** Kaydırılabilir ekran iskeleti: güvenli alan, başlık, geri düğmesi. */
-export function Screen({ title, back, right, children, scroll = true, footer }: {
-  title?: string; back?: boolean; right?: ReactNode; children: ReactNode; scroll?: boolean; footer?: ReactNode;
+/**
+ * Kaydırılabilir ekran iskeleti: güvenli alan, başlık, geri düğmesi.
+ * band: ekranın üstünde, durum çubuğunun altına kadar uzanan logo yeşili şerit (ana sayfa logosu için).
+ */
+export function Screen({ title, back, right, children, scroll = true, footer, band }: {
+  title?: string; back?: boolean; right?: ReactNode; children: ReactNode; scroll?: boolean; footer?: ReactNode; band?: ReactNode;
 }) {
   // Sekme çubuğu olmayan ekranlarda alttaki ana ekran çizgisine (iPhone) düğme denk gelmesin
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, top } = useSafeAreaInsets();
   const header = (title || back || right) && (
     <View style={s.header}>
       <View style={s.row}>
@@ -78,7 +81,12 @@ export function Screen({ title, back, right, children, scroll = true, footer }: 
     </View>
   );
   return (
-    <SafeAreaView style={s.screen} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={s.screen} edges={band ? ['left', 'right'] : ['top', 'left', 'right']}>
+      {band ? (
+        <View style={[s.band, { paddingTop: top + space.sm }]}>
+          <View style={{ width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' }}>{band}</View>
+        </View>
+      ) : null}
       <KeyboardAvoidingView style={s.inner} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {header}
         {scroll ? (
@@ -100,11 +108,13 @@ export function Card({ children, style, onPress, highlight, accessibilityLabel }
 }) {
   const accent = useAccent();
   const st = [s.card, highlight && { borderColor: accent.fill }, style];
-  if (!onPress) return <View style={st}>{children}</View>;
+  if (!onPress) return <InRowCtx.Provider value={false}><View style={st}>{children}</View></InRowCtx.Provider>;
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel} style={({ pressed }) => [st, pressed && s.pressed]}>
-      {children}
-    </Pressable>
+    <InRowCtx.Provider value={false}>
+      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel} style={({ pressed }) => [st, pressed && s.pressed]}>
+        {children}
+      </Pressable>
+    </InRowCtx.Provider>
   );
 }
 
@@ -156,8 +166,9 @@ export function IconButton({ icon, label, onPress, accent, dot }: { icon: IconNa
 export function Field({ label, error, hint, ...input }: { label: string; error?: string | null; hint?: string } & TextInputProps) {
   const [focus, setFocus] = useState(false);
   const accent = useAccent();
+  const inRow = useContext(InRowCtx);
   return (
-    <View style={{ gap: 6, flex: 1 }}>
+    <View style={[{ gap: 6 }, inRow && { flex: 1 }]}>
       <Text v="smallStrong" color={colors.text}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.iconMuted}
@@ -172,12 +183,18 @@ export function Field({ label, error, hint, ...input }: { label: string; error?:
   );
 }
 
+/**
+ * Field yan yana (Row içinde) kullanılınca alanları eşit genişliğe yaymak için flex:1 alır. Alt alta (Stack, Card,
+ * ekran) kullanılınca almaz; aksi hâlde farklı yükseklikteki alanlar (çok satırlı, hata yazılı) eşit yüksekliğe sıkışır.
+ */
+const InRowCtx = createContext(false);
+
 export function Row({ children, gap = space.md, style }: { children: ReactNode; gap?: number; style?: StyleProp<ViewStyle> }) {
-  return <View style={[s.row, { gap }, style]}>{children}</View>;
+  return <InRowCtx.Provider value><View style={[s.row, { gap }, style]}>{children}</View></InRowCtx.Provider>;
 }
 
 export function Stack({ children, gap = space.md, style }: { children: ReactNode; gap?: number; style?: StyleProp<ViewStyle> }) {
-  return <View style={[{ gap }, style]}>{children}</View>;
+  return <InRowCtx.Provider value={false}><View style={[{ gap }, style]}>{children}</View></InRowCtx.Provider>;
 }
 
 export function Section({ title, action, onAction, children }: { title: string; action?: string; onAction?: () => void; children: ReactNode }) {
@@ -312,6 +329,7 @@ export function Stat({ label, value, note }: { label: string; value: string; not
 export const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   inner: { flex: 1, width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' },
+  band: { backgroundColor: colors.logo, paddingHorizontal: space.lg, paddingBottom: space.md, borderBottomWidth: 1, borderBottomColor: colors.logoLine },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md, gap: space.md },
   scroll: { paddingHorizontal: space.lg, paddingBottom: 40 },
   footer: { paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.lg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line, backgroundColor: colors.bg },

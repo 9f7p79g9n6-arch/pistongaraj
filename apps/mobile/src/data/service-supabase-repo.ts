@@ -21,6 +21,8 @@ import { ALLOWED_MIME, MAX_FILE_BYTES, type NewBusiness, type NewBusinessVehicle
 
 type Row = Record<string, any>;
 const BUCKET = 'service-files';
+/** Müşteriye giden PDF bağlantısının geçerlilik süresi: 30 gün */
+const PDF_LINK_SECONDS = 30 * 24 * 60 * 60;
 
 function fail(err: { message?: string; code?: string } | null): never {
   const msg = err?.message ?? '';
@@ -169,6 +171,21 @@ export class ServiceSupabaseRepo implements ServiceRepo {
     });
     if (error) fail(error);
     return data as string;
+  }
+
+  /**
+   * PDF, kaydın kendi klasörüne (<işletme>/<kayıt>/) yüklenir; yükleme yetkisi storage kuralıyla kontrol edilir.
+   * Bağlantı 30 gün geçerli imzalı adrestir; tahmin edilemez, süresi dolunca açılmaz.
+   */
+  async recordPdfLink(businessId: string, recordId: string, pdfUri: string) {
+    const path = `${businessId}/${recordId}/kayit-${Date.now()}.pdf`;
+    const body = await (await fetch(pdfUri)).arrayBuffer();
+    if (body.byteLength > MAX_FILE_BYTES) throw serviceError('FILE_TOO_LARGE');
+    const { error: upErr } = await this.sb.storage.from(BUCKET).upload(path, body, { contentType: 'application/pdf', upsert: false });
+    if (upErr) fail(upErr);
+    const { data, error } = await this.sb.storage.from(BUCKET).createSignedUrl(path, PDF_LINK_SECONDS);
+    if (error || !data?.signedUrl) fail(error);
+    return data.signedUrl;
   }
 
   async addFiles(businessId: string, recordId: string, files: PendingFile[]) {

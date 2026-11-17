@@ -33,6 +33,14 @@ export default function Menu() {
         )}
       </Card>
 
+      <Section title="Kayıtlar">
+        <Card style={{ paddingVertical: 0 }}>
+          <ListItem icon="users" title="Müşteriler" subtitle={`${biz.customers.length} müşteri · ara, ekle, borç durumu`} onPress={() => router.push('/servis/musteriler')} />
+          <Divider />
+          <ListItem icon="car" title="Araçlar" subtitle={`${biz.vehicles.length} araç · plaka ile bul`} onPress={() => router.push('/servis/araclar')} />
+        </Card>
+      </Section>
+
       <Section title="İşletme">
         <Card style={{ paddingVertical: 0 }}>
           <ListItem icon="store" title="İşletme bilgileri" subtitle="Ad, adres, iletişim, vergi bilgileri" onPress={() => router.push('/servis/profil')} />

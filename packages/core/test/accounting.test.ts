@@ -3,6 +3,7 @@ import {
   balanceKurus,
   buildReport,
   computeServiceTotals,
+  countsAsDebt,
   customerDebtKurus,
   dailySeries,
   debtors,
@@ -193,6 +194,17 @@ describe('borçlu müşteriler', () => {
     expect(list.map((d) => [d.customerId, d.debtKurus])).toEqual([['c2', 900_00], ['c1', 450_00]]);
     expect(list[1]!.oldestDate).toBe('2026-11-01');
     expect(list[1]!.records.map((r) => r.balanceKurus)).toEqual([150_00, 300_00]);
+  });
+  it('eksik ödeme alınan açık kayıt hemen borçlulara geçer; ödemesiz açık kayıt geçmez', () => {
+    const list = debtors([
+      rec({ date: '2026-11-05', customer: 'c1', labor: 1000_00, status: 'awaiting_approval', payments: [{ amountKurus: 400_00, paidAt: '2026-11-07T10:00:00' }] }),
+      rec({ date: '2026-11-05', customer: 'c2', labor: 900_00, status: 'awaiting_approval' }),
+      rec({ date: '2026-11-05', customer: 'c2', labor: 500_00, status: 'approved', payments: [{ amountKurus: 500_00 }] }),
+      rec({ date: '2026-11-05', customer: 'c2', labor: 700_00, status: 'awaiting_approval', payments: [{ amountKurus: 100_00, voidedAt: '2026-11-06T10:00:00' }] }),
+    ]);
+    expect(list.map((d) => [d.customerId, d.debtKurus])).toEqual([['c1', 600_00]]);
+    expect(list[0]!.records[0]).toMatchObject({ open: true, date: '2026-11-07', balanceKurus: 600_00 });
+    expect(countsAsDebt({ status: 'awaiting_approval', payments: [] })).toBe(false);
   });
   it('müşteri borcu', () => {
     const rs = [rec({ date: '2026-11-02', customer: 'c1', labor: 300_00 })];

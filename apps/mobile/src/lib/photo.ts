@@ -34,18 +34,23 @@ async function pickPhoto(source: PhotoSource): Promise<PickResult> {
     const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], quality: 1, allowsEditing: false };
     const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
     if (res.canceled || !res.assets[0]) return { ok: false, reason: 'cancelled' };
-    const asset = res.assets[0];
-    const ctx = ImageManipulator.manipulate(asset.uri);
-    const longest = Math.max(asset.width || 0, asset.height || 0);
-    if (longest > MAX_EDGE) {
-      if ((asset.width || 0) >= (asset.height || 0)) ctx.resize({ width: MAX_EDGE });
-      else ctx.resize({ height: MAX_EDGE });
-    }
-    const img = await ctx.renderAsync();
-    const saved = await img.saveAsync({ format: SaveFormat.JPEG, compress: 0.8, base64: true });
-    if (!saved.base64) return { ok: false, reason: 'failed' };
-    return { ok: true, photo: { uri: saved.uri, base64: saved.base64, mediaType: 'image/jpeg' } };
+    const photo = await compressImage(res.assets[0]);
+    return photo ? { ok: true, photo } : { ok: false, reason: 'failed' };
   } catch {
     return { ok: false, reason: 'failed' };
   }
+}
+
+/** Fotoğrafı küçültür (uzun kenar en fazla 1568 px) ve JPEG %80 olarak kaydeder. */
+export async function compressImage(asset: { uri: string; width?: number; height?: number }): Promise<PreparedPhoto | null> {
+  const ctx = ImageManipulator.manipulate(asset.uri);
+  const longest = Math.max(asset.width || 0, asset.height || 0);
+  if (longest > MAX_EDGE) {
+    if ((asset.width || 0) >= (asset.height || 0)) ctx.resize({ width: MAX_EDGE });
+    else ctx.resize({ height: MAX_EDGE });
+  }
+  const img = await ctx.renderAsync();
+  const saved = await img.saveAsync({ format: SaveFormat.JPEG, compress: 0.8, base64: true });
+  if (!saved.base64) return null;
+  return { uri: saved.uri, base64: saved.base64, mediaType: 'image/jpeg' };
 }

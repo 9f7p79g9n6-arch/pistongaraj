@@ -19,7 +19,7 @@ export default function Customers() {
   }, [customers, q]);
 
   return (
-    <Screen title="Müşteriler" right={<Button title="Ekle" icon="plus" small variant="primary" onPress={() => router.push('/servis/musteri-ekle')} />}>
+    <Screen title="Müşteriler" back right={<Button title="Ekle" icon="plus" small variant="primary" onPress={() => router.push('/servis/musteri-ekle')} />}>
       <Field label="Ad veya telefon ile ara" value={q} onChangeText={setQ} />
       <Card style={{ paddingVertical: 0, marginTop: space.lg }}>
         {list.length === 0 ? (

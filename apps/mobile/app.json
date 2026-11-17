@@ -55,11 +55,13 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Araç fotoğrafı ve fatura eklemek için galerine erişim gerekiyor.",
-          "cameraPermission": "Araç fotoğrafı ve fiş çekmek için kameraya erişim gerekiyor."
+          "photosPermission": "Araç fotoğrafı, fatura ve forum için fotoğraf ya da video eklemek üzere galerine erişim gerekiyor.",
+          "cameraPermission": "Araç fotoğrafı, fiş ve forum için fotoğraf ya da video çekmek üzere kameraya erişim gerekiyor.",
+          "microphonePermission": "Forumda paylaşacağın videoların sesini kaydetmek için mikrofona erişim gerekiyor."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

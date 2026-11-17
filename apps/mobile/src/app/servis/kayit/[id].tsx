@@ -24,7 +24,8 @@ import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
 import { confirm } from '@/lib/confirm';
 import { pickServicePhoto } from '@/lib/photo';
-import { openWhatsApp, shareRecordPdf, whatsappMessage } from '@/lib/share-record';
+import { env } from '@/lib/env';
+import { openWhatsApp, recordPdfFile, shareRecordPdf, whatsappMessage } from '@/lib/share-record';
 
 const msg = (e: unknown, fallback: string) => (e instanceof RepoError ? e.message : fallback);
 
@@ -36,6 +37,7 @@ export default function RecordDetail() {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
 
@@ -100,10 +102,24 @@ export default function RecordDetail() {
     }
   };
 
+  // PDF oluşturulur, sunucuya yüklenir; 30 gün geçerli bağlantısı müşterinin numarasıyla açılan mesaja eklenir.
+  // Demo sürümde sunucu yok: mesaj bağlantısız gider. PDF oluşturulamaz ya da yüklenemezse mesaj yine açılır ve uyarı gösterilir.
   const sendWhatsApp = async () => {
+    if (!biz.business) return;
+    setSending(true);
     setErr(null);
-    const ok = await openWhatsApp(r.customerPhone, whatsappMessage(r));
+    let link: string | null = null;
+    let warn: string | null = null;
+    try {
+      const file = await recordPdfFile(r, biz.business);
+      if (file) link = await serviceRepo.recordPdfLink(biz.business.id, r.id, file);
+    } catch (e) {
+      warn = `PDF bağlantısı eklenemedi (${msg(e, 'bağlantı hatası')}). Mesaj PDF'siz açıldı; PDF'i aşağıdan ayrıca paylaşabilirsin.`;
+    }
+    const ok = await openWhatsApp(r.customerPhone, whatsappMessage(r, link));
+    setSending(false);
     if (!ok) setErr('WhatsApp açılamadı. Telefonunda WhatsApp yüklü mü?');
+    else if (warn) setErr(warn);
   };
   const sharePdf = async () => {
     if (!biz.business) return;
@@ -143,9 +159,13 @@ export default function RecordDetail() {
 
         <Card style={{ gap: space.sm }}>
           <Text v="bodyStrong">Müşteriye gönder</Text>
-          <Button title="WhatsApp ile gönder" icon="forum" onPress={sendWhatsApp} />
-          <Button title="PDF olarak paylaş" icon="doc" onPress={sharePdf} loading={busy} />
-          <Muted small>WhatsApp, müşterinin numarasıyla mesaj hazır açılır; göndere sen basarsın. PDF’i paylaşım menüsünden WhatsApp’a ekleyebilirsin.</Muted>
+          <Button title="WhatsApp ile PDF gönder" icon="forum" variant="primary" onPress={sendWhatsApp} loading={sending} />
+          <Button title="PDF’i başka yolla paylaş" icon="doc" onPress={sharePdf} loading={busy} />
+          <Muted small>
+            {env.isDemo
+              ? 'Demo sürümde sunucu olmadığı için mesaj PDF bağlantısı olmadan açılır; PDF’i “başka yolla paylaş” ile gönder. Sunucu bağlanınca PDF bağlantısı mesaja kendiliğinden eklenecek.'
+              : 'Müşterinin numarasıyla mesaj hazır açılır; içinde 30 gün açılabilen PDF bağlantısı vardır. Gönder tuşuna sen basarsın.'}
+          </Muted>
         </Card>
 
         <IntakeCard r={r} />

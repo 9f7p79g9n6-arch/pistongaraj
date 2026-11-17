@@ -13,3 +13,5 @@ export * from './inspection-checklist';
 export * from './accident-guide';
 export * from './service';
 export * from './accounting';
+export * from './forum';
+export * from './reminder';

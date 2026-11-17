@@ -7,8 +7,7 @@ import { useBusiness } from '@/data/business-store';
 const TABS: { name: string; title: string; icon: IconName; finance?: boolean }[] = [
   { name: 'index', title: 'Panel', icon: 'home' },
   { name: 'kayitlar', title: 'Kayıtlar', icon: 'list' },
-  { name: 'musteriler', title: 'Müşteriler', icon: 'users' },
-  { name: 'araclar', title: 'Araçlar', icon: 'car' },
+  { name: 'forum', title: 'Forum', icon: 'forum' },
   { name: 'ciro', title: 'Ciro', icon: 'chart', finance: true },
   { name: 'menu', title: 'Menü', icon: 'menu' },
 ];

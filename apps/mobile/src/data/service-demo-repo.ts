@@ -268,6 +268,11 @@ export class ServiceDemoRepo implements ServiceRepo {
     return r.id;
   }
 
+  /** Demo: sunucu yok, bağlantı üretilmez */
+  async recordPdfLink(): Promise<string | null> {
+    return null;
+  }
+
   async addFiles(businessId: string, recordId: string, files: PendingFile[]) {
     const s = await this.load();
     const r = s.records.find((x) => x.id === recordId && x.businessId === businessId);

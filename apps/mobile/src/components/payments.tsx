@@ -101,7 +101,13 @@ export function PaymentCard({ r, onAdd, onVoid }: {
         <Text v="bodyStrong" color={balance > 0 ? colors.warnText : colors.text}>{formatKurus(Math.abs(balance))}</Text>
       </Row>
       {balance < 0 && <Muted small>Kayıt düzeltildikten sonra tutar düştü. Fazla alınan tutarı iade et ya da ilgili ödemeyi iptal edip doğru tutarla yeniden gir.</Muted>}
-      {!isRevenue(r.status) && balance > 0 && <Muted small>Kayıt henüz tamamlanmadığı için borç listesine ve ciroya sayılmıyor.</Muted>}
+      {!isRevenue(r.status) && balance > 0 && (
+        <Muted small>
+          {paid > 0
+            ? 'Eksik ödeme alındı: kalan tutar borçlu müşteriler listesine yazıldı. Ciroya kayıt tamamlanınca girer.'
+            : 'Ödeme alınınca kalan tutar borçlu müşteriler listesine yazılır. Ciroya kayıt tamamlanınca girer.'}
+        </Muted>
+      )}
 
       {r.payments.length > 0 && <Divider />}
       {r.payments.map((p) => (

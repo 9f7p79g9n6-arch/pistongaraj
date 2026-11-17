@@ -35,12 +35,17 @@ export const colors = {
   special: '#20252B',
   onSpecial: '#FFFFFF',
   onSpecialMuted: '#B4BAC2',
-  tabBar: '#FFFFFF',
+  /** Alt menü zemini: logo yeşili */
+  tabBar: '#B6F000',
   /** Grafikte nötr seri */
   neutral: '#7B838E',
   /** Logo rengi (değişmez): yeşil kare üzerinde koyu "P" */
   logo: '#B6F000',
   onLogo: '#17191D',
+  /** Logo yeşili üzerinde ikincil yazı/ikon (kontrast 5,6:1) */
+  onLogoMuted: '#4A5A16',
+  /** Logo yeşili üzerinde ince çizgi */
+  logoLine: '#9DD000',
 } as const;
 
 /**

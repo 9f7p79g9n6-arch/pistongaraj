@@ -18,7 +18,7 @@ export default function Vehicles() {
   }, [vehicles, q]);
 
   return (
-    <Screen title="Araçlar" right={<Button title="Ekle" icon="plus" small variant="primary" onPress={() => router.push('/servis/arac-ekle')} />}>
+    <Screen title="Araçlar" back right={<Button title="Ekle" icon="plus" small variant="primary" onPress={() => router.push('/servis/arac-ekle')} />}>
       <Field label="Plaka ile bul" value={q} onChangeText={setQ} autoCapitalize="characters" placeholder="34 ABC 123" />
       <Muted small style={{ marginTop: space.xs }}>Yalnızca işletmenin kendi kayıtlarında arar.</Muted>
       <Card style={{ paddingVertical: 0, marginTop: space.lg }}>
