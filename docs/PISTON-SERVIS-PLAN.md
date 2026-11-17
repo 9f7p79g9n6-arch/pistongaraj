@@ -384,3 +384,23 @@ Sıradaki en önemli iş: **gerçek sunucu (Supabase) bağlantısı** — forumu
 - Sunucuda kayıt listesi her kayıt için ayrı istek atıyor (çok kayıtta yavaşlar).
 - Gmail geçici; alan adlı e-posta servisine geçiş.
 - `npm audit` 11 uyarı (test araçları; `--force` ÇALIŞTIRMA).
+
+## 13. Durum (2026-11-17 gece) — commit 28b3f69, TestFlight build 10
+
+Eklenenler (gerçek sunucuya uygulandı, uçtan uca denendi):
+- **Plaka + telefon eşleşmesi:** Profil > "Telefon numaram". Servisin girdiği müşteri telefonu + garajdaki plaka tutarsa
+  servis kaydı araç sahibine düşer. Yalnızca plaka yetmez (KVKK). Telefon SMS ile doğrulanmıyor (eksik).
+- **Servisler sekmesi:** doğrulanmış servis rehberi (şehir, kategori, arama), işletme sayfası (ara, WhatsApp, yol tarifi, yorumlar),
+  "Teklif iste" (seçilen işletmeye ya da şehirdeki ilgili kategorideki en fazla 20 servise), "Taleplerim".
+- **Parçalar sekmesi:** "Parça iste" (şehirdeki doğrulanmış yedek parçacılara), parça taleplerim, yedek parçacı listesi.
+  Sepet ve uygulama içi ödeme YOK (ödeme işletmeyle aranızda).
+- **Esnaf:** Menü/Panel > Teklif talepleri; parça + işçilik ayrı teklif, parçada orijinal/muadil/çıkma; kabul edilince müşteri telefonu görünür.
+  İşletme bilgileri > "Rehberde görünen bilgiler" (tanıtım, çalışma saatleri).
+- **Onaylı yorum:** müşteri tamamlanan servis kaydında 1–5 yıldız + yorum; rehberde "Doğrulanmış müşteri" olarak görünür.
+- **Yönetici paneli:** Profil > Yönetici paneli (yalnızca admin): işletme doğrula / askıya al / beklemeye al, forum şikâyetleri ve kaldırma.
+  Kullanıcının hesabı admin yapıldı; işletmesi "Fordpar otomotiv" doğrulandı.
+- Test verisi: kullanıcının hesabında "Deneme talebi (test)" (kabul edilmiş, 2.000 ₺) duruyor.
+
+Eksikler listesi (12. bölüm) güncel; "yönetici paneli" ve "Servisler/Parçalar ilk sürüm" maddeleri tamamlandı.
+Kalan önemli işler: bildirimler (yeni talep/teklif için push), KVKK + gizlilik metni, telefonun SMS ile doğrulanması,
+talep fotoğrafı, gerçek mağaza (ödeme/kargo), Android, Supabase Pro.
