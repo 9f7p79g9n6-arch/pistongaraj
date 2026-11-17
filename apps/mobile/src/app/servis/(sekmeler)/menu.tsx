@@ -1,10 +1,12 @@
 import { BUSINESS_CATEGORIES, BUSINESS_STATUS_LABEL, formatPhoneTR } from '@piston/core';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
 import { NextStageCard } from '@/components/servis';
-import { Button, Card, Divider, ListItem, Muted, Pill, Row, Screen, Section, Stack, Text, Toggle } from '@/components/ui';
-import { space } from '@/constants/theme';
+import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Pill, Row, Screen, Section, Stack, Text, Toggle } from '@/components/ui';
+import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
+import { RepoError } from '@/data/repo';
 import { env } from '@/lib/env';
 
 const ADVANCED: { title: string; stage: string; body: string }[] = [
@@ -93,11 +95,63 @@ export default function Menu() {
         </Card>
       </Section>
 
+      {b.role === 'owner' && <DeleteBusiness />}
+
       <Button title="Bireysel moda dön" icon="swap" variant="ghost" style={{ marginTop: space.xl }}
         onPress={() => { biz.setMode('personal'); router.replace('/(tabs)'); }} />
       <Muted small style={{ marginTop: space.md, textAlign: 'center' }}>
         PISTON SERVİS · Aşama 1{env.isDemo ? ' · Demo modu: veriler yalnızca bu cihazda' : ''}
       </Muted>
     </Screen>
+  );
+}
+
+/** İşletmeyi silme (yalnızca sahip). İşletme adı yazılarak onaylanır; yanlışlıkla silinmesin diye iki adımlı. */
+function DeleteBusiness() {
+  const biz = useBusiness();
+  const b = biz.business!;
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const others = biz.businesses.filter((x) => x.id !== b.id).length;
+
+  const remove = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await biz.run((x) => x.deleteBusiness(b.id, name));
+      if (others === 0) {
+        biz.setMode('personal');
+        router.replace('/(tabs)');
+      }
+    } catch (e) {
+      setErr(e instanceof RepoError ? e.message : 'İşletme silinemedi. Tekrar dene.');
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Section title="Tehlikeli bölge">
+      {!open ? (
+        <Button title="İşletmeyi sil" icon="trash" variant="ghost" onPress={() => { setOpen(true); setName(''); setErr(null); }} />
+      ) : (
+        <Card style={{ gap: space.md, borderColor: colors.danger }}>
+          <Text v="bodyStrong" color={colors.danger}>{`“${b.name}” silinsin mi?`}</Text>
+          <Muted small>
+            İşletme; müşterileri, araçları, servis kayıtları, ödemeleri, giderleri ve forum paylaşımlarıyla birlikte uygulamadan kalkar.
+            Müşteriler de bu işletmenin kayıtlarını artık görmez. Mali kayıtlar yasal saklama için sunucuda kapalı olarak tutulur.
+            Bu işlem uygulamadan geri alınamaz.
+          </Muted>
+          <Field label="Onaylamak için işletme adını yaz" value={name} onChangeText={setName} placeholder={b.name} autoCapitalize="none" />
+          <ErrorText>{err}</ErrorText>
+          <Row gap={space.sm}>
+            <Button title="Vazgeç" style={{ flex: 1 }} onPress={() => setOpen(false)} />
+            <Button title="Kalıcı olarak sil" variant="danger" style={{ flex: 1 }} onPress={remove} loading={busy}
+              disabled={name.trim().toLocaleLowerCase('tr') !== b.name.trim().toLocaleLowerCase('tr')} />
+          </Row>
+        </Card>
+      )}
+    </Section>
   );
 }

@@ -73,7 +73,7 @@ interface AuditEntry {
 }
 
 interface State {
-  businesses: Omit<Business, 'role'>[];
+  businesses: (Omit<Business, 'role'> & { deletedAt?: string | null })[];
   customers: BusinessCustomer[];
   vehicles: BusinessVehicle[];
   records: StoredRecord[];
@@ -115,7 +115,7 @@ export class ServiceDemoRepo implements ServiceRepo {
   }
 
   private biz(s: State, businessId: string) {
-    const b = s.businesses.find((x) => x.id === businessId);
+    const b = s.businesses.find((x) => x.id === businessId && !x.deletedAt);
     if (!b) throw serviceError('FORBIDDEN');
     return b;
   }
@@ -148,12 +148,20 @@ export class ServiceDemoRepo implements ServiceRepo {
 
   async listMyBusinesses(): Promise<Business[]> {
     const s = await this.load();
-    return s.businesses.map((b) => ({ ...b, role: 'owner' as const })); // yeni nesneler (yerinde değişiklik ekrana yansısın)
+    return s.businesses.filter((b) => !b.deletedAt).map(({ deletedAt: _d, ...b }) => ({ ...b, role: 'owner' as const })); // yeni nesneler (yerinde değişiklik ekrana yansısın)
+  }
+
+  async deleteBusiness(businessId: string, confirmName: string) {
+    const s = await this.load();
+    const b = this.biz(s, businessId);
+    if (confirmName.trim().toLocaleLowerCase('tr') !== b.name.trim().toLocaleLowerCase('tr')) throw serviceError('NAME_MISMATCH');
+    b.deletedAt = now();
+    await this.save();
   }
 
   async createBusiness(input: NewBusiness): Promise<Business> {
     const s = await this.load();
-    if (s.businesses.length >= 3) throw serviceError('BUSINESS_LIMIT');
+    if (s.businesses.filter((b) => !b.deletedAt).length >= 3) throw serviceError('BUSINESS_LIMIT');
     const b = { id: id(), ...input, logoUrl: null, status: 'pending_verification' as const, createdAt: now() };
     s.businesses.push(b);
     await this.save();

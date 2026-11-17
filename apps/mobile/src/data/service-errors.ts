@@ -11,6 +11,7 @@ export const SERVICE_MESSAGES: Record<string, string> = {
   VEHICLE_CUSTOMER_MISMATCH: 'Seçilen araç bu müşteriye ait değil.',
   RECORD_LOCKED: 'Tamamlanan kayıt değiştirilemez.',
   RECORD_DELETED: 'Bu kayıt silinmiş.',
+  NAME_MISMATCH: 'İşletme adını aynen yaz (büyük-küçük harf önemli değil).',
   HAS_PAYMENTS: 'Bu kayıtta alınmış ödeme var. Önce ödemeyi iptal et, sonra kaydı sil.',
   STATUS_INVALID: 'Kaydın durumu değişmiş. Sayfayı yenileyip tekrar dene.',
   VERSION_CHANGED: 'İşletme kaydı sen bakarken güncelledi. Yeni hâlini görüp tekrar karar ver.',

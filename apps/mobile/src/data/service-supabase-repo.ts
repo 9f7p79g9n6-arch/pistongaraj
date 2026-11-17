@@ -95,6 +95,11 @@ export class ServiceSupabaseRepo implements ServiceRepo {
     return (data ?? []).filter((m: Row) => m.businesses).map((m: Row) => toBusiness(m.businesses, m.role, null));
   }
 
+  async deleteBusiness(businessId: string, confirmName: string) {
+    const { error } = await this.sb.rpc('delete_business', { p_business_id: businessId, p_confirm_name: confirmName });
+    if (error) fail(error);
+  }
+
   async createBusiness(b: NewBusiness) {
     const { data, error } = await this.sb.rpc('create_business', {
       p_name: b.name, p_contact_name: b.contactName, p_phone: b.phone, p_email: b.email, p_city: b.city, p_district: b.district,

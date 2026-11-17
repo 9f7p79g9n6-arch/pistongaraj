@@ -105,6 +105,11 @@ export interface ServiceRepo {
   // İşletme
   listMyBusinesses(): Promise<Business[]>;
   createBusiness(input: NewBusiness): Promise<Business>;
+  /**
+   * İşletmeyi siler (yalnızca sahip; işletme adı yazılarak onaylanır). Veriler yasal saklama için sunucuda kalır
+   * ama uygulamadan kimse erişemez; işletmenin forum içeriği kaldırılır.
+   */
+  deleteBusiness(businessId: string, confirmName: string): Promise<void>;
   updateBusiness(id: string, input: NewBusiness): Promise<void>;
 
   // Müşteri ve araç (yalnızca işletmenin kendi kayıtları)
