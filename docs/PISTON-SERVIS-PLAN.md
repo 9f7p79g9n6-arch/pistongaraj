@@ -334,3 +334,53 @@ Telefonda denenmesi gerekenler: forumda fotoğraf/video ekleme ve oynatma, video
 toplu hatırlatmada WhatsApp'ın açılması.
 
 Sıradaki en önemli iş: **gerçek sunucu (Supabase) bağlantısı** — forumun ustalar arasında görünmesi ve PDF bağlantısı buna bağlı.
+
+## 12. Durum (2026-11-17 akşamı) — GERÇEK SUNUCU, demo modundan çıkıldı
+
+### Bugün yapılanlar (sırasıyla)
+1. Usta Forumu (foto/video, şikâyet, engelleme), esnaf alt menüsü Panel · Kayıtlar · Forum · Ciro · Menü.
+2. "WhatsApp ile PDF gönder" (PDF sunucuya yüklenir, 30 gün geçerli bağlantı mesaja eklenir).
+3. Borçlulara toplu hatırlatma (şablon, seçim, sırayla WhatsApp) ve son hatırlatma tarihi.
+4. Eksik ödeme alınan açık kayıt hemen borçlulara geçer.
+5. Panel özeti Bugün / Bu hafta / Bu ay.
+6. Alt menü ve ana sayfa logo şeridi logo yeşili.
+7. **Gerçek sunucu:** Supabase projesi `piston-garage` (Frankfurt, ref `uoelkgdzxbohlxokhsqy`), 10 migration uygulandı.
+   Aynı kuruluştaki **"elite"** projesi başka bir uygulamaya ait — dokunulmaz.
+8. Giriş e-postası Türkçe, 6 haneli kod; gönderici **pistondestek@gmail.com** (Gmail uygulama şifresi yalnızca Supabase panelinde).
+9. Sunucu fonksiyonu `delete-account` (hesap silme) kuruldu.
+10. **İşletme silme** (yalnızca sahip, adı yazarak onay; veriler yasal saklama için kapalı tutulur).
+11. Gerçek sunucuda denendi: giriş, işletme açma, servis kaydı, eksik ödeme + tamamlama, borçlular, ciro, forum
+    konu/yanıt/silme, araç ekleme, işletme silme. Deneme verileri temizlendi.
+12. TestFlight: build 9 = gerçek sunucu (işletme silme düğmesi build 10'da gelecek, henüz gönderilmedi).
+
+### Sunucuyla çalışma notları
+- Migration: `npx.cmd --yes supabase@latest db push --remote --yes` (`--remote` şart).
+- Ayar: `npx.cmd --yes supabase@latest config push --remote --yes`. Ücretsiz planda e-posta şablonu yalnızca kendi SMTP ile değiştirilebilir.
+- Fonksiyon: `npx.cmd --yes supabase@latest functions deploy <ad> --use-api --yes`.
+- Uygulama ayarları: `apps/mobile/.env.local` (git dışı) ve `eas.json` production env.
+
+### EKSİKLER VE YAPILACAKLAR (önem sırasıyla)
+**1. Hemen**
+- Build 9'u telefonda denemek: gerçek girişte kayıt, fotoğraf/video yükleme, PDF bağlantısı (bilgisayarda denenemiyor).
+- Build 10 göndermek (işletme silme).
+- Sohbete yazılan iki Gmail uygulama şifresini iptal edip yenilemek (isteyedekparca "PİSTON", pistondestek).
+
+**2. Mağazaya çıkmadan önce**
+- Yönetici paneli: işletme doğrulama (şu an hepsi "Doğrulama bekliyor") ve forum şikâyetlerini inceleme.
+- KVKK aydınlatma metni + gizlilik politikası: hukuk kontrolü ve web sayfasında yayın.
+- Güvenli müşteri eşleşmesi (şu an yalnızca e-posta; telefon doğrulaması ya da "bu kayıt benim" onayı).
+- Mağaza bilgileri: ekran görüntüleri, açıklama, gizlilik etiketleri, destek adresi.
+- Supabase Pro (~25 $/ay): ücretsiz planda proje 1 hafta kullanılmazsa uyur, otomatik yedek yok.
+
+**3. Eksik özellikler**
+- Bildirimler: bakım hatırlatma zamanlayıcısı (`send-reminders` + gizli anahtar), forum yanıtı / yeni kayıt / ödeme bildirimi.
+- Gösterge ışığı yapay zekâ (`identify-warning-light` + ANTHROPIC_API_KEY).
+- Esnaf: personel ekleme, iş emirleri, randevu, stok, işletme logosu, tarih seçici.
+- Bireysel: Parçalar (ürün, sepet, ödeme), servis bulma/teklif, ekspertiz, PISTON Plus satın alma, ayarlar, yardım.
+- Araç sahipleri forumu.
+
+**4. Teknik**
+- Android hiç derlenmedi/denenmedi.
+- Sunucuda kayıt listesi her kayıt için ayrı istek atıyor (çok kayıtta yavaşlar).
+- Gmail geçici; alan adlı e-posta servisine geçiş.
+- `npm audit` 11 uyarı (test araçları; `--force` ÇALIŞTIRMA).
