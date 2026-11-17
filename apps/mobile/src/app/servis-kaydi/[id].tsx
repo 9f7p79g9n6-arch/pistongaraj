@@ -2,6 +2,7 @@
 import { isRevenue, needsCustomerAction } from '@piston/core';
 
 import { PaymentCard } from '@/components/payments';
+import { ReviewCard } from '@/components/review-card';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
@@ -84,6 +85,7 @@ export default function CustomerRecord() {
         <IntakeCard r={r} />
       </Stack>
 
+      {r.status === 'completed' && <Section title="Değerlendir"><ReviewCard recordId={r.id} businessName={r.businessName} /></Section>}
       <Section title="Değişen parçalar ve işçilik"><ItemsList items={r.items} /></Section>
       <Section title="Tutar"><TotalsCard totals={r.totals} /></Section>
       {r.payments.length > 0 || isRevenue(r.status) ? <Section title="Ödeme"><PaymentCard r={r} /></Section> : null}

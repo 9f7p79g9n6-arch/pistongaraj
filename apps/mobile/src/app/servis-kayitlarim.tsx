@@ -18,7 +18,7 @@ export default function MyServiceRecords() {
     <Screen title="Servis kayıtlarım" back>
       {myRecords.length === 0 ? (
         <Stack gap={space.md}>
-          <Empty title="Henüz servis kaydı yok" body="Aracına bakım ya da onarım yapan servis PISTON SERVİS kullanıyorsa, kayıt burada görünür ve onayını bekler." />
+          <Empty title="Henüz servis kaydı yok" body="Aracına bakım yapan servis PISTON SERVİS kullanıyorsa kayıt burada görünür. Bunun için Profil’e telefon numaranı yaz ve aracını plakasıyla Garajım’a ekle; servis de aynı telefon ve plakayı girmeli." />
           <CustomerEmailHint />
         </Stack>
       ) : (

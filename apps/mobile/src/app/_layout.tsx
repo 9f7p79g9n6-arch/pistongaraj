@@ -61,6 +61,10 @@ function Routes() {
         <Stack.Screen name="servis-kayitlarim" />
         <Stack.Screen name="servis-kaydi/[id]" />
         <Stack.Screen name="forum" />
+        <Stack.Screen name="rehber/[id]" />
+        <Stack.Screen name="teklif/yeni" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="teklif/[id]" />
+        <Stack.Screen name="yonetim" />
       </Stack.Protected>
       <Stack.Screen name="legal/kvkk" />
     </Stack>

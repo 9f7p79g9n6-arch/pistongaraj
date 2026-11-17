@@ -1,12 +1,13 @@
 /** PISTON SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
 import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus, inPeriod, localDateOf, periodOf } from '@piston/core';
-import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 
 import { BigAction, CountTile, NextStageCard, RecordCard } from '@/components/servis';
 import { Button, Card, DemoBadge, Empty, ErrorText, Muted, Pill, Row, Screen, Section, Segmented, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
+import { marketRepo } from '@/data/market';
 
 
 type Span = 'today' | 'week' | 'month';
@@ -24,6 +25,16 @@ const SPAN_LABEL: Record<Span, { title: string; adj: string; filter: string }> =
 
 export default function Panel() {
   const { business, records, advanced, error, refresh, canFinance } = useBusiness();
+  // Araç sahiplerinden gelen teklif talepleri: yeni (görülmemiş) ve teklif bekleyen sayısı
+  const [quotes, setQuotes] = useState<{ fresh: number; open: number }>({ fresh: 0, open: 0 });
+  useFocusEffect(useCallback(() => {
+    if (!business || !marketRepo.available) return;
+    let alive = true;
+    marketRepo.businessRequests(business.id).then((l) => {
+      if (alive) setQuotes({ fresh: l.filter((r) => !r.seen && r.status === 'open').length, open: l.filter((r) => r.status === 'open' && !r.myOffer).length });
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, [business]));
 
   const [span, setSpan] = useState<Span>('today');
   const c = useMemo(() => {
@@ -65,6 +76,13 @@ export default function Panel() {
         <BigAction primary icon="plus" title="YENİ SERVİS KAYDI" subtitle="Plaka yaz, işlemleri ekle, ücreti al" onPress={() => router.push('/servis/yeni-kayit')} />
         <BigAction icon="users" title="+ MÜŞTERİ EKLE" onPress={() => router.push('/servis/musteri-ekle')} />
       </Stack>
+
+      {quotes.open > 0 && (
+        <Card onPress={() => router.push('/servis/talepler')} highlight style={{ marginTop: space.md, gap: 4 }} accessibilityLabel="Teklif talepleri">
+          <Text v="bodyStrong" color={colors.brandDark}>{quotes.fresh > 0 ? `${quotes.fresh} yeni teklif talebi` : `${quotes.open} talep teklifini bekliyor`}</Text>
+          <Muted small>Araç sahipleri sorununu ya da aradığı parçayı yazdı. Fiyat ver, müşteri kazan.</Muted>
+        </Card>
+      )}
 
       <Section title={L.title}>
         <Segmented<Span> options={SPANS} value={span} onChange={setSpan} />

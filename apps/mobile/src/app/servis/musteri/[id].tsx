@@ -23,7 +23,7 @@ export default function CustomerDetail() {
     <Screen title={c.fullName} back>
       <Card style={{ gap: 4 }}>
         <Text v="bodyStrong">{formatPhoneTR(c.phone)}</Text>
-        {c.email ? <Muted small>{c.email}</Muted> : <Muted small>E-posta yok: müşteri kaydı uygulamada göremez.</Muted>}
+        {c.email ? <Muted small>{c.email}</Muted> : <Muted small>E-posta yok. Müşteri, Profil’ine bu telefonu ve Garajım’a aracının plakasını eklerse kayıtları uygulamada görür.</Muted>}
         <Row gap={space.sm} style={{ marginTop: space.sm }}>
           <Button title="Ara" small icon="user" onPress={() => Linking.openURL(`tel:${c.phone}`)} />
         </Row>

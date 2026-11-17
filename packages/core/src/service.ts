@@ -81,6 +81,9 @@ export interface Business {
   taxOffice: string | null;
   taxNumber: string | null;
   logoUrl: string | null;
+  /** Rehberde görünen tanıtım ve çalışma saatleri */
+  description?: string | null;
+  workingHours?: string | null;
   status: BusinessStatus;
   role: BusinessRole;
   createdAt: string;

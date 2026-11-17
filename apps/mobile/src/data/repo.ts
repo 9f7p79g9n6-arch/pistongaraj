@@ -25,6 +25,10 @@ export interface Account {
   email: string | null;
   plan: Plan;
   displayName: string | null;
+  /** Kullanıcının kendi telefonu (+90…). Servis kayıtları plaka + bu telefonla eşleşir. */
+  phone: string | null;
+  /** Yönetici (işletme doğrulama, forum şikâyetleri) */
+  isAdmin: boolean;
 }
 
 export interface LightIdentification {
@@ -67,6 +71,8 @@ export interface GarageRepo {
 
   // Oturum
   getAccount(): Promise<Account | null>;
+  /** Profildeki telefon numarası (null: kaldır). Servisin girdiği müşteri telefonu + araç plakası tutarsa kayıt bu hesaba düşer. */
+  updateMyPhone(phoneE164: string | null): Promise<void>;
   onAuthChange(cb: () => void): () => void;
   requestEmailCode(email: string): Promise<void>;
   verifyEmailCode(email: string, code: string): Promise<void>;

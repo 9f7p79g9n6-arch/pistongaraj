@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-
 import { View } from 'react-native';
 
 import { SpecialCard } from '@/components/brand';
+import { MyPhoneCard } from '@/components/my-phone';
 import { Button, Card, Divider, ErrorText, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { serviceRepo, useBusiness } from '@/data/business-store';
@@ -91,6 +91,7 @@ export default function Profile() {
             subtitle={biz.myPendingCount > 0 ? `${biz.myPendingCount} kayıt onayını bekliyor` : 'Servislerin senin için açtığı kayıtlar'}
             onPress={() => router.push('/servis-kayitlarim')} />
         </Card>
+        <MyPhoneCard />
       </Section>
 
       <Section title="PISTON SERVİS">
@@ -117,6 +118,14 @@ export default function Profile() {
           <ListItem icon="forum" title="Forum" subtitle="Marka ve model toplulukları · yakında" onPress={() => router.push('/forum')} />
         </Card>
       </Section>
+
+      {account?.isAdmin && (
+        <Section title="Yönetim">
+          <Card style={{ paddingVertical: 0 }}>
+            <ListItem icon="shield" title="Yönetici paneli" subtitle="İşletme doğrulama ve forum şikâyetleri" onPress={() => router.push('/yonetim')} />
+          </Card>
+        </Section>
+      )}
 
       <Section title="Gizlilik ve güvenlik">
         <Card style={{ paddingVertical: 0 }}>

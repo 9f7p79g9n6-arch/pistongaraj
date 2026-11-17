@@ -235,7 +235,7 @@ export function CustomerEmailHint() {
     <Muted small>
       {env.isDemo
         ? `Demo: müşteri ekranını bu cihazda denemek için e-posta olarak ${DEMO_CUSTOMER_EMAIL} yaz; kayıt bireysel moddaki "Servis kayıtlarım" ekranına düşer.`
-        : 'Müşteri bu e-postayla PISTON GARAGE hesabı açtıysa, servis kaydını kendi uygulamasında görür ve onaylar.'}
+        : 'E-posta isteğe bağlı. Müşteri PISTON GARAGE kullanıyorsa kayıt ona iki yoldan gider: bu e-posta onun giriş e-postasıysa ya da Profil’ine yazdığı telefon buradaki telefonla ve Garajım’daki plaka bu plakayla aynıysa.'}
     </Muted>
   );
 }

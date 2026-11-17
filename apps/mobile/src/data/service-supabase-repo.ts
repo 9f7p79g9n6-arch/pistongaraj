@@ -41,6 +41,7 @@ function fail(err: { message?: string; code?: string } | null): never {
 const toBusiness = (r: Row, role: Business['role'], logoUrl: string | null): Business => ({
   id: r.id, name: r.name, contactName: r.contact_name, phone: r.phone, email: r.email, city: r.city, district: r.district,
   address: r.address, category: r.category, taxOffice: r.tax_office, taxNumber: r.tax_number, logoUrl, status: r.status,
+  description: r.description ?? null, workingHours: r.working_hours ?? null,
   role, createdAt: r.created_at,
 });
 const toCustomer = (r: Row): BusinessCustomer => ({

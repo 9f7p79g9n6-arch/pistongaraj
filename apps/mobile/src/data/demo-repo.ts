@@ -30,6 +30,7 @@ const KEY = 'piston-demo-v1';
 interface DemoState {
   signedIn: boolean;
   plan: Plan;
+  phone?: string | null;
   vehicles: (Vehicle & { archived: boolean })[];
   rules: MaintenanceRule[];
   events: MaintenanceEvent[];
@@ -133,7 +134,12 @@ export class DemoRepo implements GarageRepo {
 
   async getAccount(): Promise<Account | null> {
     const s = await this.load();
-    return s.signedIn ? { userId: 'demo', email: null, plan: s.plan, displayName: 'Demo kullanıcı' } : null;
+    return s.signedIn ? { userId: 'demo', email: null, plan: s.plan, displayName: 'Demo kullanıcı', phone: s.phone ?? null, isAdmin: false } : null;
+  }
+
+  async updateMyPhone(phoneE164: string | null) {
+    await this.mutate((s) => { s.phone = phoneE164; });
+    this.emit();
   }
 
   onAuthChange(cb: () => void) {

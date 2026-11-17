@@ -84,8 +84,19 @@ export class SupabaseRepo implements GarageRepo {
     const { data } = await this.sb.auth.getSession();
     const user = data.session?.user;
     if (!user) return null;
-    const { data: p } = await this.sb.from('profiles').select('plan, display_name').eq('id', user.id).maybeSingle();
-    return { userId: user.id, email: user.email ?? null, plan: (p?.plan as Account['plan']) ?? 'free', displayName: p?.display_name ?? null };
+    const [{ data: p }, { data: roles }] = await Promise.all([
+      this.sb.from('profiles').select('plan, display_name, phone').eq('id', user.id).maybeSingle(),
+      this.sb.from('user_roles').select('role').eq('user_id', user.id),
+    ]);
+    return { userId: user.id, email: user.email ?? null, plan: (p?.plan as Account['plan']) ?? 'free', displayName: p?.display_name ?? null, phone: p?.phone ?? null, isAdmin: (roles ?? []).some((r: { role: string }) => r.role === 'admin') };
+  }
+
+  async updateMyPhone(phoneE164: string | null) {
+    const { data } = await this.sb.auth.getSession();
+    const uid = data.session?.user.id;
+    if (!uid) throw new RepoError('AUTH', 'Oturum kapanmış. Yeniden giriş yap.');
+    const { error } = await this.sb.from('profiles').update({ phone: phoneE164 }).eq('id', uid);
+    if (error) throw new RepoError('INVALID', 'Telefon kaydedilemedi. Numarayı 05XX XXX XX XX biçiminde yaz.');
   }
 
   onAuthChange(cb: () => void) {

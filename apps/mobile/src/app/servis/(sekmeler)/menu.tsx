@@ -40,6 +40,8 @@ export default function Menu() {
           <ListItem icon="users" title="Müşteriler" subtitle={`${biz.customers.length} müşteri · ara, ekle, borç durumu`} onPress={() => router.push('/servis/musteriler')} />
           <Divider />
           <ListItem icon="car" title="Araçlar" subtitle={`${biz.vehicles.length} araç · plaka ile bul`} onPress={() => router.push('/servis/araclar')} />
+          <Divider />
+          <ListItem icon="send" title="Teklif talepleri" subtitle="Araç sahiplerinden gelen servis ve parça talepleri" onPress={() => router.push('/servis/talepler')} />
         </Card>
       </Section>
 
