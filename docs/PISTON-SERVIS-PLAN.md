@@ -314,3 +314,23 @@ Bugün eklenenler (commit c1af1c6, `ozellik/piston-servis`):
 Henüz olmayanlar (tasarım talimatında geçen): gerçek parça listesi ve sepet, Ekspertiz, Ayarlar, Yardım ve destek ekranları. Android/web için Inter yazı tipi eklenmedi.
 
 Sıradaki işler: 9. bölümdeki 2, 3, 5, 6, 7, 8. maddeler (en önemlisi gerçek sunucu bağlantısı).
+
+## 11. Durum (2026-11-17) — commit 20af518, TestFlight build 8
+
+Eklenenler:
+- **Usta Forumu** (esnaf alt menüsünde "Forum"): işletmeler arası konu ve yanıt; en fazla 4 fotoğraf ya da 1 video (60 sn);
+  çözüldü işareti, şikâyet (3 işletme şikâyet edince gizlenir), işletme engelleme, kendi içeriğini silme.
+  Sunucu: `20261120000001_forum.sql` + `zzforum.test.sql` (F1–F10). Demoda paylaşımlar yalnızca cihazda; 2 "örnek" konu var.
+- Esnaf alt menüsü: Panel · Kayıtlar · Forum · Ciro · Menü. Müşteriler ve Araçlar Menü'de.
+- **WhatsApp ile PDF gönder:** PDF sunucuya yüklenir, 30 gün geçerli bağlantı müşterinin numarasıyla açılan mesaja eklenir.
+  Demoda sunucu olmadığı için mesaj bağlantısız gider (ekranda yazıyor).
+- **Borçlu müşteriler:** toplu hatırlatma (şablon {ad} {tutar} {detay} {isletme}, müşteri seçimi, sırayla WhatsApp), son hatırlatma tarihi.
+- Eksik ödeme alınan açık kayıt hemen borçlulara geçer ("iş devam ediyor"); ciroya tamamlanınca girer.
+- Panel özeti: Bugün / Bu hafta / Bu ay. Kayıtlar'a hafta/ay süzgeci.
+- Alt menü ve ana sayfa logo şeridi logo yeşili (#B6F000).
+- Düzeltme: farklı yükseklikteki form alanlarının sıkışması.
+
+Telefonda denenmesi gerekenler: forumda fotoğraf/video ekleme ve oynatma, video çekerken mikrofon izni,
+toplu hatırlatmada WhatsApp'ın açılması.
+
+Sıradaki en önemli iş: **gerçek sunucu (Supabase) bağlantısı** — forumun ustalar arasında görünmesi ve PDF bağlantısı buna bağlı.
