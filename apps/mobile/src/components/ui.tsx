@@ -27,7 +27,7 @@ import { Icon, type IconName } from './icons';
 
 type Variant = keyof typeof type;
 
-/** Vurgu rengi bağlamı. Varsayılan bireysel mod (yeşil); PISTON SERVİS kendi bölümünü kırmızı ile sarar. */
+/** Vurgu rengi bağlamı. Varsayılan bireysel mod (yeşil); OTOM SERVİS kendi bölümünü kırmızı ile sarar. */
 const AccentCtx = createContext<Accent>(ACCENT_PERSONAL);
 export function AccentProvider({ value, children }: { value: Accent; children: ReactNode }) {
   return <AccentCtx.Provider value={value}>{children}</AccentCtx.Provider>;

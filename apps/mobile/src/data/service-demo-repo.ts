@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS DEMO veri katmanı. Veriler yalnızca bu cihazda (AsyncStorage) tutulur; sunucuya hiçbir şey gitmez.
+ * OTOM SERVİS DEMO veri katmanı. Veriler yalnızca bu cihazda (AsyncStorage) tutulur; sunucuya hiçbir şey gitmez.
  * Sunucudaki kuralların aynısını uygular: işletme sınırı, tekil telefon/plaka, tekrar kayıt engeli,
  * sunucuda tutar hesabı, durum geçişleri, sürüm kontrolü, silinmeyen onay geçmişi.
  *

@@ -16,3 +16,4 @@ export * from './accounting';
 export * from './forum';
 export * from './reminder';
 export * from './quotes';
+export * from './social';

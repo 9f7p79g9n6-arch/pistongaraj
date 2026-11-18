@@ -1,5 +1,5 @@
 /**
- * Yönetici paneli (yalnızca user_roles.role = 'admin'): işletme doğrulama / askıya alma ve forum şikâyetleri.
+ * Yönetici paneli (yalnızca user_roles.role = 'admin'): işletme doğrulama / askıya alma, forum ve Ana Sayfa şikâyetleri.
  * Doğrulanan işletme araç sahiplerinin rehberinde görünür ve teklif talebi alır.
  */
 import { BUSINESS_STATUS_LABEL, formatPhoneTR, timeAgoTR, type BusinessStatus } from '@piston/core';
@@ -12,8 +12,11 @@ import { Button, Card, Chip, Empty, ErrorText, Muted, Pill, Row, Screen, Segment
 import { space } from '@/constants/theme';
 import { marketRepo, type AdminBusiness, type AdminReport } from '@/data/market';
 import { RepoError } from '@/data/repo';
+import { socialRepo } from '@/data/social';
 import { useApp } from '@/data/store';
 import { confirm } from '@/lib/confirm';
+
+type Report = AdminReport & { source: 'forum' | 'social' };
 
 const STATUS_TONE: Record<BusinessStatus, Tone> = { active: 'ok', pending_verification: 'warn', suspended: 'bad', incomplete: 'neutral' };
 
@@ -22,15 +25,18 @@ export default function Admin() {
   const [tab, setTab] = useState<'isletmeler' | 'sikayetler'>('isletmeler');
   const [status, setStatus] = useState<BusinessStatus | null>('pending_verification');
   const [businesses, setBusinesses] = useState<AdminBusiness[] | null>(null);
-  const [reports, setReports] = useState<AdminReport[] | null>(null);
+  const [reports, setReports] = useState<Report[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [b, r] = await Promise.all([marketRepo.adminBusinesses(status), marketRepo.adminReports()]);
+      const [b, r, sr] = await Promise.all([marketRepo.adminBusinesses(status), marketRepo.adminReports(), socialRepo.adminReports()]);
       setBusinesses(b);
-      setReports(r);
+      setReports([
+        ...sr.map((x): Report => ({ ...x, businessName: x.authorName, source: 'social' })),
+        ...r.map((x): Report => ({ ...x, source: 'forum' })),
+      ].sort((a, c) => c.reportCount - a.reportCount));
       setErr(null);
     } catch (e) {
       setErr(e instanceof RepoError ? e.message : 'Yüklenemedi.');
@@ -108,20 +114,20 @@ export default function Admin() {
         </>
       ) : (
         <Stack gap={space.sm} style={{ marginTop: space.md }}>
-          <Muted small>3 farklı işletmeden şikâyet alan içerik zaten otomatik gizlenir. Burada inceleyip kalıcı olarak kaldırabilirsin.</Muted>
-          {reports === null ? <Muted>Yükleniyor…</Muted> : reports.length === 0 ? <Empty title="Şikâyet yok" body="Forumda şikâyet edilen içerik yok." /> : reports.map((r) => (
+          <Muted small>3 farklı kişiden ya da işletmeden şikâyet alan içerik zaten otomatik gizlenir. Burada inceleyip kalıcı olarak kaldırabilirsin.</Muted>
+          {reports === null ? <Muted>Yükleniyor…</Muted> : reports.length === 0 ? <Empty title="Şikâyet yok" body="Forumda ve Ana Sayfa'da şikâyet edilen içerik yok." /> : reports.map((r) => (
             <Card key={`${r.postId ?? ''}${r.commentId ?? ''}`} style={{ gap: 6, opacity: r.deleted ? 0.55 : 1 }}>
               <Row style={{ justifyContent: 'space-between' }}>
                 <Pill tone={r.reportCount >= 3 ? 'bad' : 'warn'}>{`${r.reportCount} şikâyet`}</Pill>
-                <Muted small>{`${r.postId ? 'Konu' : 'Yanıt'} · ${r.businessName}`}</Muted>
+                <Muted small>{`${r.source === 'social' ? (r.postId ? 'Ana Sayfa gönderisi' : 'Ana Sayfa yorumu') : r.postId ? 'Forum konusu' : 'Forum yanıtı'} · ${r.businessName}`}</Muted>
               </Row>
               <Text v="small">{r.text}</Text>
               {r.reasons.length > 0 && <Muted small>{`Sebepler: ${r.reasons.join(' · ')}`}</Muted>}
               {r.deleted ? <Pill tone="neutral">Kaldırıldı</Pill> : (
                 <Button title="İçeriği kaldır" icon="trash" small variant="danger" loading={busy === `r-${r.postId ?? r.commentId}`}
                   onPress={async () => {
-                    if (!(await confirm('İçeriği kaldır', 'İçerik forumdan kalıcı olarak kaldırılır.', 'Kaldır', true))) return;
-                    void act(`r-${r.postId ?? r.commentId}`, () => marketRepo.adminRemove(r.postId, r.commentId));
+                    if (!(await confirm('İçeriği kaldır', 'İçerik herkesten kaldırılır.', 'Kaldır', true))) return;
+                    void act(`r-${r.postId ?? r.commentId}`, () => (r.source === 'social' ? socialRepo.adminRemove(r.postId, r.commentId) : marketRepo.adminRemove(r.postId, r.commentId)));
                   }} />
               )}
             </Card>

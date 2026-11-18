@@ -21,7 +21,7 @@ export default function VehicleDetail() {
     if (!(await confirm('Aracı garajdan kaldır', `${v.make} ${v.model} arşivlenir. Kayıtları silinmez.`, 'Kaldır', true))) return;
     try {
       await run((r) => r.archiveVehicle(v.id));
-      router.replace('/');
+      router.replace('/garajim');
     } catch (e) {
       setErr(e instanceof RepoError ? e.message : 'Araç kaldırılamadı.');
     }

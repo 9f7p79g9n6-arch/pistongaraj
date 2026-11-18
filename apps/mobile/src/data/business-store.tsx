@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS durumu: aktif mod (bireysel / işletme), işletmeler, seçili işletmenin müşteri, araç ve kayıtları,
+ * OTOM SERVİS durumu: aktif mod (bireysel / işletme), işletmeler, seçili işletmenin müşteri, araç ve kayıtları,
  * müşteri tarafındaki servis kayıtları. Bireysel AppProvider'dan ayrıdır; onun verisini değiştirmez.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,7 +36,7 @@ interface BusinessState {
   records: ServiceRecord[];
   /** İşletme giderleri (yalnızca finans yetkisi olan rolde dolu) */
   expenses: BusinessExpense[];
-  /** PISTON CİRO'yu görebilir mi (sahip, müdür) */
+  /** OTOM CİRO'yu görebilir mi (sahip, müdür) */
   canFinance: boolean;
   /** Servis kaydı silebilir mi (sahip, müdür) */
   canDelete: boolean;

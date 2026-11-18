@@ -26,7 +26,7 @@ function Routes() {
     if (allReady) SplashScreen.hideAsync().catch(() => {});
     // Çıkış yapılınca sıfırlanır: yeniden girişte giriş ekranında seçilen mod (Araç sahibi / İşletme) uygulanır
     if (allReady && !signedIn) restored.current = false;
-    // Uygulama en son işletme modunda kapatıldıysa ana ekran yerine PISTON SERVİS ile açılır
+    // Uygulama en son işletme modunda kapatıldıysa ana ekran yerine OTOM SERVİS ile açılır
     // (belirli bir sayfa açılıyorsa, ör. bildirim bağlantısı, ona dokunulmaz)
     if (allReady && signedIn && !restored.current) {
       restored.current = true;
@@ -56,7 +56,7 @@ function Routes() {
         <Stack.Screen name="vehicle/[id]/add-fuel" options={{ presentation: 'modal' }} />
         <Stack.Screen name="vehicle/[id]/add-expense" options={{ presentation: 'modal' }} />
         <Stack.Screen name="vehicle/[id]/odometer" options={{ presentation: 'modal' }} />
-        {/* PISTON SERVİS: işletme modu (kendi navigasyonu) ve müşteri tarafı ekranları */}
+        {/* OTOM SERVİS: işletme modu (kendi navigasyonu) ve müşteri tarafı ekranları */}
         <Stack.Screen name="servis" options={{ animation: 'fade' }} />
         <Stack.Screen name="servis-kayitlarim" />
         <Stack.Screen name="servis-kaydi/[id]" />
@@ -65,6 +65,12 @@ function Routes() {
         <Stack.Screen name="teklif/yeni" options={{ presentation: 'modal' }} />
         <Stack.Screen name="teklif/[id]" />
         <Stack.Screen name="yonetim" />
+        <Stack.Screen name="profil" />
+        <Stack.Screen name="sosyal/yeni" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="sosyal/[id]" />
+        <Stack.Screen name="sosyal/kisi/[id]" />
+        <Stack.Screen name="sosyal/gruplar" />
+        <Stack.Screen name="sosyal/grup/[id]" />
       </Stack.Protected>
       <Stack.Screen name="legal/kvkk" />
     </Stack>

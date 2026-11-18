@@ -1,5 +1,5 @@
 /**
- * PISTON CİRO: işletmenin ne kadar iş yaptığı, ne kadar gelir elde ettiği, ne kadar gider yaptığı ve işletme sonucu.
+ * OTOM CİRO: işletmenin ne kadar iş yaptığı, ne kadar gelir elde ettiği, ne kadar gider yaptığı ve işletme sonucu.
  * Rakamlar gerçek servis kayıtlarından, ödemelerden ve girilen giderlerden hesaplanır (packages/core accounting.ts).
  * Yalnızca finans yetkisi olan rol (sahip, müdür) görür; sunucu da aynı kuralı uygular.
  */
@@ -86,11 +86,11 @@ export default function Ciro() {
   const debt = useMemo(() => debtors(records), [records]);
   const periodExpenses = useMemo(() => expenses.filter((x) => x.spentOn >= period.from && x.spentOn <= period.to), [expenses, period]);
 
-  if (!business) return <Screen title="PISTON CİRO">{null}</Screen>;
+  if (!business) return <Screen title="OTOM CİRO">{null}</Screen>;
   if (!canFinance) {
     return (
-      <Screen title="PISTON CİRO">
-        <Empty title="Yetkin yok" body="PISTON CİRO'yu yalnızca işletme sahibi ve yetki verilen personel görebilir." />
+      <Screen title="OTOM CİRO">
+        <Empty title="Yetkin yok" body="OTOM CİRO'yu yalnızca işletme sahibi ve yetki verilen personel görebilir." />
       </Screen>
     );
   }
@@ -174,7 +174,7 @@ export default function Ciro() {
   );
 
   return (
-    <Screen title="PISTON CİRO">
+    <Screen title="OTOM CİRO">
       <Row style={{ flexWrap: 'wrap' }} gap={space.sm}>
         {PERIODS.map((p) => <Chip key={p.value} label={p.label} selected={kind === p.value} onPress={() => setKind(p.value)} />)}
       </Row>

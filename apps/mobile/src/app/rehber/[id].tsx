@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Linking, View } from 'react-native';
 
-import { categoryLabel, Stars } from '@/components/market';
+import { BusinessThumb, categoryLabel, Stars } from '@/components/market';
 import { Button, Card, Empty, Muted, Pill, Row, Screen, Section, Stack, Text } from '@/components/ui';
 import { space } from '@/constants/theme';
 import { marketRepo } from '@/data/market';
@@ -35,6 +35,7 @@ export default function BusinessPage() {
     <Screen title={isParts ? 'Yedek parçacı' : 'Servis'} back>
       <Card style={{ gap: space.sm }}>
         <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <BusinessThumb path={b.logoPath} size={64} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text v="title">{b.name}</Text>
             <Muted small>{categoryLabel(b.category)}</Muted>
@@ -58,7 +59,7 @@ export default function BusinessPage() {
           onPress={() => router.push({ pathname: '/teklif/yeni', params: { tur: isParts ? 'parca' : 'servis', isletme: b.id, isletmeAdi: b.name } })} />
         <Row gap={space.sm}>
           <Button title="Ara" icon="user" style={{ flex: 1 }} onPress={() => Linking.openURL(`tel:${b.phone}`)} />
-          <Button title="WhatsApp" icon="forum" style={{ flex: 1 }} onPress={() => openWhatsApp(b.phone, 'Merhaba, PISTON GARAGE üzerinden ulaşıyorum.')} />
+          <Button title="WhatsApp" icon="forum" style={{ flex: 1 }} onPress={() => openWhatsApp(b.phone, 'Merhaba, OTOM üzerinden ulaşıyorum.')} />
         </Row>
         <Button title="Yol tarifi" icon="car" variant="ghost" onPress={() => Linking.openURL(mapsSearchUrl(b))} />
       </Stack>

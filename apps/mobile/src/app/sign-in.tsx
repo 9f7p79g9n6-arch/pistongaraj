@@ -1,6 +1,6 @@
 /**
  * Giriş: önce iki seçenek (Araç sahibi / İşletme), sonra aynı e-posta kodu ya da demo girişi.
- * İşletme seçilirse giriş sonrası uygulama PISTON SERVİS ile açılır (işletmesi yoksa "İşletme hesabı aç").
+ * İşletme seçilirse giriş sonrası uygulama OTOM SERVİS ile açılır (işletmesi yoksa "İşletme hesabı aç").
  */
 import { Link } from 'expo-router';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const OPTIONS: { mode: AppMode; icon: IconName; title: string; body: string }[] = [
   { mode: 'personal', icon: 'car', title: 'Araç sahibiyim', body: 'Bakım hatırlatmaları, yakıt, masraf ve servis kayıtların.' },
-  { mode: 'business', icon: 'wrench', title: 'İşletmeyim', body: 'PISTON SERVİS: servis kaydı, müşteri, tahsilat ve ciro.' },
+  { mode: 'business', icon: 'wrench', title: 'İşletmeyim', body: 'OTOM SERVİS: servis kaydı, müşteri, tahsilat ve ciro.' },
 ];
 
 export default function SignIn() {

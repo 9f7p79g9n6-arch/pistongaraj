@@ -25,8 +25,9 @@ const P: Record<string, string[]> = {
   camera: ['M4 8h3l2-3h6l2 3h3v11H4z'],
   trash: ['M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14'],
   logout: ['M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10'],
-  // PISTON SERVİS
+  // OTOM SERVİS
   chart: ['M4 20h16', 'M7 20v-6M12 20V8M17 20v-10'],
+  edit: ['M4 20h4L18.5 9.5l-4-4L4 16z', 'M13 7l4 4'],
   // Forum
   play: ['M8 5v14l11-7z'],
   video: ['M3 7h12v10H3z', 'M15 10l6-3v10l-6-3z'],
@@ -39,13 +40,16 @@ const P: Record<string, string[]> = {
   store: ['M3 9l2-5h14l2 5M4 9v11h16V9M3 9h18M9 20v-6h6v6'],
   swap: ['M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7'],
   menu: ['M4 7h16M4 12h16M4 17h16'],
+  heart: ['M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20z'],
+  more: ['M5 12h.01M12 12h.01M19 12h.01'],
+  question: ['M9.2 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4.5M12 18h.01'],
 };
 
 export type IconName = keyof typeof P;
 
-export function Icon({ name, size = 20, color = colors.text }: { name: IconName; size?: number; color?: string }) {
+export function Icon({ name, size = 20, color = colors.text, fill }: { name: IconName; size?: number; color?: string; fill?: string }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={fill ?? 'none'} stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
       {P[name]!.map((d, i) => <Path key={i} d={d} />)}
       {name === 'parts' && <Circle cx={12} cy={12} r={3} />}
       {name === 'user' && <Circle cx={12} cy={8} r={4} />}
@@ -53,6 +57,7 @@ export function Icon({ name, size = 20, color = colors.text }: { name: IconName;
       {name === 'camera' && <Circle cx={12} cy={13} r={3.5} />}
       {name === 'search' && <Circle cx={10.5} cy={10.5} r={6.5} />}
       {name === 'ban' && <Circle cx={12} cy={12} r={9} />}
+      {name === 'question' && <Circle cx={12} cy={12} r={9} />}
       {name === 'users' && (<><Circle cx={8} cy={8} r={3.5} /><Circle cx={17} cy={9} r={2.8} /></>)}
       {name === 'lock' && <Rect x={5} y={11} width={14} height={10} rx={2} />}
       {name === 'car' && (<><Circle cx={7.5} cy={16.5} r={1.8} /><Circle cx={16.5} cy={16.5} r={1.8} /></>)}

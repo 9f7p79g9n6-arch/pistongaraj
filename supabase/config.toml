@@ -19,11 +19,11 @@ otp_expiry = 600
 # Gönderici: kendi SMTP (pistondestek@gmail.com, Supabase panelinde tanımlı; şifre panelde, burada değil).
 # Yeni kullanıcıya "confirmation", kayıtlı kullanıcıya "magic_link" şablonu gider; ikisi de aynı kodu içerir.
 [auth.email.template.confirmation]
-subject = "PISTON GARAGE giriş kodun"
+subject = "OTOM giriş kodun"
 content_path = "./supabase/templates/giris-kodu.html"
 
 [auth.email.template.magic_link]
-subject = "PISTON GARAGE giriş kodun"
+subject = "OTOM giriş kodun"
 content_path = "./supabase/templates/giris-kodu.html"
 
 [functions.send-reminders]

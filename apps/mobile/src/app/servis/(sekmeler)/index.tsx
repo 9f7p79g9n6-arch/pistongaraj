@@ -1,4 +1,4 @@
-/** PISTON SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
+/** OTOM SERVİS ana paneli: önce iş yapan düğmeler, sonra sayılar, sonra son kayıtlar. Grafik yok. */
 import { activePayments, BUSINESS_STATUS_LABEL, debtors, formatKurus, inPeriod, localDateOf, periodOf } from '@piston/core';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -53,14 +53,14 @@ export default function Panel() {
   const debt = useMemo(() => debtors(records), [records]);
   const debtTotal = debt.reduce((s, d) => s + d.debtKurus, 0);
 
-  if (!business) return <Screen title="PISTON SERVİS">{null}</Screen>;
+  if (!business) return <Screen title="OTOM SERVİS">{null}</Screen>;
   const toList = (filtre: string) => router.push({ pathname: '/servis/kayitlar', params: { filtre } });
 
   return (
     <Screen>
       <Row style={{ justifyContent: 'space-between', marginBottom: space.md }}>
         <Stack gap={2} style={{ flex: 1 }}>
-          <Text v="label">PISTON SERVİS</Text>
+          <Text v="label">OTOM SERVİS</Text>
           <Text v="title" numberOfLines={1}>{business.name}</Text>
         </Stack>
         <Stack gap={4} style={{ alignItems: 'flex-end' }}>
@@ -94,7 +94,7 @@ export default function Panel() {
         </Row>
         {canFinance && (
           <Row gap={space.sm}>
-            <Card onPress={() => router.push('/servis/ciro')} style={{ flex: 1, gap: 2 }} accessibilityLabel={`${L.adj} tahsilat, PISTON CİRO`}>
+            <Card onPress={() => router.push('/servis/ciro')} style={{ flex: 1, gap: 2 }} accessibilityLabel={`${L.adj} tahsilat, OTOM CİRO`}>
               <Text v="number">{formatKurus(c.collected)}</Text>
               <Muted small>{`${L.adj} tahsilat`}</Muted>
             </Card>
@@ -112,7 +112,7 @@ export default function Panel() {
           <Button title="Araç bul" icon="car" small onPress={() => router.push('/servis/araclar')} />
           <Button title="Servis geçmişi" icon="list" small onPress={() => toList('tumu')} />
           <Button title="Açık kayıtlar" icon="alert" small onPress={() => toList('acik')} />
-          {canFinance && <Button title="PISTON CİRO" icon="doc" small onPress={() => router.push('/servis/ciro')} />}
+          {canFinance && <Button title="OTOM CİRO" icon="doc" small onPress={() => router.push('/servis/ciro')} />}
           {canFinance && <Button title="Borçlu müşteriler" icon="users" small onPress={() => router.push('/servis/borclular')} />}
         </Row>
       </Section>

@@ -1,4 +1,4 @@
-/** PISTON SERVİS hata kodları → kullanıcıya gösterilecek metin. Kodlar sunucudaki exception adlarıyla aynıdır. */
+/** OTOM SERVİS hata kodları → kullanıcıya gösterilecek metin. Kodlar sunucudaki exception adlarıyla aynıdır. */
 import { RepoError } from './repo';
 
 export const SERVICE_MESSAGES: Record<string, string> = {

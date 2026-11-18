@@ -1,5 +1,5 @@
 /**
- * PISTON CİRO: ciro, tahsilat, alacak, gider ve işletme sonucu; dönem özeti, grafik verisi ve CSV.
+ * OTOM CİRO: ciro, tahsilat, alacak, gider ve işletme sonucu; dönem özeti, grafik verisi ve CSV.
  * Kurallar:
  *   * Gerçekleşen ciroya YALNIZCA tamamlanan servis kayıtları girer; tamamlanma tarihine göre döneme yazılır.
  *     Onay bekleyen, onaylanmış ama tamamlanmamış ve itirazlı kayıtlar ciroya girmez, ayrı gösterilir.
@@ -457,7 +457,7 @@ export function reportCsv(allRecords: readonly ServiceRecord[], period: Period, 
     .sort((a, b) => a.p.paidAt.localeCompare(b.p.paidAt))
     .map(({ r, p }) => [localDateOf(p.paidAt), r.plate, r.customerName, PAYMENT_METHOD_LABEL[p.method], money(p.amountKurus), p.note ?? '']);
   const lines = [
-    [`PISTON CİRO: ${period.label} (${period.from} – ${period.to})`],
+    [`OTOM CİRO: ${period.label} (${period.from} – ${period.to})`],
     ['Bu tablo işletme içi gelir-gider takibidir; fatura, kesin net kâr veya resmi defter yerine geçmez.'],
     [],
     ['SERVİS KAYITLARI'],

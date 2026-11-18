@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS Usta Forumu: işletmeler (servis, usta, oto sanayi) arasında soru, tartışma ve tecrübe paylaşımı.
+ * OTOM SERVİS Usta Forumu: işletmeler (servis, usta, oto sanayi) arasında soru, tartışma ve tecrübe paylaşımı.
  * Yalnızca işletme hesabı olanlar okur ve yazar. Gönderiye fotoğraf ya da video eklenebilir.
  * Kurallar sunucuda da aynen uygulanır (supabase/migrations/*_forum.sql).
  */

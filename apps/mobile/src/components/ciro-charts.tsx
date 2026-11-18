@@ -1,5 +1,5 @@
 /**
- * PISTON CİRO grafikleri. Sade, tek eksenli; değer bir sütuna dokununca görünür.
+ * OTOM CİRO grafikleri. Sade, tek eksenli; değer bir sütuna dokununca görünür.
  * Renkler beyaz zeminde renk körlüğü ve kontrast kontrolünden geçti (dataviz doğrulayıcı):
  *   SERIES_A (ciro / parça / bu ay), SERIES_B (gider / işçilik / geçen ay). Değerler theme.ts > chart.
  * Rakamlar her zaman metin rengiyle yazılır; renk yalnızca işaretin kimliğini taşır.

@@ -4,11 +4,12 @@ import { View } from 'react-native';
 
 import { SpecialCard } from '@/components/brand';
 import { MyPhoneCard } from '@/components/my-phone';
-import { Button, Card, Divider, ErrorText, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
+import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { serviceRepo, useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
 import { ServiceDemoRepo } from '@/data/service-demo-repo';
+import { socialRepo } from '@/data/social';
 import { repo, useApp } from '@/data/store';
 import { confirm, notify } from '@/lib/confirm';
 import { env } from '@/lib/env';
@@ -55,7 +56,7 @@ export default function Profile() {
   };
 
   return (
-    <Screen title="Profil">
+    <Screen title="Profil" back>
       <Card style={{ alignItems: 'center', gap: space.sm, paddingVertical: space.xl }}>
         <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: '#FDECEE', alignItems: 'center', justifyContent: 'center' }}
           accessibilityElementsHidden importantForAccessibility="no">
@@ -64,7 +65,7 @@ export default function Profile() {
         <Text v="title" numberOfLines={1} style={{ textAlign: 'center' }}>{account?.displayName ?? account?.email ?? 'Hesabım'}</Text>
         <Muted small>{`${vehicles.length} araç`}</Muted>
         <View style={{ flexDirection: 'row' }}>
-          <Pill tone={account?.plan === 'plus' ? 'ok' : 'neutral'}>{account?.plan === 'plus' ? 'PISTON Plus üyesi' : 'Ücretsiz üyelik'}</Pill>
+          <Pill tone={account?.plan === 'plus' ? 'ok' : 'neutral'}>{account?.plan === 'plus' ? 'OTOM Plus üyesi' : 'Ücretsiz üyelik'}</Pill>
         </View>
       </Card>
 
@@ -72,7 +73,7 @@ export default function Profile() {
         <SpecialCard style={{ marginTop: space.md, gap: space.md }}>
           <View style={{ gap: 4 }}>
             <Text v="label" color={colors.onSpecialMuted}>PREMIUM</Text>
-            <Text v="section" color={colors.onSpecial}>PISTON Plus</Text>
+            <Text v="section" color={colors.onSpecial}>OTOM Plus</Text>
             <Text v="small" color={colors.onSpecialMuted}>Sınırsız araç, Araç Pasaportu, gelişmiş raporlar. Aşama 2’de açılıyor.</Text>
           </View>
           <Button title="Plus’ı incele" variant="primary" onPress={() => router.push('/premium')} />
@@ -94,7 +95,7 @@ export default function Profile() {
         <MyPhoneCard />
       </Section>
 
-      <Section title="PISTON SERVİS">
+      <Section title="OTOM SERVİS">
         <Card style={{ paddingVertical: 0 }}>
           {biz.businesses.length > 0 ? (
             <ListItem icon="store" title="İşletme moduna geç" subtitle={biz.business?.name ?? ''}
@@ -113,16 +114,22 @@ export default function Profile() {
         </Card>
       </Section>
 
-      <Section title="Topluluk">
-        <Card style={{ paddingVertical: 0 }}>
-          <ListItem icon="forum" title="Forum" subtitle="Marka ve model toplulukları · yakında" onPress={() => router.push('/forum')} />
-        </Card>
-      </Section>
+      {socialRepo.available && account && (
+        <Section title="Ana Sayfa (topluluk)">
+          <Card style={{ paddingVertical: 0 }}>
+            <ListItem icon="user" title="Paylaşımlarım" subtitle="Takipçilerin, takip ettiklerin ve paylaşımların"
+              onPress={() => router.push(`/sosyal/kisi/${account.userId}`)} />
+            <Divider />
+            <ListItem icon="users" title="Marka grupları" subtitle="Aracının markasının grubuna katıl" onPress={() => router.push('/sosyal/gruplar')} />
+          </Card>
+          <NameCard />
+        </Section>
+      )}
 
       {account?.isAdmin && (
         <Section title="Yönetim">
           <Card style={{ paddingVertical: 0 }}>
-            <ListItem icon="shield" title="Yönetici paneli" subtitle="İşletme doğrulama ve forum şikâyetleri" onPress={() => router.push('/yonetim')} />
+            <ListItem icon="shield" title="Yönetici paneli" subtitle="İşletme doğrulama, forum ve Ana Sayfa şikâyetleri" onPress={() => router.push('/yonetim')} />
           </Card>
         </Section>
       )}
@@ -139,8 +146,39 @@ export default function Profile() {
       <Button title="Çıkış yap" icon="logout" variant="ghost" style={{ marginTop: space.xl }} loading={busy === 'out'}
         onPress={async () => { setBusy('out'); await repo.signOut(); }} />
       <Muted small style={{ marginTop: space.md, textAlign: 'center' }}>
-        PISTON GARAGE · Aşama 1{env.isDemo ? ' · Demo modu' : ''}
+        OTOM · Aşama 1{env.isDemo ? ' · Demo modu' : ''}
       </Muted>
     </Screen>
+  );
+}
+
+/** Paylaşımlarda görünen ad */
+function NameCard() {
+  const { account, refresh } = useApp();
+  const [name, setName] = useState(account?.displayName ?? '');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      await socialRepo.setMyName(name);
+      await refresh();
+      setDone(true);
+    } catch (e) {
+      setErr(e instanceof RepoError ? e.message : 'Kaydedilemedi.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card style={{ gap: space.sm, marginTop: space.sm }}>
+      <Field label="Adın (paylaşımlarında görünür)" value={name} onChangeText={(t) => { setName(t); setDone(false); }} maxLength={40}
+        autoCapitalize="words" placeholder="Örn. Ahmet Y." />
+      <ErrorText>{err}</ErrorText>
+      {done && <Text v="small" color="#1E7D53">Kaydedildi.</Text>}
+      <Button title="Adımı kaydet" small variant="outline" onPress={save} loading={busy} disabled={name.trim() === (account?.displayName ?? '').trim()} />
+    </Card>
   );
 }

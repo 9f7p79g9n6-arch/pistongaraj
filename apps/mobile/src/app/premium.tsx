@@ -13,7 +13,7 @@ const PLANS = [
 
 export default function Premium() {
   return (
-    <Screen title="PISTON Plus" back>
+    <Screen title="OTOM Plus" back>
       <Stack>
         <Pill tone="info">Aşama 2’de açılıyor</Pill>
         {PLANS.map((p, i) => (

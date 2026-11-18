@@ -1,5 +1,5 @@
 /**
- * Servisler: PISTON SERVİS kullanan doğrulanmış servislerin rehberi ve araç sahibinin servis teklif talepleri.
+ * Servisler: OTOM SERVİS kullanan doğrulanmış servislerin rehberi ve araç sahibinin servis teklif talepleri.
  * Rehberde yalnızca yönetici tarafından doğrulanmış işletmeler görünür; sahte servis gösterilmez.
  */
 import { SERVICE_DIRECTORY_CATEGORIES, type BusinessCategory, type PublicBusiness, type QuoteRequest } from '@piston/core';
@@ -42,7 +42,7 @@ export default function Services() {
 
   return (
     <Screen title="Servisler" right={<Button title="Teklif iste" icon="plus" small variant="primary" onPress={() => router.push({ pathname: '/teklif/yeni', params: { tur: 'servis' } })} />}>
-      <Muted small>PISTON SERVİS kullanan, doğrulanmış servisler. Sorununu yaz, birden çok servisten fiyat al.</Muted>
+      <Muted small>OTOM SERVİS kullanan, doğrulanmış servisler. Sorununu yaz, birden çok servisten fiyat al.</Muted>
 
       {!marketRepo.available ? (
         <Empty title="Sunucu bağlantısı gerekiyor" body="Servis rehberi ve teklifler demo sürümde kullanılamaz." />

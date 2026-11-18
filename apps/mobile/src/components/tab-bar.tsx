@@ -1,5 +1,5 @@
 /**
- * Alt menünün ortak görünümü (bireysel mod ve PISTON SERVİS): logo yeşili zemin.
+ * Alt menünün ortak görünümü (bireysel mod ve OTOM SERVİS): logo yeşili zemin.
  * Kırmızı yazı yeşil üzerinde okunmadığı için (3:1) aktif sekme koyu yazı + açık vurgu, pasif sekme zeytin yeşili (5,6:1).
  */
 import { Platform } from 'react-native';

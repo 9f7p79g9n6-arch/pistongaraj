@@ -4,8 +4,25 @@
     {
       "name": "mobile-web",
       "runtimeExecutable": "npm.cmd",
-      "runtimeArgs": ["run", "web", "-w", "mobile", "--", "--port", "8081"],
+      "runtimeArgs": [
+        "run",
+        "web",
+        "-w",
+        "mobile",
+        "--",
+        "--port",
+        "8081"
+      ],
       "port": 8081
+    },
+    {
+      "name": "mobile-web-demo",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": [
+        "/c",
+        "set EXPO_PUBLIC_DEMO_MODE=1&& npm.cmd run web -w mobile -- --port 8082"
+      ],
+      "port": 8082
     }
   ]
 }

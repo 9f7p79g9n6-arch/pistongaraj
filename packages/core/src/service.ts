@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS iş kuralları: işletme, müşteri, servis kaydı, tutar hesabı ve kayıt durumları.
+ * OTOM SERVİS iş kuralları: işletme, müşteri, servis kaydı, tutar hesabı ve kayıt durumları.
  * Tutarlar kuruş cinsinden tam sayıdır; ondalık hatası olmaz. Sunucudaki tetikleyici aynı hesabı yapar
  * (supabase/migrations/20261116000001_piston_servis.sql → private.service_totals).
  */
@@ -460,7 +460,7 @@ export function nextServiceStatus(current: ServiceRecordStatus, event: ServiceEv
     case 'edit':
       if (current === 'awaiting_approval' || current === 'revised') return current;
       if (current === 'approved' || current === 'objected') return 'revised';
-      return null;
+      return 'completed'; // tamamlanan kayıt düzeltilebilir, tamamlanmış kalır
     case 'complete':
       return current === 'completed' ? null : 'completed';
   }

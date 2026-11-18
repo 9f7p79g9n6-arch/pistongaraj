@@ -67,7 +67,7 @@
     "steps": ["Hızını düşür, takip mesafesini artır."] },
   { "id": "service_due", "name": "Bakım zamanı", "symbol": "İngiliz anahtarı", "color": "amber", "severity": "info",
     "meaning": "Aracın bakım aralığı doldu ya da dolmak üzere.",
-    "steps": ["Bakım randevusu al. PISTON GARAGE'da bakım kaydını güncelle."] },
+    "steps": ["Bakım randevusu al. OTOM'da bakım kaydını güncelle."] },
   { "id": "low_beam", "name": "Kısa far", "symbol": "Aşağı eğik çizgili far", "color": "green", "severity": "info",
     "meaning": "Kısa farlar açık.", "steps": [] },
   { "id": "fog_light", "name": "Sis farı", "symbol": "Dalgalı çizgiden geçen ışık", "color": "green", "severity": "info",

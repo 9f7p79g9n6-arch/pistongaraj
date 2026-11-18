@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS veri katmanı sözleşmesi. Bireysel taraftaki GarageRepo'dan ayrıdır; ekranlar yalnızca bunu kullanır.
+ * OTOM SERVİS veri katmanı sözleşmesi. Bireysel taraftaki GarageRepo'dan ayrıdır; ekranlar yalnızca bunu kullanır.
  * Demo ve Supabase uygulamaları aynı kuralları uygular (tutar hesabı, durum geçişleri, tekrar kayıt engeli).
  */
 import type {

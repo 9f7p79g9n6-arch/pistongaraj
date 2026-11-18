@@ -3,12 +3,12 @@ import { Tabs } from 'expo-router/js-tabs';
 import { TAB_BAR_OPTIONS } from '@/components/tab-bar';
 import { Icon, type IconName } from '@/components/icons';
 
-/** Alt menü: Ana Sayfa · Servisler · Parçalar · Profil. Forum, Profil menüsünden açılır. */
+/** Alt menü: Ana Sayfa (sosyal) · Servisler · Parçalar · Garajım. Profil, Ana Sayfa'nın sol üstündeki ☰ ile açılır. */
 const TABS: { name: string; title: string; icon: IconName }[] = [
   { name: 'index', title: 'Ana Sayfa', icon: 'home' },
   { name: 'services', title: 'Servisler', icon: 'wrench' },
   { name: 'market', title: 'Parçalar', icon: 'parts' },
-  { name: 'profile', title: 'Profil', icon: 'user' },
+  { name: 'garajim', title: 'Garajım', icon: 'car' },
 ];
 
 export default function TabLayout() {

@@ -23,6 +23,11 @@ import type { SupabaseRepo } from './supabase-repo';
 
 type Row = Record<string, any>;
 
+/** Herkese açık işletme fotoğrafı adresi */
+export function businessPhotoUrl(path: string | null | undefined): string | null {
+  return path && env.supabaseUrl ? `${env.supabaseUrl}/storage/v1/object/public/business-photos/${path}` : null;
+}
+
 export interface NewQuoteRequest {
   kind: QuoteKind;
   category: BusinessCategory;
@@ -81,7 +86,7 @@ function fail(err: { message?: string; code?: string } | null): never {
 
 const toBusiness = (j: Row): PublicBusiness => ({
   id: j.id, name: j.name, category: j.category, city: j.city, district: j.district, address: j.address, phone: j.phone,
-  description: j.description ?? null, workingHours: j.working_hours ?? null,
+  description: j.description ?? null, workingHours: j.working_hours ?? null, logoPath: j.logo_path ?? null,
   ratingAvg: j.rating_avg == null ? null : Number(j.rating_avg), ratingCount: Number(j.rating_count ?? 0),
 });
 const toOffer = (j: Row): QuoteOffer => ({
@@ -169,6 +174,20 @@ class MarketRepo {
     if (!this.sb) throw new RepoError('DEMO', MESSAGES.DEMO!);
     const { error } = await this.sb.from('businesses')
       .update({ description: description.trim() || null, working_hours: workingHours.trim() || null }).eq('id', businessId);
+    if (error) fail(error);
+  }
+
+  /** İşletme fotoğrafı yükler (yalnızca sahip); eski fotoğraf yolunun yerine yazılır. null: fotoğrafı kaldır. */
+  async setBusinessPhoto(businessId: string, uri: string | null): Promise<void> {
+    if (!this.sb) throw new RepoError('DEMO', MESSAGES.DEMO!);
+    let path: string | null = null;
+    if (uri) {
+      path = `${businessId}/${Date.now()}.jpg`;
+      const body = await (await fetch(uri)).arrayBuffer();
+      const { error: up } = await this.sb.storage.from('business-photos').upload(path, body, { contentType: 'image/jpeg', upsert: false });
+      if (up) fail(up);
+    }
+    const { error } = await this.sb.from('businesses').update({ logo_path: path }).eq('id', businessId);
     if (error) fail(error);
   }
 

@@ -2,6 +2,7 @@ import { BUSINESS_CATEGORIES, BUSINESS_STATUS_LABEL, formatPhoneTR } from '@pist
 import { router } from 'expo-router';
 import { useState } from 'react';
 
+import { BusinessThumb } from '@/components/market';
 import { NextStageCard } from '@/components/servis';
 import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Pill, Row, Screen, Section, Stack, Text, Toggle } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
@@ -26,6 +27,7 @@ export default function Menu() {
     <Screen title="Menü">
       <Card style={{ gap: 4 }}>
         <Row style={{ justifyContent: 'space-between' }}>
+          <BusinessThumb url={b.logoUrl} size={40} />
           <Text v="section" style={{ flex: 1 }} numberOfLines={1}>{b.name}</Text>
           <Pill tone={b.status === 'active' ? 'ok' : b.status === 'suspended' ? 'bad' : 'warn'}>{BUSINESS_STATUS_LABEL[b.status]}</Pill>
         </Row>
@@ -66,7 +68,7 @@ export default function Menu() {
       {biz.canFinance && (
         <Section title="Finans">
           <Card style={{ paddingVertical: 0 }}>
-            <ListItem icon="doc" title="PISTON CİRO" subtitle="Ciro, gider, net kazanç, tahsilat; PDF ve Excel" onPress={() => router.push('/servis/ciro')} />
+            <ListItem icon="doc" title="OTOM CİRO" subtitle="Ciro, gider, net kazanç, tahsilat; PDF ve Excel" onPress={() => router.push('/servis/ciro')} />
             <Divider />
             <ListItem icon="users" title="Borçlu müşteriler" subtitle="Ödenmemiş tutarlar ve hatırlatma" onPress={() => router.push('/servis/borclular')} />
           </Card>
@@ -92,7 +94,7 @@ export default function Menu() {
         <Card style={{ gap: 4 }}>
           <Muted small>
             Müşteri adı, telefonu ve plakası işletmenin kendi müşteri kaydıdır; bu verilerin sorumlusu işletmedir. Müşterini, bilgilerinin
-            PISTON SERVİS’te tutulduğu ve kaydı uygulamadan görebileceği konusunda bilgilendir. Aydınlatma metni taslağı hukuki incelemeden sonra eklenecek.
+            OTOM SERVİS’te tutulduğu ve kaydı uygulamadan görebileceği konusunda bilgilendir. Aydınlatma metni taslağı hukuki incelemeden sonra eklenecek.
           </Muted>
         </Card>
       </Section>
@@ -102,7 +104,7 @@ export default function Menu() {
       <Button title="Bireysel moda dön" icon="swap" variant="ghost" style={{ marginTop: space.xl }}
         onPress={() => { biz.setMode('personal'); router.replace('/(tabs)'); }} />
       <Muted small style={{ marginTop: space.md, textAlign: 'center' }}>
-        PISTON SERVİS · Aşama 1{env.isDemo ? ' · Demo modu: veriler yalnızca bu cihazda' : ''}
+        OTOM SERVİS · Aşama 1{env.isDemo ? ' · Demo modu: veriler yalnızca bu cihazda' : ''}
       </Muted>
     </Screen>
   );

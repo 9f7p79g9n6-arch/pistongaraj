@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS: işletme modu. Kendi navigasyonu ve kırmızı vurgu rengi var; bireysel ekranlardan ayrıdır.
+ * OTOM SERVİS: işletme modu. Kendi navigasyonu ve kırmızı vurgu rengi var; bireysel ekranlardan ayrıdır.
  * İşletmesi olmayan kullanıcı yalnızca "İşletme hesabı aç" ekranını görür.
  */
 import { Stack } from 'expo-router';

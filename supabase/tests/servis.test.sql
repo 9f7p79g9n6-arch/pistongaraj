@@ -231,14 +231,20 @@ select public.respond_to_service_record(current_setting('test.rec')::uuid, 2, 'a
 
 -- ---------------- İşletme A: tamamlar ----------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000c1","role":"authenticated"}', false) \g /dev/null
-\echo 'S14. Onaylanan kayıt tamamlanır; tamamlanan kayıt değiştirilemez'
+\echo 'S14. Onaylanan kayıt tamamlanır; tamamlanan kayıt düzeltilince tamamlanmış kalır'
 do $$ begin
   if (select approved_at from public.service_records where id = current_setting('test.rec')::uuid) is null then raise exception 'onay zamanı yok'; end if;
   if (select count(*) from public.service_approvals where record_id = current_setting('test.rec')::uuid) <> 2 then raise exception 'onay geçmişi eksik'; end if;
   perform public.complete_service_record(current_setting('test.rec')::uuid);
 end $$;
-select pg_temp.expect_error($$select public.save_service_record(jsonb_build_object('id', current_setting('test.rec'), 'odometer_km', 1,
-  'complaint', 'Sonradan değişiklik', 'items', jsonb_build_array(jsonb_build_object('title', 'Ek iş'))))$$, 'RECORD_LOCKED');
+-- Tamamlanan kayıt düzeltilebilir ve tamamlanmış kalır (20261124000001)
+do $$ begin
+  perform public.save_service_record(jsonb_build_object('id', current_setting('test.rec'), 'odometer_km', 1,
+    'complaint', 'Sonradan değişiklik', 'items', jsonb_build_array(jsonb_build_object('title', 'Ek iş', 'labor_kurus', 50000))));
+  if (select status from public.service_records where id = current_setting('test.rec')::uuid) <> 'completed' then raise exception 'düzeltme sonrası tamamlanmış kalmadı'; end if;
+  if (select grand_kurus from public.service_records where id = current_setting('test.rec')::uuid) <> 50000 then raise exception 'düzeltilmiş tutar yanlış: %', (select grand_kurus from public.service_records where id = current_setting('test.rec')::uuid); end if;
+  if (select completed_at from public.service_records where id = current_setting('test.rec')::uuid) is null then raise exception 'tamamlanma tarihi silindi'; end if;
+end $$;
 
 \echo 'S15. Storage: işletme kendi klasörüne yükler, başkasınınkine yükleyemez'
 insert into storage.objects (bucket_id, name) values ('service-files', current_setting('test.biz_a') || '/' || current_setting('test.rec') || '/kabul-1.jpg');

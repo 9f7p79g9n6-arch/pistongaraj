@@ -1,6 +1,6 @@
 /**
  * Servis rehberi, teklif talepleri (servis ve parça) ve onaylı yorumlar.
- * Araç sahibi talep açar; PISTON SERVİS'teki doğrulanmış işletmeler teklif verir. Ödeme uygulama dışında yapılır.
+ * Araç sahibi talep açar; OTOM SERVİS'teki doğrulanmış işletmeler teklif verir. Ödeme uygulama dışında yapılır.
  * Kurallar sunucuda da aynen uygulanır (supabase/migrations/*_rehber_teklif.sql).
  */
 import type { BusinessCategory } from './service';
@@ -38,6 +38,8 @@ export interface PublicBusiness {
   phone: string;
   description: string | null;
   workingHours: string | null;
+  /** İşletme fotoğrafının dosya yolu (herkese açık klasör) */
+  logoPath: string | null;
   ratingAvg: number | null;
   ratingCount: number;
 }

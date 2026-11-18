@@ -37,7 +37,7 @@ export function reportHtml(rep: ServiceReport, b: Pick<Business, 'name' | 'phone
   .note { margin-top: 20px; font-size: 10px; color: #666; }
 </style></head><body>
 <div class="head"><div><h1>${esc(b.name)}</h1><div class="muted">${esc(b.district)} / ${esc(b.city)} · ${esc(formatPhoneTR(b.phone))}</div></div>
-<div style="text-align:right"><div class="muted">PISTON CİRO</div><b>${esc(rep.period.label)}</b><div class="muted">${esc(rep.period.from)} – ${esc(rep.period.to)}</div></div></div>
+<div style="text-align:right"><div class="muted">OTOM CİRO</div><b>${esc(rep.period.label)}</b><div class="muted">${esc(rep.period.from)} – ${esc(rep.period.to)}</div></div></div>
 <h2>Ciro (tamamlanan servisler, KDV hariç)</h2>
 <table>${row('Tamamlanan servis', String(r.count))}${row('Parça satış geliri', formatKurus(r.partsKurus))}${row('İşçilik geliri', formatKurus(r.laborKurus))}
 ${row('Ortalama servis tutarı', formatKurus(r.averageKurus))}${row('Toplam ciro', formatKurus(r.ciroKurus), true)}</table>
@@ -55,7 +55,7 @@ ${row('Toplam tahsilat', formatKurus(rep.collected.totalKurus), true)}</table>
 ${debtorsList.length ? `<h2>Borçlu müşteriler</h2><table><tr><th>Müşteri</th><th>Telefon</th><th>En eski</th><th class="num">Borç</th></tr>
 ${debtorsList.map((d) => `<tr><td>${esc(d.customerName)}</td><td>${esc(formatPhoneTR(d.customerPhone))}</td><td>${esc(d.oldestDate)}</td><td class="num">${esc(formatKurus(d.debtKurus))}</td></tr>`).join('')}</table>` : ''}
 ${rep.topParts.length ? `<h2>En çok değişen parçalar</h2><table>${rep.topParts.map((p) => row(`${p.name} (${p.count} adet)`, formatKurus(p.totalKurus))).join('')}</table>` : ''}
-<div class="note">Bu rapor bilgilendirme amaçlıdır; fatura, e-arşiv veya resmi defter yerine geçmez. PISTON SERVİS ile oluşturuldu.</div>
+<div class="note">Bu rapor bilgilendirme amaçlıdır; fatura, e-arşiv veya resmi defter yerine geçmez. OTOM SERVİS ile oluşturuldu.</div>
 </body></html>`;
 }
 

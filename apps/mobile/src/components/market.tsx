@@ -16,11 +16,13 @@ import {
   type QuoteRequest,
   type QuoteStatus,
 } from '@piston/core';
+import { Image } from 'expo-image';
 import { Pressable, View } from 'react-native';
 
 import { colors, space } from '@/constants/theme';
 import { Icon } from './icons';
 import { Card, Muted, Pill, Row, Text, type Tone } from './ui';
+import { businessPhotoUrl } from '@/data/market';
 
 export const categoryLabel = (c: BusinessCategory) => BUSINESS_CATEGORIES.find((x) => x.value === c)?.label ?? c;
 
@@ -51,11 +53,23 @@ export function StarInput({ value, onChange }: { value: number; onChange: (v: nu
   );
 }
 
+/** İşletme fotoğrafı küçük görseli; fotoğraf yoksa dükkân simgesi */
+export function BusinessThumb({ path, url, size = 44 }: { path?: string | null; url?: string | null; size?: number }) {
+  const src = url ?? businessPhotoUrl(path);
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 4, overflow: 'hidden', backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+      {src ? <Image source={{ uri: src }} style={{ width: '100%', height: '100%' }} contentFit="cover" accessibilityLabel="İşletme fotoğrafı" />
+        : <Icon name="store" size={Math.round(size * 0.45)} color={colors.iconMuted} />}
+    </View>
+  );
+}
+
 export function BusinessCard({ b, onPress, selected, right }: { b: PublicBusiness; onPress: () => void; selected?: boolean; right?: React.ReactNode }) {
   return (
     <Card onPress={onPress} highlight={selected} style={{ gap: 6 }}
       accessibilityLabel={`${b.name}, ${categoryLabel(b.category)}, ${b.district} ${b.city}, ${ratingText(b.ratingAvg, b.ratingCount)}`}>
       <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <BusinessThumb path={b.logoPath} size={44} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text v="bodyStrong" numberOfLines={1}>{b.name}</Text>
           <Muted small>{`${categoryLabel(b.category)} · ${b.district} / ${b.city}`}</Muted>

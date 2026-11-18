@@ -67,7 +67,7 @@ export default function QuoteRequestScreen() {
           <Row gap={space.sm}>
             <Button title="Ara" icon="user" variant="primary" style={{ flex: 1 }} onPress={() => Linking.openURL(`tel:${accepted.businessPhone}`)} />
             <Button title="WhatsApp" icon="forum" style={{ flex: 1 }}
-              onPress={() => openWhatsApp(accepted.businessPhone, `Merhaba, PISTON GARAGE'daki "${r.title}" talebim için teklifinizi kabul ettim.`)} />
+              onPress={() => openWhatsApp(accepted.businessPhone, `Merhaba, OTOM'daki "${r.title}" talebim için teklifinizi kabul ettim.`)} />
           </Row>
         </Card>
       )}

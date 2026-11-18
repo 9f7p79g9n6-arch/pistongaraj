@@ -165,7 +165,7 @@ describe('kayıt durumları', () => {
     expect(nextServiceStatus('approved', 'edit')).toBe('revised');
     expect(nextServiceStatus('objected', 'edit')).toBe('revised');
     expect(nextServiceStatus('awaiting_approval', 'edit')).toBe('awaiting_approval');
-    expect(nextServiceStatus('completed', 'edit')).toBeNull();
+    expect(nextServiceStatus('completed', 'edit')).toBe('completed');
   });
   it('müşteri onayı olmadan da tamamlanır; tamamlanan kayıt yeniden tamamlanmaz', () => {
     expect(nextServiceStatus('approved', 'complete')).toBe('completed');

@@ -51,7 +51,7 @@ export function whatsappMessage(r: ServiceRecord, pdfUrl: string | null = null):
     `Genel toplam: ${formatKurus(t.grandKurus)}`,
     ...(pdfUrl ? ['', 'Servis kaydının PDF belgesi (30 gün açılabilir):', pdfUrl] : []),
     '',
-    'Kaydı PISTON GARAGE uygulamasında "Servis kayıtlarım" bölümünden de görebilirsiniz.',
+    'Kaydı OTOM uygulamasında "Servis kayıtlarım" bölümünden de görebilirsiniz.',
   ];
   return out.join('\n');
 }
@@ -95,7 +95,7 @@ ${row('Parça toplamı', formatKurus(t.partsKurus), false)}</table>
 ${t.discountKurus > 0 ? row('İndirim', `−${formatKurus(t.discountKurus)}`) : ''}
 ${t.vatRate != null ? row(`KDV (%${t.vatRate})`, formatKurus(t.vatKurus)) : row('KDV', 'Uygulanmadı')}
 ${row('Genel toplam', formatKurus(t.grandKurus), true)}</table>
-<div class="note">Bu belge bilgilendirme amaçlıdır; fatura veya vergi belgesi yerine geçmez. PISTON SERVİS ile oluşturuldu.</div>
+<div class="note">Bu belge bilgilendirme amaçlıdır; fatura veya vergi belgesi yerine geçmez. OTOM SERVİS ile oluşturuldu.</div>
 </body></html>`;
 }
 

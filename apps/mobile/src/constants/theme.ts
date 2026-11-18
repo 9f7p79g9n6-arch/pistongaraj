@@ -1,5 +1,5 @@
 /**
- * PISTON GARAGE tasarım sistemi. Bütün ekranlar renk, yazı ve ölçüleri buradan alır.
+ * OTOM tasarım sistemi. Bütün ekranlar renk, yazı ve ölçüleri buradan alır.
  * Açık tema: beyaz ve açık gri yüzeyler, koyu antrasit yazı, ölçülü kırmızı marka vurgusu.
  * Kural: kırmızı yalnızca birincil aksiyon, aktif sekme/menü, bildirim ve marka vurgusu içindir.
  */
@@ -49,7 +49,7 @@ export const colors = {
 } as const;
 
 /**
- * Vurgu rengi. Bireysel mod ve PISTON SERVİS aynı marka kırmızısını kullanır.
+ * Vurgu rengi. Bireysel mod ve OTOM SERVİS aynı marka kırmızısını kullanır.
  * fill: düğme zemini (üzerindeki metin `onFill`), text: beyaz/açık zeminde kırmızı metin.
  */
 export interface Accent { fill: string; onFill: string; text: string }

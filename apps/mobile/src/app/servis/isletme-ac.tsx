@@ -10,13 +10,13 @@ export default function OpenBusiness() {
   const leave = () => {
     if (biz.businesses.length === 0) {
       biz.setMode('personal');
-      router.replace('/(tabs)/profile');
+      router.replace('/profil');
     } else router.back();
   };
   return (
     <Screen title="İşletme hesabı aç" back>
       <Card style={{ gap: 4 }}>
-        <Text v="bodyStrong">PISTON SERVİS</Text>
+        <Text v="bodyStrong">OTOM SERVİS</Text>
         <Muted small>
           Servis kaydı aç, parça ve işçiliği ayrı yaz, müşterinin onayını al. Şimdilik ücretsiz. İşletmen açıldıktan sonra
           doğrulama bekler; bu sürede kullanabilirsin, müşterilerin kayıtta “doğrulanmadı” etiketini görür.

@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS ortak bileşenleri: durum etiketi, kayıt kartı, tutar dökümü, işlem listesi.
+ * OTOM SERVİS ortak bileşenleri: durum etiketi, kayıt kartı, tutar dökümü, işlem listesi.
  * Hem işletme ekranlarında hem müşterinin onay ekranında kullanılır; müşteri ve işletme aynı dökümü görür.
  */
 import {
@@ -235,7 +235,7 @@ export function CustomerEmailHint() {
     <Muted small>
       {env.isDemo
         ? `Demo: müşteri ekranını bu cihazda denemek için e-posta olarak ${DEMO_CUSTOMER_EMAIL} yaz; kayıt bireysel moddaki "Servis kayıtlarım" ekranına düşer.`
-        : 'E-posta isteğe bağlı. Müşteri PISTON GARAGE kullanıyorsa kayıt ona iki yoldan gider: bu e-posta onun giriş e-postasıysa ya da Profil’ine yazdığı telefon buradaki telefonla ve Garajım’daki plaka bu plakayla aynıysa.'}
+        : 'E-posta isteğe bağlı. Müşteri OTOM kullanıyorsa kayıt ona iki yoldan gider: bu e-posta onun giriş e-postasıysa ya da Profil’ine yazdığı telefon buradaki telefonla ve Garajım’daki plaka bu plakayla aynıysa.'}
     </Muted>
   );
 }

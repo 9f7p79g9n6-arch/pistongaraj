@@ -1,5 +1,5 @@
 /**
- * PISTON SERVİS Supabase veri katmanı. Yetki kontrolünü veritabanı yapar (RLS + security definer fonksiyonlar);
+ * OTOM SERVİS Supabase veri katmanı. Yetki kontrolünü veritabanı yapar (RLS + security definer fonksiyonlar);
  * servis kaydı yalnızca save_service_record ile yazılır, tutarlar sunucuda hesaplanır.
  * Not: Gerçek bir Supabase projesine bağlanıp uçtan uca denenene kadar bu katman "test edildi" sayılmaz.
  */
@@ -40,7 +40,9 @@ function fail(err: { message?: string; code?: string } | null): never {
 
 const toBusiness = (r: Row, role: Business['role'], logoUrl: string | null): Business => ({
   id: r.id, name: r.name, contactName: r.contact_name, phone: r.phone, email: r.email, city: r.city, district: r.district,
-  address: r.address, category: r.category, taxOffice: r.tax_office, taxNumber: r.tax_number, logoUrl, status: r.status,
+  address: r.address, category: r.category, taxOffice: r.tax_office, taxNumber: r.tax_number,
+  logoUrl: logoUrl ?? (r.logo_path ? `${process.env.EXPO_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/business-photos/${r.logo_path}` : null),
+  status: r.status,
   description: r.description ?? null, workingHours: r.working_hours ?? null,
   role, createdAt: r.created_at,
 });

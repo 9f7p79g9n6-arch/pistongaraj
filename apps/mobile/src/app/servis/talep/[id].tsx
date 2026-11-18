@@ -100,7 +100,7 @@ export default function IncomingRequest() {
               <Row gap={space.sm}>
                 <Button title="Ara" icon="user" variant="primary" style={{ flex: 1 }} onPress={() => Linking.openURL(`tel:${r.customerPhone}`)} />
                 <Button title="WhatsApp" icon="forum" style={{ flex: 1 }}
-                  onPress={() => openWhatsApp(r.customerPhone!, `Merhaba, PISTON GARAGE'daki "${r.title}" talebiniz için teklifimizi kabul ettiniz. Randevu için yazıyorum.`)} />
+                  onPress={() => openWhatsApp(r.customerPhone!, `Merhaba, OTOM'daki "${r.title}" talebiniz için teklifimizi kabul ettiniz. Randevu için yazıyorum.`)} />
               </Row>
             </>
           ) : (

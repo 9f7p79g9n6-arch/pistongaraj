@@ -72,7 +72,7 @@ export default function CustomerRecord() {
           <Text v="section" style={{ flex: 1 }}>{r.businessName}</Text>
           {!r.businessVerified && <Pill tone="warn">Doğrulanmadı</Pill>}
         </Row>
-        {!r.businessVerified && <Muted small>Bu işletmenin bilgileri henüz PISTON tarafından doğrulanmadı.</Muted>}
+        {!r.businessVerified && <Muted small>Bu işletmenin bilgileri henüz OTOM tarafından doğrulanmadı.</Muted>}
       </Card>
 
       <Stack gap={space.md} style={{ marginTop: space.md }}>

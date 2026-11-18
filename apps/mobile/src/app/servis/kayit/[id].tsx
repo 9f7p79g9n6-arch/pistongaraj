@@ -15,6 +15,7 @@ import {
 import * as Crypto from 'expo-crypto';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { View } from 'react-native';
 
 import { PaymentCard } from '@/components/payments';
 import { FilesGrid, HistoryList, IntakeCard, ItemsList, ResponsesList, TotalsCard } from '@/components/servis';
@@ -62,6 +63,10 @@ export default function RecordDetail() {
   const edit = async () => {
     if (r.status === 'approved') {
       const ok = await confirm('Onaylı kaydı düzelt', 'Müşteri bu kaydı onayladı. Değişiklik yaparsan eski ve yeni değerler saklanır.', 'Düzelt');
+      if (!ok) return;
+    }
+    if (r.status === 'completed') {
+      const ok = await confirm('Tamamlanan kaydı düzelt', 'Kayıt tamamlanmış olarak kalır; eski hâli saklanır. Ciro ve müşterinin borcu yeni tutara göre güncellenir.', 'Düzelt');
       if (!ok) return;
     }
     router.push({ pathname: '/servis/yeni-kayit', params: { duzenle: r.id } });
@@ -147,6 +152,16 @@ export default function RecordDetail() {
           </Card>
         )}
 
+        <Card style={{ gap: space.sm }}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <Text v="bodyStrong">Kaydı düzelt</Text>
+              <Muted small>{open ? 'Parça, fiyat, işçilik ya da araç bilgisini değiştir.' : 'Kayıt tamamlandı; düzeltirsen ciro ve borç yeni tutara göre güncellenir.'}</Muted>
+            </View>
+            <Button title="Düzelt" icon="edit" small variant="outline" onPress={edit} />
+          </Row>
+        </Card>
+
         {open && (
           <ChargeCard r={r} onDone={load}
             onCharge={async (amount, method, requestId) => {
@@ -192,8 +207,7 @@ export default function RecordDetail() {
       <Section title="Durum geçmişi"><HistoryList r={r} /></Section>
 
       <ErrorText>{err}</ErrorText>
-      {open && <Button title="Kaydı düzelt" variant="ghost" style={{ marginTop: space.xl }} onPress={edit} />}
-      {!open && <Muted small style={{ marginTop: space.lg }}>Bu kayıt tamamlandı; değiştirilemez. Fotoğraf ve ödeme eklenebilir.</Muted>}
+      {!open && <Muted small style={{ marginTop: space.lg }}>Bu kayıt tamamlandı. Düzeltme, fotoğraf ve ödeme eklenebilir.</Muted>}
 
       {biz.canDelete && !deleting && (
         <Button title="Kaydı sil" icon="trash" variant="ghost" style={{ marginTop: space.md }}
@@ -203,7 +217,7 @@ export default function RecordDetail() {
         <Card style={{ borderColor: colors.danger, gap: space.sm, marginTop: space.md }}>
           <Text v="bodyStrong" color={colors.danger}>Bu kayıt silinsin mi?</Text>
           <Muted small>
-            Kayıt listelerden, müşteri ekranından ve PISTON CİRO’dan çıkar. Denetim için arka planda saklanır.
+            Kayıt listelerden, müşteri ekranından ve OTOM CİRO’dan çıkar. Denetim için arka planda saklanır.
             {r.payments.some((p) => !p.voidedAt) ? ' Bu kayıtta alınmış ödeme var: önce Tahsilat bölümünden ödemeyi iptal et.' : ''}
           </Muted>
           <Field label="Sebep (isteğe bağlı)" value={deleteReason} onChangeText={setDeleteReason} placeholder="Örn. Yanlışlıkla açıldı" />
@@ -278,7 +292,7 @@ function ChargeCard({ r, onCharge, onDone }: {
           Ödeme sonra · borç olarak tamamla
         </Text>
       )}
-      <Muted small>Tamamlanan kayıt PISTON CİRO’ya girer. Müşteri onayı gerekmez.</Muted>
+      <Muted small>Tamamlanan kayıt OTOM CİRO’ya girer. Müşteri onayı gerekmez.</Muted>
       <ErrorText>{err}</ErrorText>
     </Card>
   );
