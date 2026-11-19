@@ -2,7 +2,7 @@ import { formatNumber, parseDateTR, parseNumberTR, toDateTR } from '@piston/core
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
-import { Button, Chip, ErrorText, Field, Muted, Row, Screen, Stack, Text } from '@/components/ui';
+import { Button, Chip, ErrorText, Field, Row, Screen, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { RepoError } from '@/data/repo';
 import { useApp, useVehicle } from '@/data/store';
@@ -73,7 +73,6 @@ export default function LogMaintenance() {
           <Field label="Kim yaptı" value={by} onChangeText={setBy} placeholder="Servis adı ya da Kendim" />
         </Row>
         <Field label="Not" value={notes} onChangeText={setNotes} placeholder="Kullanılan parça, garanti vb." multiline style={{ minHeight: 80, textAlignVertical: 'top' }} />
-        <Muted small>Fatura ve fiş fotoğrafı ekleme (otomatik okuma ile) Aşama 2’de geliyor.</Muted>
         <ErrorText>{err}</ErrorText>
       </Stack>
     </Screen>

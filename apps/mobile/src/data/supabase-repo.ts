@@ -14,7 +14,7 @@ import { RepoError, type Account, type AppNotification, type NotifyPrefs, type C
 type Row = Record<string, any>;
 
 const MESSAGES: Record<string, string> = {
-  VEHICLE_LIMIT: 'Ücretsiz planda en fazla 2 araç ekleyebilirsin. Plus ile sınırsız araç eklenir.',
+  VEHICLE_LIMIT: 'Garajında en fazla 5 araç olabilir. Yer açmak için kullanmadığın bir aracı garajdan kaldır.',
   ODOMETER_BELOW_HISTORY: 'Kilometre, kayıtlı en yüksek değerin altına inemez.',
   MODEL_YEAR_INVALID: 'Model yılını kontrol et.',
   VIN_INVALID: 'Şasi numarası geçersiz.',
@@ -116,6 +116,11 @@ export class SupabaseRepo implements GarageRepo {
   async verifyEmailCode(email: string, code: string) {
     const { error } = await this.sb.auth.verifyOtp({ email, token: code, type: 'email' });
     if (error) throw new RepoError('OTP', 'Kod hatalı ya da süresi dolmuş. Yeni kod iste.');
+  }
+
+  async signInWithPassword(email: string, password: string) {
+    const { error } = await this.sb.auth.signInWithPassword({ email, password });
+    if (error) throw new RepoError('PASSWORD', 'E-posta ya da şifre hatalı.');
   }
 
   async startDemo() {

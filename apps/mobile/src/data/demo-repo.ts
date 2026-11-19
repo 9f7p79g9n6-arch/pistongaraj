@@ -163,6 +163,10 @@ export class DemoRepo implements GarageRepo {
     return () => this.listeners.delete(cb);
   }
 
+  async signInWithPassword() {
+    throw new RepoError('NOT_SUPPORTED', 'Demo sürümünde şifreyle giriş yok.');
+  }
+
   async requestEmailCode() {
     throw new RepoError('DEMO', 'Demo modunda e-posta ile giriş yok. "Demo ile gez" düğmesini kullan.');
   }
@@ -204,7 +208,7 @@ export class DemoRepo implements GarageRepo {
   async addVehicle(input: NewVehicle) {
     return this.mutate((s) => {
       if (!canAddVehicle(s.plan, s.vehicles.filter((v) => !v.archived).length))
-        throw new RepoError('VEHICLE_LIMIT', 'Ücretsiz planda en fazla 2 araç ekleyebilirsin.');
+        throw new RepoError('VEHICLE_LIMIT', 'Garajında en fazla 5 araç olabilir. Yer açmak için kullanmadığın bir aracı garajdan kaldır.');
       const { vin, photoUri, ...rest } = input;
       const v: Vehicle & { archived: boolean } = {
         ...rest, id: id(), createdAt: new Date().toISOString(), archived: false,

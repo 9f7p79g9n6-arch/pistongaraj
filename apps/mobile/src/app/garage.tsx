@@ -1,4 +1,4 @@
-import { canAddVehicle, formatNumber } from '@piston/core';
+import { canAddVehicle, formatNumber, PLAN_LIMITS } from '@piston/core';
 import { router } from 'expo-router';
 
 import { CarArt, TYPE_LABEL } from '@/components/vehicle';
@@ -9,10 +9,10 @@ import { space } from '@/constants/theme';
 export default function Garage() {
   const { vehicles, active, selectVehicle, account } = useApp();
   const canAdd = canAddVehicle(account?.plan ?? 'free', vehicles.length);
-  const add = () => (canAdd ? router.push('/vehicle/new') : router.push('/premium'));
+  const add = () => { if (canAdd) router.push('/vehicle/new'); };
 
   return (
-    <Screen title="Garajım" back right={<IconButton icon="plus" label="Araç ekle" onPress={add} />}>
+    <Screen title="Garajım" back right={canAdd ? <IconButton icon="plus" label="Araç ekle" onPress={add} /> : undefined}>
       <Stack>
         {vehicles.map((v) => (
           <Card key={v.id} highlight={v.id === active?.id}>
@@ -33,8 +33,8 @@ export default function Garage() {
             </Row>
           </Card>
         ))}
-        <Button title={canAdd ? 'Araç ekle' : 'Araç sınırına ulaştın · Plus'} icon="plus" variant={canAdd ? 'primary' : 'secondary'} onPress={add} />
-        <Muted small>Ücretsiz planda 2 araç. Plus ile sınırsız araç ve aile paylaşımı.</Muted>
+        <Button title={canAdd ? 'Araç ekle' : 'Araç sınırına ulaştın'} icon="plus" variant={canAdd ? 'primary' : 'secondary'} onPress={add} disabled={!canAdd} />
+        <Muted small>{`Garajında en fazla ${PLAN_LIMITS.free.maxVehicles} araç olabilir. Yer açmak için kullanmadığın aracı detay sayfasından garajdan kaldır.`}</Muted>
       </Stack>
     </Screen>
   );

@@ -51,15 +51,21 @@ select pg_temp.expect_error($$insert into public.vehicles (make, model, model_ye
 select pg_temp.expect_error($$insert into public.vehicles (make, model, model_year, fuel_type, transmission, odometer_km)
   values ('Ford','Courier',2099,'diesel','manual',1)$$, 'MODEL_YEAR_INVALID');
 
-\echo '5. Ücretsiz planda 3. araç reddedilir; arşivleyince yer açılır'
+\echo '5. Ücretsiz planda 6. araç reddedilir; arşivleyince yer açılır'
 insert into public.vehicles (id, make, model, model_year, fuel_type, transmission, odometer_km)
 values ('10000000-0000-0000-0000-000000000002', 'Ford', 'Transit Courier', 2020, 'diesel', 'manual', 86300);
+insert into public.vehicles (id, make, model, model_year, fuel_type, transmission, odometer_km) values
+  ('10000000-0000-0000-0000-0000000000e1', 'Fiat', 'Doblo', 2018, 'diesel', 'manual', 1000),
+  ('10000000-0000-0000-0000-0000000000e2', 'Fiat', 'Egea', 2019, 'diesel', 'manual', 1000),
+  ('10000000-0000-0000-0000-0000000000e3', 'Fiat', 'Linea', 2015, 'diesel', 'manual', 1000);
 select pg_temp.expect_error($$insert into public.vehicles (make, model, model_year, fuel_type, transmission, odometer_km)
   values ('Renault','Clio',2022,'gasoline','manual',1000)$$, 'VEHICLE_LIMIT');
 update public.vehicles set archived_at = now() where id = '10000000-0000-0000-0000-000000000002';
 insert into public.vehicles (id, make, model, model_year, fuel_type, transmission, odometer_km)
 values ('10000000-0000-0000-0000-000000000003', 'Renault', 'Clio', 2022, 'gasoline', 'manual', 1000);
 select pg_temp.expect_error($$update public.vehicles set archived_at = null where id = '10000000-0000-0000-0000-000000000002'$$, 'VEHICLE_LIMIT');
+-- Sonraki adımlar için ek araçlar arşivlenir (2 aktif araç kalır)
+update public.vehicles set archived_at = now() where id in ('10000000-0000-0000-0000-0000000000e1', '10000000-0000-0000-0000-0000000000e2', '10000000-0000-0000-0000-0000000000e3');
 
 \echo '6. Şasi numarası şifreli saklanır, yalnızca maskeli hali tabloda'
 select pg_temp.expect_error($$select public.set_vehicle_vin('10000000-0000-0000-0000-000000000001', 'WF0XXXGCDXGO12345')$$, 'VIN_INVALID');

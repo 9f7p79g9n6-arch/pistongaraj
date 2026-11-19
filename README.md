@@ -54,16 +54,27 @@ Telefonda **Expo Go** ile QR kodu okut. `.env` yoksa uygulama **DEMO** modunda a
 
 ### Bildirimler
 
-- `app.json` içine `extra.eas.projectId` ekle (`npx eas-cli@latest init` yazar).
-- Günlük gönderim için Supabase'de `pg_cron` ve `pg_net` eklentilerini aç, ardından:
+Akış: veritabanı olayları (servis kaydı, teklif, yorum, takip…) ve `send-reminders` → `notifications` tablosu →
+`push-dispatch` → Expo push → telefon. Kullanıcı Ayarlar'dan 4 konuyu (hatırlatmalar, servis, teklifler, topluluk)
+telefona gelmeyecek şekilde kapatabilir; kapalı konu uygulamadaki listede yine görünür.
+
+- `app.json` içinde `extra.eas.projectId` olmalı (`npx eas-cli@latest init` yazar).
+- Gizli anahtar: `npx supabase secrets set CRON_SECRET=<uzun-rastgele-değer>` (eski `REMINDERS_CRON_SECRET` de okunur).
+- Supabase'de `pg_cron` ve `pg_net` eklentilerini aç, ardından (SQL Editor):
   ```sql
   select cron.schedule('bakim-hatirlatma', '0 6 * * *',  -- 06:00 UTC = 09:00 İstanbul
     $$select net.http_post(
         url := 'https://<proje-ref>.supabase.co/functions/v1/send-reminders',
-        headers := jsonb_build_object('x-cron-secret', '<REMINDERS_CRON_SECRET>', 'Content-Type', 'application/json'),
+        headers := jsonb_build_object('x-cron-secret', '<CRON_SECRET>', 'Content-Type', 'application/json'),
+        body := '{}'::jsonb)$$);
+  select cron.schedule('bildirim-gonder', '* * * * *',  -- her dakika
+    $$select net.http_post(
+        url := 'https://<proje-ref>.supabase.co/functions/v1/push-dispatch',
+        headers := jsonb_build_object('x-cron-secret', '<CRON_SECRET>', 'Content-Type', 'application/json'),
         body := '{}'::jsonb)$$);
   ```
-- Aynı hatırlatma için 7 gün içinde ikinci bildirim gönderilmez.
+- Aynı bakım hatırlatması 7 gün, aynı ceza hatırlatması 5 gün içinde tekrar oluşturulmaz.
+- Test: `npm run fn:test` (sahte sunucularla; gerçek bildirim gönderilmez).
 
 ### Gösterge ışığı tanıma
 

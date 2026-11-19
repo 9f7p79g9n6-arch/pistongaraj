@@ -18,7 +18,7 @@ const NAV = [['index.html', 'OTOM'], ['kosullar.html', 'Kullanım koşulları'],
 function page(file, title, body) {
   const nav = NAV.map(([f, l]) => `<a href="${f}"${f === file ? ' aria-current="page"' : ''}>${esc(l)}</a>`).join('');
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(title)} · OTOM</title>
+<title>${title === "OTOM" ? "OTOM" : esc(title) + " · OTOM"}</title>
 <style>
   :root { --bg:#fff; --fg:#16181c; --muted:#5b6170; --line:#e6e8ec; --brand:#d6303d; }
   @media (prefers-color-scheme: dark) { :root { --bg:#14161a; --fg:#eef0f3; --muted:#a3a9b5; --line:#2a2e36; --brand:#ff5a66; } }

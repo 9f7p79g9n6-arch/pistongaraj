@@ -69,7 +69,6 @@ export default function AddFuel() {
         </Card>
         <Toggle label="Depo tamamen doldu" hint="Doğru tüketim hesabı için gerekli. Kısmi dolum bir sonraki tam dolumda hesaba katılır." value={full} onChange={setFull} />
         {errs.map((e) => <ErrorText key={e}>{e}</ErrorText>)}
-        <Muted small>Fiş fotoğrafından otomatik doldurma Aşama 2’de geliyor.</Muted>
       </Stack>
     </Screen>
   );

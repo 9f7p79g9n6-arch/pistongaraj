@@ -68,7 +68,6 @@ function Routes() {
       <Stack.Protected guard={signedIn && !needsTerms}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="garage" />
-        <Stack.Screen name="premium" />
         <Stack.Screen name="lights" />
         <Stack.Screen name="accident" />
         <Stack.Screen name="vehicle/[id]/fines" />

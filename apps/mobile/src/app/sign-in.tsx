@@ -28,7 +28,8 @@ export default function SignIn() {
   const [mode, setMode] = useState<AppMode>('personal');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [password, setPassword] = useState('');
+  const [step, setStep] = useState<'email' | 'code' | 'password'>('email');
   const [kvkk, setKvkk] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -55,6 +56,8 @@ export default function SignIn() {
   const sendCode = () => act(async () => {
     if (!kvkk) throw new RepoError('KVKK', 'Devam etmek için kullanım koşullarını ve aydınlatma metnini onayla.');
     if (!EMAIL_RE.test(email.trim())) throw new RepoError('EMAIL', 'Geçerli bir e-posta adresi gir.');
+    // App Store inceleme hesabı kodla değil şifreyle girer
+    if (env.reviewEmail && email.trim().toLowerCase() === env.reviewEmail) { setStep('password'); return; }
     await repo.requestEmailCode(email.trim().toLowerCase());
     setStep('code');
   });
@@ -64,6 +67,13 @@ export default function SignIn() {
     if (!/^\d{6}$/.test(code.trim())) throw new RepoError('OTP', 'E-postana gelen 6 haneli kodu gir.');
     biz.setMode(mode);
     await repo.verifyEmailCode(email.trim().toLowerCase(), code.trim());
+    await consents();
+  });
+
+  const passwordSignIn = () => act(async () => {
+    if (!password) throw new RepoError('PASSWORD', 'Şifreni gir.');
+    biz.setMode(mode);
+    await repo.signInWithPassword(email.trim().toLowerCase(), password);
     await consents();
   });
 
@@ -143,6 +153,14 @@ export default function SignIn() {
             )}
             <Muted small style={{ textAlign: 'center' }}>Aynı hesapla iki tarafı da kullanabilirsin; Profil’den geçiş yaparsın.</Muted>
           </Stack>
+        ) : step === 'password' ? (
+          <Card style={{ gap: space.md }}>
+            <Muted small>{chosen.title}</Muted>
+            <Field label="Şifre" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoComplete="password" textContentType="password" />
+            <ErrorText>{err}</ErrorText>
+            <Button title="Giriş yap" variant="primary" onPress={passwordSignIn} loading={busy} />
+            <Button title="E-postayı değiştir" variant="ghost" onPress={() => { setStep('email'); setPassword(''); setErr(null); }} />
+          </Card>
         ) : (
           <Card style={{ gap: space.md }}>
             <Muted small>{chosen.title}</Muted>

@@ -54,7 +54,8 @@
     "web": "expo start --web",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "export:web": "expo export --platform web"
+    "export:web": "expo export --platform web",
+    "screenshots": "node e2e/screenshots.cjs"
   },
   "private": true
 }

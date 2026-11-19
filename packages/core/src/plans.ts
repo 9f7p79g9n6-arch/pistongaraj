@@ -2,7 +2,7 @@ import type { Plan } from './types';
 
 /** Plan sınırları. Sunucudaki `enforce_vehicle_limit` tetikleyicisiyle aynı değerleri kullanır. */
 export const PLAN_LIMITS: Record<Plan, { maxVehicles: number }> = {
-  free: { maxVehicles: 2 },
+  free: { maxVehicles: 5 },
   plus: { maxVehicles: 50 },
 };
 

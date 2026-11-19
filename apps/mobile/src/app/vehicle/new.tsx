@@ -82,7 +82,7 @@ export default function NewVehicle() {
     <Screen title="Araç ekle" back footer={<Button title="Garaja ekle" variant="primary" onPress={save} loading={busy} />}>
       <Stack gap={space.lg}>
         <Segmented<VehicleType> value={type} onChange={setType} options={[
-          { value: 'car', label: 'Otomobil' }, { value: 'commercial', label: 'Ticari' }, { value: 'motorcycle', label: 'Motosiklet · yakında', disabled: true },
+          { value: 'car', label: 'Otomobil' }, { value: 'commercial', label: 'Ticari' },
         ]} />
 
         <Stack gap={space.sm}>

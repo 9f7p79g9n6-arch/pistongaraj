@@ -2,8 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { SpecialCard } from '@/components/brand';
-import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
+import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Screen, Section, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
@@ -25,21 +24,7 @@ export default function Profile() {
         </View>
         <Text v="title" numberOfLines={1} style={{ textAlign: 'center' }}>{account?.displayName ?? account?.email ?? 'Hesabım'}</Text>
         <Muted small>{`${vehicles.length} araç`}</Muted>
-        <View style={{ flexDirection: 'row' }}>
-          <Pill tone={account?.plan === 'plus' ? 'ok' : 'neutral'}>{account?.plan === 'plus' ? 'OTOM Plus üyesi' : 'Ücretsiz üyelik'}</Pill>
-        </View>
       </Card>
-
-      {account?.plan !== 'plus' && (
-        <SpecialCard style={{ marginTop: space.md, gap: space.md }}>
-          <View style={{ gap: 4 }}>
-            <Text v="label" color={colors.onSpecialMuted}>PREMIUM</Text>
-            <Text v="section" color={colors.onSpecial}>OTOM Plus</Text>
-            <Text v="small" color={colors.onSpecialMuted}>Sınırsız araç, Araç Pasaportu, gelişmiş raporlar. Aşama 2’de açılıyor.</Text>
-          </View>
-          <Button title="Plus’ı incele" variant="primary" onPress={() => router.push('/premium')} />
-        </SpecialCard>
-      )}
 
       <Section title="Garaj">
         <Card style={{ paddingVertical: 0 }}>

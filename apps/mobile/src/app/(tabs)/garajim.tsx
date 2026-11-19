@@ -124,7 +124,7 @@ export default function Garajim() {
           <QuickTile icon="doc" title="Servis Kayıtları" subtitle="Servislerin açtığı kayıtlar" badge={myPendingCount}
             onPress={() => router.push('/servis-kayitlarim')} />
           <QuickTile icon="parts" title="Parça ve Ürünler" subtitle="Aracına uyan parçalar" onPress={() => router.push('/market')} />
-          <QuickTile icon="search" title="Ekspertiz" subtitle="Alım öncesi kontrol" soon />
+          <QuickTile icon="shield" title="Muayene" subtitle="Muayene öncesi kontrol" onPress={() => router.push(`/vehicle/${vid}/inspection`)} />
         </View>
         <Row gap={space.sm}>
           <Tool icon="alert" tint={colors.warnText} label="Gösterge ışığı" onPress={() => router.push('/lights')} />

@@ -208,9 +208,9 @@ describe('biçimlendirme ve plan', () => {
     expect(describeLeft(2240, 116)).toBe('2.240 km kaldı · 116 gün kaldı');
     expect(describeLeft(-1000, -3)).toBe('1.000 km geçti · 3 gün gecikti');
   });
-  it('ücretsiz planda 2 araç', () => {
-    expect(canAddVehicle('free', 1)).toBe(true);
-    expect(canAddVehicle('free', 2)).toBe(false);
-    expect(canAddVehicle('plus', 2)).toBe(true);
+  it('ücretsiz planda 5 araç', () => {
+    expect(canAddVehicle('free', 4)).toBe(true);
+    expect(canAddVehicle('free', 5)).toBe(false);
+    expect(canAddVehicle('plus', 5)).toBe(true);
   });
 });

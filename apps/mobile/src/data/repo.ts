@@ -97,6 +97,8 @@ export interface GarageRepo {
   onAuthChange(cb: () => void): () => void;
   requestEmailCode(email: string): Promise<void>;
   verifyEmailCode(email: string, code: string): Promise<void>;
+  /** Yalnızca App Store inceleme hesabı için (env.reviewEmail) */
+  signInWithPassword(email: string, password: string): Promise<void>;
   startDemo(): Promise<void>;
   signOut(): Promise<void>;
   deleteAccount(): Promise<void>;

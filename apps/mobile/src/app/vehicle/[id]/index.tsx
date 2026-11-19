@@ -64,13 +64,6 @@ export default function VehicleDetail() {
         </Card>
       </Section>
 
-      <Section title="Araç Pasaportu">
-        <Card style={{ gap: space.xs }}>
-          <Text v="bodyStrong">Satışta geçmişini paylaş</Text>
-          <Muted small>Belgeli bakım geçmişini alıcıya tek bağlantıyla göstermek Plus ile Aşama 2’de açılıyor. Şimdiden faturalı kayıt ekledikçe pasaportun dolar.</Muted>
-        </Card>
-      </Section>
-
       <Stack style={{ marginTop: space.xl }}>
         <ErrorText>{err}</ErrorText>
         <Button title="Aracı garajdan kaldır" variant="ghost" icon="trash" onPress={archive} />
