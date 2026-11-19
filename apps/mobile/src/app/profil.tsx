@@ -136,6 +136,10 @@ export default function Profile() {
 
       <Section title="Gizlilik ve güvenlik">
         <Card style={{ paddingVertical: 0 }}>
+          <ListItem icon="doc" title="Kullanım koşulları" onPress={() => router.push('/legal/kosullar')} />
+          <Divider />
+          <ListItem icon="shield" title="Gizlilik politikası" onPress={() => router.push('/legal/gizlilik')} />
+          <Divider />
           <ListItem icon="shield" title="KVKK aydınlatma metni" onPress={() => router.push('/legal/kvkk')} />
           <Divider />
           <ListItem icon="trash" title="Hesabımı sil" subtitle="Tüm verilerin kalıcı olarak silinir" danger onPress={deleteAccount} />

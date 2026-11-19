@@ -9,7 +9,7 @@ import { normalizePlate, type TrafficFine, type ExpenseRecord, type FuelRecord, 
 import { Platform } from 'react-native';
 
 import { env } from '@/lib/env';
-import { RepoError, type Account, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
+import { RepoError, type Account, type ConsentType, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
 
 type Row = Record<string, any>;
 
@@ -132,7 +132,14 @@ export class SupabaseRepo implements GarageRepo {
     await this.sb.auth.signOut();
   }
 
-  async recordConsent(consent: 'kvkk_notice' | 'marketing' | 'analytics' | 'ai_processing', granted: boolean, textVersion: string) {
+  async hasConsent(consent: ConsentType, textVersion: string) {
+    const { data, error } = await this.sb.from('consents').select('granted')
+      .eq('consent', consent).eq('text_version', textVersion).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    if (error) fail(error);
+    return data?.granted === true;
+  }
+
+  async recordConsent(consent: ConsentType, granted: boolean, textVersion: string) {
     const { error } = await this.sb.from('consents').insert({ consent, granted, text_version: textVersion });
     if (error) fail(error);
   }

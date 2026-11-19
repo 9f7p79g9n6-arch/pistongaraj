@@ -1,0 +1,61 @@
+{
+  "version": "2026-11-v2",
+  "updated": "19 Kasım 2026",
+  "status": "TASLAK — yayından önce hukuk kontrolü gerekir. Köşeli parantezli alanlar doldurulmalıdır.",
+  "company": {
+    "name": "[ŞİRKET UNVANI]",
+    "address": "[ŞİRKET ADRESİ]",
+    "registry": "[MERSİS NO / VERGİ DAİRESİ VE NUMARASI]",
+    "email": "pistondestek@gmail.com",
+    "kep": "[KEP ADRESİ — varsa]"
+  },
+  "documents": {
+    "kosullar": {
+      "title": "Kullanım Koşulları",
+      "intro": "Bu koşullar, OTOM mobil uygulamasını (araç sahipleri için OTOM ve işletmeler için OTOM SERVİS) kullanırken uyacağın kuralları anlatır. Uygulamayı kullanarak bu koşulları kabul etmiş olursun.",
+      "sections": [
+        ["1. Hizmet", "OTOM; araç bakım hatırlatmaları, yakıt ve masraf takibi, trafik cezası ve muayene hatırlatmaları, servis kayıtları, servis ve yedek parça rehberi, teklif talepleri ve araç sahipleri ile ustaların paylaşım yaptığı topluluk alanları sunar. Hizmet {company.name} tarafından sağlanır."],
+        ["2. Hesap", "Uygulamayı kullanmak için 18 yaşını doldurmuş olmalısın. Hesabını e-posta adresine gelen kodla açarsın. Hesabının güvenliğinden ve hesabınla yapılan işlemlerden sen sorumlusun. Hesabını istediğin zaman Profil > Hesabımı sil bölümünden kapatabilirsin."],
+        ["3. Paylaşım kuralları ve sıfır tolerans", "Topluluk alanlarında, forumda, yorumlarda ve tekliflerde paylaştığın içerikten sen sorumlusun. Şunlar kesinlikle yasaktır: hakaret, tehdit, taciz, nefret söylemi; müstehcen ya da şiddet içeren içerik; başkasının kişisel verisini (plaka, telefon, adres, yüz) izinsiz paylaşma; yanıltıcı ya da sahte bilgi, sahte yorum; reklam ve istenmeyen ileti; yasa dışı ürün ya da hizmet; başkasının fikri haklarını ihlal eden içerik. Bu tür içeriklere ve bunları paylaşan kullanıcılara tolerans gösterilmez."],
+        ["4. Şikâyet, engelleme ve denetim", "Uygunsuz bir içeriği ya da kullanıcıyı uygulama içinden şikâyet edebilir, bir kullanıcıyı engelleyebilirsin. Şikâyetler en geç 24 saat içinde incelenir. Kurallara aykırı içerik kaldırılır; kuralları ihlal eden hesap uyarılmadan askıya alınabilir ya da kapatılabilir. Birden fazla kişinin şikâyet ettiği içerik inceleme bitene kadar gizlenebilir."],
+        ["5. İşletmeler (OTOM SERVİS)", "İşletme hesabı açan kişi, işletme adına işlem yapmaya yetkili olduğunu ve verdiği bilgilerin doğru olduğunu kabul eder. İşletmeler doğrulanana kadar \"doğrulama bekliyor\" olarak görünür. İşletmenin uygulamaya girdiği müşteri bilgilerinin (ad, telefon, e-posta, plaka, araç, fotoğraf, ücret) veri sorumlusu işletmenin kendisidir; işletme müşterisini bu konuda bilgilendirmek ve gerekiyorsa açık rızasını almakla yükümlüdür. OTOM bu verileri işletme adına saklar ve işletmenin talimatı dışında kullanmaz. Uygulamanın oluşturduğu servis dökümü ve PDF bilgilendirme amaçlıdır; fatura ya da vergi belgesi yerine geçmez."],
+        ["6. Teklifler, yorumlar ve rehber", "OTOM, araç sahipleri ile işletmeleri buluşturur; aralarındaki hizmet ya da satış ilişkisinin tarafı değildir. Fiyat, ödeme, garanti ve teslim konuları araç sahibi ile işletme arasındadır. Uygulama içinden ödeme alınmaz. Yorumlar yalnızca tamamlanmış servis kaydı olan müşteriler tarafından yazılabilir ve gerçek deneyimi yansıtmalıdır."],
+        ["7. Bilgilendirme amaçlı özellikler", "Bakım aralıkları kullanıcının girdiği değerlerdir; üretici önerisi yerine geçmez. Trafik cezası indirim ve ödeme süreleri genel kurala göre hesaplanır; güncel tutar ve süre için resmî kaynaklar (e-Devlet) esastır. Kaza asistanı ve muayene listesi genel bilgilendirmedir, hukuki ya da teknik danışmanlık değildir. Bu bilgilere dayanarak aldığın kararlardan önce gerekirse bir uzmana danış."],
+        ["8. Sorumluluğun sınırı", "Hizmeti kesintisiz ve hatasız sunmak için çalışırız ancak bunu garanti edemeyiz. Yürürlükteki mevzuatın izin verdiği ölçüde, kullanıcıların ve işletmelerin paylaştığı içerikten, işletmelerin verdiği hizmetten ve bilgilendirme amaçlı özelliklerin kullanımından doğan zararlardan sorumlu değiliz. Tüketici olarak 6502 sayılı Kanun'dan doğan hakların saklıdır."],
+        ["9. Fikri haklar", "Uygulamanın tasarımı, yazılımı ve markası {company.name}'e aittir. Paylaştığın içeriğin hakları sende kalır; içeriği uygulamada göstermek, saklamak ve yaymak için bize ücretsiz ve münhasır olmayan bir kullanım izni verirsin. Hesabını silince bu izin sona erer."],
+        ["10. Değişiklikler ve fesih", "Bu koşulları değiştirebiliriz; önemli değişikliklerde uygulama içinde yeniden onayını isteriz. Kuralları ihlal eden hesapları kapatabiliriz. Sen de hesabını istediğin zaman silebilirsin."],
+        ["11. Uygulanacak hukuk ve iletişim", "Bu koşullara Türkiye Cumhuriyeti hukuku uygulanır. Tüketici uyuşmazlıklarında tüketici hakem heyetleri ve tüketici mahkemeleri yetkilidir. Sorular ve şikâyetler için: {company.email}"]
+      ]
+    },
+    "gizlilik": {
+      "title": "Gizlilik Politikası",
+      "intro": "Bu politika, OTOM'u kullanırken hangi verilerini neden işlediğimizi, kimlerle paylaştığımızı ve haklarını anlatır. KVKK kapsamındaki ayrıntılar KVKK Aydınlatma Metni'ndedir.",
+      "sections": [
+        ["1. Veri sorumlusu", "{company.name}, {company.address}, {company.registry}. İletişim: {company.email}"],
+        ["2. Topladığımız veriler", "Hesap: e-posta adresi, adın, isteğe bağlı telefon numaran. Garaj: araç bilgileri (marka, model, yıl, kilometre; isteğe bağlı plaka ve şifreli saklanan şasi numarası), bakım, yakıt, masraf, ceza ve muayene kayıtların, yüklediğin fotoğraf ve belgeler. Topluluk: paylaştığın yazı, fotoğraf ve videolar, yorumlar, beğeniler, takip ettiğin ve engellediğin kişiler, şikâyetlerin. Teklif ve rehber: talep açıklaman, şehir ve kategori, yorumların. Servis kayıtları: bir işletmenin senin için açtığı kayıtlar (araç, yapılan işler, ücret, fotoğraflar) ve bu kayda verdiğin onay ya da itiraz. Cihaz: bildirim izni verdiysen bildirim anahtarı. Kayıtlar: KVKK ve kullanım koşulları onaylarının tarihleri."],
+        ["3. İşletmelerin girdiği müşteri verileri", "OTOM SERVİS kullanan bir işletme, müşterisinin adını, telefonunu, isteğe bağlı e-postasını, plakasını, araç bilgisini ve fotoğraflarını uygulamaya girer. Bu verilerin veri sorumlusu işletmedir; OTOM bu verileri işletme adına barındıran veri işleyendir. Bu verilerle ilgili taleplerini doğrudan işletmeye, ya da bize iletebilirsin; ilgili işletmeye ulaştırırız."],
+        ["4. Neden işliyoruz", "Hesabını açmak ve girişi doğrulamak; garaj, hatırlatma ve hesaplama özelliklerini sunmak; servis kayıtlarını sana ve işletmeye göstermek; teklif ve rehber özelliklerini çalıştırmak; topluluk alanlarını işletmek ve denetlemek; seni bildirimlerle uyarmak; güvenliği sağlamak ve kötüye kullanımı engellemek; yasal yükümlülüklerimizi yerine getirmek. Pazarlama iletisi yalnızca ayrıca onay verirsen gönderilir."],
+        ["5. Kimlerle paylaşıyoruz", "Verilerini satmayız ve reklam için paylaşmayız. Hizmeti sunmak için şu hizmet sağlayıcıları kullanırız: Supabase (veritabanı ve dosya barındırma, Avrupa Birliği — Frankfurt), Expo ve Apple (bildirim gönderimi), Google (giriş kodu e-postalarının gönderimi). Teklifini kabul ettiğin işletme telefon numaranı görür. Servis kaydı paylaşımlarını (WhatsApp, PDF) sen başlatırsın. Yasal zorunluluk hâlinde yetkili kamu kurumlarıyla paylaşabiliriz."],
+        ["6. Yurt dışına aktarım", "Hizmet sağlayıcılarımızın bir kısmı yurt dışındadır. Aktarım, KVKK'nın 9. maddesine uygun güvencelerle yapılır. [Hukuk kontrolü: aktarım dayanağı ve standart sözleşmeler yazılacak.]"],
+        ["7. Saklama süresi", "Verilerin hesabın açık olduğu sürece saklanır. Hesabını silince garaj kayıtların, paylaşımların ve profil bilgilerin silinir. Bir işletmenin muhasebe ve yasal saklama yükümlülüğü olan servis kayıtları, yasal süre boyunca erişime kapalı olarak saklanabilir."],
+        ["8. Güvenlik", "Veriler şifreli bağlantıyla taşınır. Her kullanıcı yalnızca kendi verisine, her işletme yalnızca kendi kayıtlarına erişebilir; bu kurallar veritabanı düzeyinde uygulanır. Şasi numarası şifreli saklanır."],
+        ["9. Hakların ve hesap silme", "Verilerine erişme, düzeltme, silme ve itiraz hakların vardır (KVKK md. 11). Hesabını ve verilerini Profil > Hesabımı sil bölümünden kendin silebilirsin. Diğer talepler için: {company.email}"],
+        ["10. Çocuklar", "Uygulama 18 yaşından küçüklere yönelik değildir ve bilerek çocuklardan veri toplamayız."],
+        ["11. Değişiklikler", "Bu politikayı güncelleyebiliriz; önemli değişiklikleri uygulama içinde duyururuz."]
+      ]
+    },
+    "kvkk": {
+      "title": "KVKK Aydınlatma Metni",
+      "intro": "6698 sayılı Kişisel Verilerin Korunması Kanunu'nun 10. maddesi uyarınca, kişisel verilerinin işlenmesine ilişkin seni bilgilendiririz.",
+      "sections": [
+        ["Veri sorumlusu", "{company.name}, {company.address}, {company.registry}, {company.kep}"],
+        ["İşlenen veriler", "Kimlik ve iletişim (ad, e-posta, isteğe bağlı telefon), araç ve kullanım verileri (araç bilgileri, bakım, yakıt, masraf, ceza kayıtları), görsel veriler (yüklediğin fotoğraf ve videolar), topluluk verileri (paylaşımlar, yorumlar, şikâyetler), işlem güvenliği verileri (giriş kayıtları, bildirim anahtarı), onay kayıtları."],
+        ["Amaçlar", "Üyelik ve kimlik doğrulama; uygulama özelliklerinin sunulması; servis kayıtlarının ilgili kişiye iletilmesi; topluluk alanlarının işletilmesi ve denetimi; bildirim gönderimi; bilgi güvenliğinin sağlanması; hukuki yükümlülüklerin yerine getirilmesi; açık rızan varsa pazarlama iletisi gönderimi."],
+        ["Hukuki sebepler", "Sözleşmenin kurulması ve ifası (md. 5/2-c), hukuki yükümlülük (md. 5/2-ç), bir hakkın tesisi ve korunması (md. 5/2-e), meşru menfaat (md. 5/2-f). Pazarlama iletileri ve yurt dışına aktarımda gerekli hâllerde açık rıza (md. 5/1, md. 9)."],
+        ["Aktarım", "Barındırma, bildirim ve e-posta gönderimi hizmeti aldığımız tedarikçilere (bir kısmı yurt dışında, md. 9 kapsamındaki güvencelerle), teklifini kabul ettiğin işletmeye ve yasal zorunluluk hâlinde yetkili kurumlara aktarılabilir. [Hukuk kontrolü: tedarikçi listesi ve aktarım dayanağı.]"],
+        ["Toplama yöntemi", "Verilerin, uygulamaya senin girdiğin bilgilerle ve servis kaydı açan işletmenin girdiği bilgilerle elektronik ortamda toplanır."],
+        ["Hakların", "KVKK md. 11 uyarınca verilerinin işlenip işlenmediğini öğrenme, bilgi isteme, amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı kişileri bilme, düzeltme, silme, itiraz ve zararın giderilmesini isteme hakların vardır. Başvurularını {company.email} adresine iletebilirsin. Hesabını uygulama içinden kendin de silebilirsin."]
+      ]
+    }
+  }
+}

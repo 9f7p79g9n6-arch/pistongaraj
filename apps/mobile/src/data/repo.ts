@@ -20,6 +20,8 @@ export type NewFuel = Omit<FuelRecord, 'id'>;
 export type NewExpense = Omit<ExpenseRecord, 'id'>;
 export type NewFine = Omit<TrafficFine, 'id' | 'paidOn' | 'paidAmount'>;
 
+export type ConsentType = 'kvkk_notice' | 'marketing' | 'analytics' | 'ai_processing' | 'terms';
+
 export interface Account {
   userId: string;
   email: string | null;
@@ -79,7 +81,9 @@ export interface GarageRepo {
   startDemo(): Promise<void>;
   signOut(): Promise<void>;
   deleteAccount(): Promise<void>;
-  recordConsent(consent: 'kvkk_notice' | 'marketing' | 'analytics' | 'ai_processing', granted: boolean, textVersion: string): Promise<void>;
+  recordConsent(consent: ConsentType, granted: boolean, textVersion: string): Promise<void>;
+  /** Bu metin sürümü için en son verilen onay "evet" mi */
+  hasConsent(consent: ConsentType, textVersion: string): Promise<boolean>;
 
   // Garaj
   listVehicles(): Promise<Vehicle[]>;

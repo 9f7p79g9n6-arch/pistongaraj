@@ -2,6 +2,7 @@
  * Giriş: önce iki seçenek (Araç sahibi / İşletme), sonra aynı e-posta kodu ya da demo girişi.
  * İşletme seçilirse giriş sonrası uygulama OTOM SERVİS ile açılır (işletmesi yoksa "İşletme hesabı aç").
  */
+import { LEGAL_VERSION } from '@piston/core';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -34,6 +35,7 @@ export default function SignIn() {
   const [err, setErr] = useState<string | null>(null);
 
   const consents = async () => {
+    await repo.recordConsent('terms', true, LEGAL_VERSION);
     await repo.recordConsent('kvkk_notice', true, env.kvkkTextVersion);
     await repo.recordConsent('marketing', marketing, env.kvkkTextVersion);
   };
@@ -51,7 +53,7 @@ export default function SignIn() {
   };
 
   const sendCode = () => act(async () => {
-    if (!kvkk) throw new RepoError('KVKK', 'Devam etmek için aydınlatma metnini okuduğunu onayla.');
+    if (!kvkk) throw new RepoError('KVKK', 'Devam etmek için kullanım koşullarını ve aydınlatma metnini onayla.');
     if (!EMAIL_RE.test(email.trim())) throw new RepoError('EMAIL', 'Geçerli bir e-posta adresi gir.');
     await repo.requestEmailCode(email.trim().toLowerCase());
     setStep('code');
@@ -66,7 +68,7 @@ export default function SignIn() {
   });
 
   const demo = () => act(async () => {
-    if (!kvkk) throw new RepoError('KVKK', 'Devam etmek için aydınlatma metnini okuduğunu onayla.');
+    if (!kvkk) throw new RepoError('KVKK', 'Devam etmek için kullanım koşullarını ve aydınlatma metnini onayla.');
     biz.setMode(mode);
     await repo.startDemo();
     await consents();
@@ -115,10 +117,18 @@ export default function SignIn() {
                 <Field label="E-posta" value={email} onChangeText={setEmail} placeholder="ornek@eposta.com"
                   autoCapitalize="none" keyboardType="email-address" autoComplete="email" textContentType="emailAddress" />
               )}
-              <Toggle label="Aydınlatma metnini okudum" hint="Kişisel verilerin KVKK kapsamında işlenir." value={kvkk} onChange={(v) => { setKvkk(v); if (v) setErr(null); }} />
-              <Link href="/legal/kvkk" asChild>
-                <Pressable accessibilityRole="link"><Text v="smallStrong" color={colors.brandDark}>KVKK aydınlatma metnini oku</Text></Pressable>
-              </Link>
+              <Toggle label="Aydınlatma metnini okudum" hint="Kullanım koşullarını kabul ediyorum. Uygunsuz içeriğe tolerans gösterilmez; kişisel verilerin KVKK kapsamında işlenir." value={kvkk} onChange={(v) => { setKvkk(v); if (v) setErr(null); }} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
+                <Link href="/legal/kosullar" asChild>
+                  <Pressable accessibilityRole="link"><Text v="smallStrong" color={colors.brandDark}>Kullanım koşulları</Text></Pressable>
+                </Link>
+                <Link href="/legal/gizlilik" asChild>
+                  <Pressable accessibilityRole="link"><Text v="smallStrong" color={colors.brandDark}>Gizlilik politikası</Text></Pressable>
+                </Link>
+                <Link href="/legal/kvkk" asChild>
+                  <Pressable accessibilityRole="link"><Text v="smallStrong" color={colors.brandDark}>KVKK aydınlatma metni</Text></Pressable>
+                </Link>
+              </View>
               <Toggle label="Kampanya ve haber bildirimleri" hint="İsteğe bağlı. İstediğin zaman kapatabilirsin." value={marketing} onChange={setMarketing} />
             </Card>
 

@@ -170,6 +170,12 @@ export class DemoRepo implements GarageRepo {
     this.emit();
   }
 
+  async hasConsent(consent: string, textVersion: string) {
+    const s = await this.load();
+    const last = [...s.consents].reverse().find((c) => c.consent === consent && c.textVersion === textVersion);
+    return last?.granted === true;
+  }
+
   async recordConsent(consent: string, granted: boolean, textVersion: string) {
     await this.mutate((s) => { s.consents.push({ consent, granted, textVersion, at: new Date().toISOString() }); });
   }

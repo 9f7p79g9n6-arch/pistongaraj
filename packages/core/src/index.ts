@@ -18,3 +18,4 @@ export * from './reminder';
 export * from './quotes';
 export * from './social';
 export * from './claim-code';
+export * from './legal';
