@@ -48,8 +48,8 @@ export function QuickTile({ icon, title, subtitle, onPress, soon, badge }: {
     <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" accessibilityState={{ disabled }}
       accessibilityLabel={[title, subtitle, soon ? 'yakında' : null, badge ? `${badge} yeni` : null].filter(Boolean).join(', ')}
       style={({ pressed }) => [{
-        flexBasis: '47%', flexGrow: 1, backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, gap: space.md,
-        borderWidth: 1, borderColor: colors.line, minHeight: 112,
+        flexBasis: '47%', flexGrow: 1, backgroundColor: colors.cardTint, borderRadius: radius.lg, padding: space.lg, gap: space.md,
+        borderWidth: 1, borderColor: colors.cardLine, minHeight: 112,
       }, shadow, pressed && { opacity: 0.7 }]}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: soon ? colors.surface : '#FDECEE', alignItems: 'center', justifyContent: 'center' }}>

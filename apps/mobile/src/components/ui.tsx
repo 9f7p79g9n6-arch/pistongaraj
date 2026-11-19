@@ -347,7 +347,7 @@ export const s = StyleSheet.create({
   scroll: { paddingHorizontal: space.lg, paddingBottom: 40 },
   footer: { paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.lg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 18, borderWidth: 1, borderColor: colors.line, ...shadow },
+  card: { backgroundColor: colors.cardTint, borderRadius: radius.lg, padding: 18, borderWidth: 1, borderColor: colors.cardLine, ...shadow },
   pressed: { opacity: 0.7 },
   btn: { minHeight: 50, borderRadius: radius.md, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center' },
   btnSmall: { minHeight: 38, paddingHorizontal: space.md, borderRadius: 11 },

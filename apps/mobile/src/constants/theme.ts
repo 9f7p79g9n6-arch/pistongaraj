@@ -10,6 +10,10 @@ export const colors = {
   bg: '#F3F4F6',
   /** Kart arka planı */
   card: '#FFFFFF',
+  /** Kutucuk (kart) zemini: çok açık logo yeşili */
+  cardTint: '#F7FBEA',
+  /** Kutucuk kenarlığı: açık yeşilimsi */
+  cardLine: '#DDEBB4',
   /** İkincil kart, giriş alanı ve ikincil düğme zemini */
   surface: '#E9ECF0',
   /** Çizgi ve kenarlık */
