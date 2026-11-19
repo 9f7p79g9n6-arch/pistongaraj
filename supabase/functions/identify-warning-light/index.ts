@@ -9,7 +9,7 @@
 // Gerekli gizli değer: ANTHROPIC_API_KEY  (npx supabase secrets set ANTHROPIC_API_KEY=...)
 import Anthropic from 'npm:@anthropic-ai/sdk@1.8.0';
 import { betaZodOutputFormat } from 'npm:@anthropic-ai/sdk@1.8.0/helpers/beta/zod';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.119.1';
 import * as z from 'npm:zod@4.6.7';
 
 import { corsHeaders, json } from '../_shared/cors.ts';

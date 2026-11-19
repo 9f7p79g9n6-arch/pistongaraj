@@ -1,6 +1,6 @@
 // Günlük bakım bildirimi. pg_cron ile her gün 09:00 (İstanbul) çağrılır; README > Bildirimler.
 // Aynı kural için 7 gün içinde ikinci bildirim gönderilmez.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.119.1';
 import { json } from '../_shared/cors.ts';
 
 type DueRow = {

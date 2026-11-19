@@ -1,7 +1,7 @@
 // Uygulama içinden hesap silme (App Store 5.1.1(v), KVKK md. 7).
 // 1) İsteği yapan kullanıcıyı JWT ile doğrular  2) Storage'daki dosyalarını siler
 // 3) auth.users kaydını siler; veritabanındaki tüm kayıtlar ON DELETE CASCADE ile gider.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.119.1';
 import { corsHeaders, json } from '../_shared/cors.ts';
 
 const BUCKETS = ['documents', 'vehicle-photos'];

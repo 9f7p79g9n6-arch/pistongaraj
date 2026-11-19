@@ -28,3 +28,6 @@ content_path = "./supabase/templates/giris-kodu.html"
 
 [functions.send-reminders]
 verify_jwt = false # cron çağırır; içeride gizli başlık kontrol edilir
+
+[functions.push-dispatch]
+verify_jwt = false # cron çağırır; içeride gizli başlık kontrol edilir

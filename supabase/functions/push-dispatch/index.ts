@@ -4,7 +4,7 @@
 // 2) Kullanıcının tercihine bakar (profiles.notify_*); kapalı gruptaki bildirim telefona gitmez ama uygulamada görünür
 // 3) Kullanıcının cihaz anahtarlarına Expo Push ile gönderir (100'lük paketler)
 // 4) "DeviceNotRegistered" dönen anahtarları siler; işlenen satırları pushed_at ile işaretler
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.119.1';
 import { json } from '../_shared/cors.ts';
 
 type Notif = { id: string; user_id: string; kind: string; title: string; body: string | null; data: Record<string, unknown> };
