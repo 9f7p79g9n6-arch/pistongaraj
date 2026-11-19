@@ -153,7 +153,14 @@ export class SupabaseRepo implements GarageRepo {
   async listVehicles() {
     const { data, error } = await this.sb.from('vehicles').select('*').is('archived_at', null).order('created_at');
     if (error) fail(error);
-    return Promise.all((data ?? []).map(async (r) => toVehicle(r, await this.photoUrl(r.photo_path))));
+    // Tüm araç fotoğrafları tek istekte imzalanır
+    const paths = (data ?? []).map((r) => r.photo_path as string | null).filter((x): x is string => !!x);
+    const urls = new Map<string, string>();
+    if (paths.length) {
+      const { data: signed } = await this.sb.storage.from('vehicle-photos').createSignedUrls(paths, 60 * 60);
+      for (const d of signed ?? []) if (d.path && d.signedUrl) urls.set(d.path, d.signedUrl);
+    }
+    return (data ?? []).map((r) => toVehicle(r, r.photo_path ? urls.get(r.photo_path) ?? null : null));
   }
 
   async addVehicle(input: NewVehicle) {

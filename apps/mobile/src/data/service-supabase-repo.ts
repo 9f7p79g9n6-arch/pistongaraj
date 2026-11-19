@@ -60,13 +60,24 @@ export class ServiceSupabaseRepo implements ServiceRepo {
   readonly mode = 'supabase' as const;
   constructor(private readonly sb: SupabaseClient) {}
 
-  private async signed(path: string): Promise<string> {
-    const { data } = await this.sb.storage.from(BUCKET).createSignedUrl(path, 60 * 30);
-    return data?.signedUrl ?? '';
+  /** Birden çok kaydın fotoğraf/belge bağlantılarını tek istekte imzalar */
+  private async signAll(rows: Row[]): Promise<Map<string, string>> {
+    const paths = [...new Set(rows.flatMap((j) => ((j.files as Row[] | undefined) ?? []).map((f) => f.storage_path as string)))];
+    const urls = new Map<string, string>();
+    for (let i = 0; i < paths.length; i += 500) {
+      const { data } = await this.sb.storage.from(BUCKET).createSignedUrls(paths.slice(i, i + 500), 60 * 30);
+      for (const d of data ?? []) if (d.path && d.signedUrl) urls.set(d.path, d.signedUrl);
+    }
+    return urls;
+  }
+
+  private async fromViews(rows: Row[]): Promise<ServiceRecord[]> {
+    const urls = await this.signAll(rows);
+    return rows.map((j) => this.fromView(j, urls));
   }
 
   /** business_service_record / my_service_records çıktısını uygulama biçimine çevirir */
-  private async fromView(j: Row): Promise<ServiceRecord> {
+  private fromView(j: Row, urls: Map<string, string>): ServiceRecord {
     const items = (j.items as Row[]).map((i) => ({
       id: i.id, title: i.title, description: i.description, partName: i.part_name, partQty: i.part_qty,
       partUnitKurus: Number(i.part_unit_kurus), laborKurus: Number(i.labor_kurus), discountKurus: Number(i.discount_kurus),
@@ -80,7 +91,7 @@ export class ServiceSupabaseRepo implements ServiceRepo {
       vehicleId: j.vehicle_id, plate: j.plate, vehicleLabel: j.vehicle_label, status: j.status, approvalVersion: j.approval_version,
       intakeAt: j.intake_at, odometerKm: j.odometer_km, complaint: j.complaint, initialNote: j.initial_note, fuelLevel: j.fuel_level,
       existingDamage: j.existing_damage, items, totals,
-      files: await Promise.all((j.files as Row[]).map(async (f) => ({ id: f.id, kind: f.kind, url: await this.signed(f.storage_path), mimeType: f.mime_type, sizeBytes: f.size_bytes }))),
+      files: (j.files as Row[]).map((f) => ({ id: f.id, kind: f.kind, url: urls.get(f.storage_path) ?? '', mimeType: f.mime_type, sizeBytes: f.size_bytes })),
       responses: (j.responses as Row[]).map((a) => ({ id: a.id, version: a.version, action: a.action, reason: a.reason, via: a.via, at: a.created_at })),
       history: (j.history as Row[]).map((h) => ({ status: h.status, by: h.actor, at: h.created_at })),
       payments: ((j.payments as Row[] | undefined) ?? []).map((p) => ({
@@ -154,17 +165,17 @@ export class ServiceSupabaseRepo implements ServiceRepo {
   }
 
   async listRecords(businessId: string) {
-    const { data, error } = await this.sb.from('service_records').select('id').eq('business_id', businessId).is('deleted_at', null)
-      .order('created_at', { ascending: false }).limit(200);
+    // Tek çağrı: kayıtlar ve tüm dosya bağlantıları birlikte (önceden kayıt başına ayrı istek gidiyordu)
+    const { data, error } = await this.sb.rpc('business_service_records', { p_business_id: businessId, p_limit: 200 });
     if (error) fail(error);
-    return Promise.all((data ?? []).map((r: Row) => this.getRecord(r.id)));
+    return this.fromViews((data as Row[]) ?? []);
   }
 
   async getRecord(id: string) {
     const { data, error } = await this.sb.rpc('business_service_record', { p_record_id: id });
     if (error) fail(error);
     if (!data) throw serviceError('NOT_FOUND');
-    return this.fromView(data);
+    return (await this.fromViews([data as Row]))[0]!;
   }
 
   async saveRecord(d: ServiceRecordDraft) {
@@ -290,7 +301,7 @@ export class ServiceSupabaseRepo implements ServiceRepo {
   async myRecords() {
     const { data, error } = await this.sb.rpc('my_service_records');
     if (error) fail(error);
-    return Promise.all(((data as Row[]) ?? []).map((j) => this.fromView(j)));
+    return this.fromViews((data as Row[]) ?? []);
   }
 
   async respond(recordId: string, version: number, action: 'approved' | 'objected', reason: string | null) {
