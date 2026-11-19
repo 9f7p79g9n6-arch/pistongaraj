@@ -5,6 +5,7 @@
  * Demo sürümde sunucu olmadığı için mesaj bağlantısız gider; PDF paylaşım menüsüyle ayrıca gönderilir.
  */
 import {
+  formatClaimCode,
   formatDate,
   formatKm,
   formatKurus,
@@ -33,7 +34,7 @@ function lines(r: ServiceRecord) {
 }
 
 /** WhatsApp mesajı: kısa özet; varsa PDF bağlantısı. Sahte bağlantı içermez. */
-export function whatsappMessage(r: ServiceRecord, pdfUrl: string | null = null): string {
+export function whatsappMessage(r: ServiceRecord, pdfUrl: string | null = null, claimCode: string | null = null): string {
   const { parts, labor } = lines(r);
   const t = r.totals;
   const out = [
@@ -51,7 +52,12 @@ export function whatsappMessage(r: ServiceRecord, pdfUrl: string | null = null):
     `Genel toplam: ${formatKurus(t.grandKurus)}`,
     ...(pdfUrl ? ['', 'Servis kaydının PDF belgesi (30 gün açılabilir):', pdfUrl] : []),
     '',
-    'Kaydı OTOM uygulamasında "Servis kayıtlarım" bölümünden de görebilirsiniz.',
+    ...(claimCode
+      ? [
+          `Kaydı OTOM uygulamasında görmek ve onaylamak için "Servis kayıtlarım" bölümünde "Kayıt kodu gir"e dokunup şu kodu yazın: ${formatClaimCode(claimCode)}`,
+          'Bu kodu başkasıyla paylaşmayın.',
+        ]
+      : ['Kaydı OTOM uygulamasında "Servis kayıtlarım" bölümünden de görebilirsiniz.']),
   ];
   return out.join('\n');
 }
@@ -67,7 +73,7 @@ export async function openWhatsApp(phoneE164: string, text: string): Promise<boo
   }
 }
 
-export function recordHtml(r: ServiceRecord, b: Pick<Business, 'name' | 'phone' | 'address' | 'district' | 'city'>): string {
+export function recordHtml(r: ServiceRecord, b: Pick<Business, 'name' | 'phone' | 'address' | 'district' | 'city'>, claimCode: string | null = null): string {
   const { parts, labor } = lines(r);
   const t = r.totals;
   const row = (label: string, value: string, strong = false) =>
@@ -80,6 +86,7 @@ export function recordHtml(r: ServiceRecord, b: Pick<Business, 'name' | 'phone' 
   table { width: 100%; border-collapse: collapse; } td { padding: 6px 0; border-bottom: 1px solid #eee; }
   .num { text-align: right; white-space: nowrap; } .strong td { font-weight: 700; font-size: 15px; border-top: 2px solid #111; }
   .plate { font-size: 18px; font-weight: 700; letter-spacing: 1px; } .note { margin-top: 24px; font-size: 11px; color: #666; }
+  .code { margin-top: 18px; padding: 12px; border: 2px dashed #E53945; border-radius: 8px; } .code span { font-size: 18px; font-weight: 700; letter-spacing: 2px; }
 </style></head><body>
 <div class="head"><div><h1>${esc(b.name)}</h1><div class="muted">${esc(b.address)}, ${esc(b.district)} / ${esc(b.city)}<br>${esc(formatPhoneTR(b.phone))}</div></div>
 <div style="text-align:right"><div class="muted">SERVİS KAYDI</div><div>${esc(formatDate(r.intakeAt.slice(0, 10)))}</div><div class="muted">${esc(SERVICE_STATUS_LABEL[r.status])} · sürüm ${r.approvalVersion}</div></div></div>
@@ -95,20 +102,21 @@ ${row('Parça toplamı', formatKurus(t.partsKurus), false)}</table>
 ${t.discountKurus > 0 ? row('İndirim', `−${formatKurus(t.discountKurus)}`) : ''}
 ${t.vatRate != null ? row(`KDV (%${t.vatRate})`, formatKurus(t.vatKurus)) : row('KDV', 'Uygulanmadı')}
 ${row('Genel toplam', formatKurus(t.grandKurus), true)}</table>
+${claimCode ? `<div class="code">OTOM uygulamasında kaydı görmek ve onaylamak için <b>Servis kayıtlarım → Kayıt kodu gir</b> bölümüne şu kodu yazın: <span>${esc(formatClaimCode(claimCode))}</span><br>Bu kodu başkasıyla paylaşmayın.</div>` : ''}
 <div class="note">Bu belge bilgilendirme amaçlıdır; fatura veya vergi belgesi yerine geçmez. OTOM SERVİS ile oluşturuldu.</div>
 </body></html>`;
 }
 
 /** PDF dosyasını telefonda oluşturur ve yolunu döner. Web'de dosya üretilemez: null. */
-export async function recordPdfFile(r: ServiceRecord, b: Parameters<typeof recordHtml>[1]): Promise<string | null> {
+export async function recordPdfFile(r: ServiceRecord, b: Parameters<typeof recordHtml>[1], claimCode: string | null = null): Promise<string | null> {
   if (Platform.OS === 'web') return null;
-  const { uri } = await Print.printToFileAsync({ html: recordHtml(r, b) });
+  const { uri } = await Print.printToFileAsync({ html: recordHtml(r, b, claimCode) });
   return uri;
 }
 
 /** PDF oluşturur ve paylaşım menüsünü açar (WhatsApp seçilebilir). Web'de yazdırma penceresi açılır. */
-export async function shareRecordPdf(r: ServiceRecord, b: Parameters<typeof recordHtml>[1]): Promise<'shared' | 'printed' | 'unavailable'> {
-  const html = recordHtml(r, b);
+export async function shareRecordPdf(r: ServiceRecord, b: Parameters<typeof recordHtml>[1], claimCode: string | null = null): Promise<'shared' | 'printed' | 'unavailable'> {
+  const html = recordHtml(r, b, claimCode);
   if (Platform.OS === 'web') {
     await Print.printAsync({ html });
     return 'printed';

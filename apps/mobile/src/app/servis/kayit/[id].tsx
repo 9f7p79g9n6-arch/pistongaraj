@@ -3,6 +3,7 @@
  * Müşteri onayı zorunlu değil: esnaf "Ücret alındı" deyince kayıt tamamlanır ve ciroya girer.
  */
 import {
+  formatClaimCode,
   balanceKurus,
   formatKurus,
   kurusToInput,
@@ -41,6 +42,8 @@ export default function RecordDetail() {
   const [sending, setSending] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
+  const [claimCode, setClaimCode] = useState<string | null>(null);
+  const [claimed, setClaimed] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -53,6 +56,31 @@ export default function RecordDetail() {
   // Liste her güncellendiğinde (ör. müşteri yanıt verdiğinde) kayıt yeniden okunur
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load(); }, [load, biz.records]);
+
+  // Kayıt kodu: müşteri bu kodu girince kayıt onun hesabına bağlanır
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const [code, isClaimed] = await Promise.all([serviceRepo.recordClaimCode(id), serviceRepo.isRecordClaimed(id)]);
+        if (alive) { setClaimCode(code); setClaimed(isClaimed); }
+      } catch {
+        // Kod alınamazsa mesaj ve PDF kodsuz gider; ekranda kod kartı görünmez
+      }
+    })();
+    return () => { alive = false; };
+  }, [id]);
+
+  const resetCode = async () => {
+    const ok = await confirm('Kodu yenile', 'Eski kod geçersiz olur ve kayda bağlı müşteri hesabı çıkarılır. Yeni kodu müşteriye tekrar göndermen gerekir.', 'Yenile', true);
+    if (!ok) return;
+    try {
+      setClaimCode(await serviceRepo.resetRecordClaim(id));
+      setClaimed(false);
+    } catch (e) {
+      setErr(msg(e, 'Kod yenilenemedi.'));
+    }
+  };
 
   if (loadErr) return <Screen title="Servis kaydı" back><Empty title="Kayıt açılamadı" body={loadErr} action="Tekrar dene" onAction={load} /></Screen>;
   if (!r) return <Screen title="Servis kaydı" back><Muted>Yükleniyor…</Muted></Screen>;
@@ -116,12 +144,12 @@ export default function RecordDetail() {
     let link: string | null = null;
     let warn: string | null = null;
     try {
-      const file = await recordPdfFile(r, biz.business);
+      const file = await recordPdfFile(r, biz.business, claimCode);
       if (file) link = await serviceRepo.recordPdfLink(biz.business.id, r.id, file);
     } catch (e) {
       warn = `PDF bağlantısı eklenemedi (${msg(e, 'bağlantı hatası')}). Mesaj PDF'siz açıldı; PDF'i aşağıdan ayrıca paylaşabilirsin.`;
     }
-    const ok = await openWhatsApp(r.customerPhone, whatsappMessage(r, link));
+    const ok = await openWhatsApp(r.customerPhone, whatsappMessage(r, link, claimCode));
     setSending(false);
     if (!ok) setErr('WhatsApp açılamadı. Telefonunda WhatsApp yüklü mü?');
     else if (warn) setErr(warn);
@@ -131,7 +159,7 @@ export default function RecordDetail() {
     setBusy(true);
     setErr(null);
     try {
-      const res = await shareRecordPdf(r, biz.business);
+      const res = await shareRecordPdf(r, biz.business, claimCode);
       if (res === 'unavailable') setErr('Bu cihazda paylaşım kullanılamıyor.');
     } catch {
       setErr('PDF oluşturulamadı. Tekrar dene.');
@@ -174,6 +202,16 @@ export default function RecordDetail() {
 
         <Card style={{ gap: space.sm }}>
           <Text v="bodyStrong">Müşteriye gönder</Text>
+          {claimCode && (
+            <View style={{ gap: 4 }}>
+              <Muted small>Müşterinin kayıt kodu (mesaja ve PDF’e eklenir)</Muted>
+              <Row style={{ justifyContent: 'space-between' }}>
+                <Text v="number" style={{ letterSpacing: 2 }}>{formatClaimCode(claimCode)}</Text>
+                <Button title="Kodu yenile" small variant="ghost" onPress={resetCode} />
+              </Row>
+              <Muted small>{claimed ? 'Müşteri bu kodla kaydı hesabına ekledi.' : 'Müşteri kodu OTOM’da girince kaydı görür ve onaylar.'}</Muted>
+            </View>
+          )}
           <Button title="WhatsApp ile PDF gönder" icon="forum" variant="primary" onPress={sendWhatsApp} loading={sending} />
           <Button title="PDF’i başka yolla paylaş" icon="doc" onPress={sharePdf} loading={busy} />
           <Muted small>

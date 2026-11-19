@@ -3,6 +3,7 @@
  * Demo ve Supabase uygulamaları aynı kuralları uygular (tutar hesabı, durum geçişleri, tekrar kayıt engeli).
  */
 import type {
+  ClaimResult,
   Business,
   BusinessExpense,
   BusinessCategory,
@@ -144,7 +145,17 @@ export interface ServiceRepo {
   updateExpense(id: string, input: ExpensePatch): Promise<void>;
   deleteExpense(id: string): Promise<void>;
 
+  // Kayıt kodu: işletme müşteriye iletir, müşteri girince kayıt hesabına bağlanır
+  /** Kaydın kodunu verir (yoksa üretir) */
+  recordClaimCode(recordId: string): Promise<string>;
+  /** Kodu yeniler ve kayda bağlı hesabı çıkarır; yeni kodu döner */
+  resetRecordClaim(recordId: string): Promise<string>;
+  /** Kayda bir müşteri hesabı bağlanmış mı */
+  isRecordClaimed(recordId: string): Promise<boolean>;
+
   // Müşteri tarafı (bireysel kullanıcı)
+  /** Servisin verdiği kodla kaydı hesaba bağlar */
+  claimRecord(code: string): Promise<{ status: ClaimResult; recordId: string | null }>;
   myRecords(): Promise<ServiceRecord[]>;
   respond(recordId: string, version: number, action: 'approved' | 'objected', reason: string | null): Promise<void>;
 }

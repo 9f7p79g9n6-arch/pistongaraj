@@ -3,6 +3,7 @@ import { needsCustomerAction } from '@piston/core';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 
+import { ClaimCodeCard } from '@/components/claim-code';
 import { CustomerEmailHint, RecordCard } from '@/components/servis';
 import { Empty, Screen, Section, Stack } from '@/components/ui';
 import { space } from '@/constants/theme';
@@ -16,9 +17,10 @@ export default function MyServiceRecords() {
 
   return (
     <Screen title="Servis kayıtlarım" back>
+      <ClaimCodeCard onClaimed={(rid) => { void refresh(); if (rid) router.push(`/servis-kaydi/${rid}`); }} />
       {myRecords.length === 0 ? (
         <Stack gap={space.md}>
-          <Empty title="Henüz servis kaydı yok" body="Aracına bakım yapan servis OTOM SERVİS kullanıyorsa kayıt burada görünür. Bunun için Profil’e telefon numaranı yaz ve aracını plakasıyla Garajım’a ekle; servis de aynı telefon ve plakayı girmeli." />
+          <Empty title="Henüz servis kaydı yok" body="Aracına bakım yapan servis OTOM SERVİS kullanıyorsa kayıt burada görünür: servise giriş e-postanı verdiysen kendiliğinden, vermediysen servisin WhatsApp’tan ya da PDF’le gönderdiği kayıt kodunu yukarıya girince." />
           <CustomerEmailHint />
         </Stack>
       ) : (

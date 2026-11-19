@@ -1,6 +1,7 @@
 /**
- * Profildeki "Telefon numaram": servislerin girdiği müşteri telefonu + garajdaki aracın plakası tutarsa
- * servis kayıtları bu hesaba kendiliğinden düşer. Yalnızca plaka yetmez (plaka herkesin görebildiği bilgidir).
+ * Profildeki "Telefon numaram": teklif kabul edildiğinde işletmenin seni araması için kullanılır.
+ * Servis kayıtlarının hesaba bağlanmasında KULLANILMAZ: numara SMS ile doğrulanmadığı için kayıtlar
+ * yalnızca doğrulanmış e-posta ya da servisin verdiği kayıt koduyla bağlanır.
  */
 import { formatPhoneTR, normalizePhoneTR } from '@piston/core';
 import { useState } from 'react';
@@ -43,8 +44,7 @@ export function MyPhoneCard() {
     <Card style={{ gap: space.sm }}>
       <Text v="bodyStrong">Telefon numaram</Text>
       <Muted small>
-        Servis, kaydı açarken bu numarayı ve aracının plakasını girerse kayıt “Servis kayıtlarım”a kendiliğinden gelir.
-        Aracın plakası Garajım’da kayıtlı olmalı.
+        Bir servisin ya da parçacının teklifini kabul ettiğinde, seni arayabilmesi için bu numara ona gösterilir.
       </Muted>
       {editing ? (
         <>
@@ -62,7 +62,7 @@ export function MyPhoneCard() {
             <Text v="section">{saved ? formatPhoneTR(saved) : '—'}</Text>
             <Text v="smallStrong" color={colors.brandDark} onPress={() => setEditing(true)} accessibilityRole="button">Değiştir</Text>
           </Row>
-          {done && <Text v="small" color="#1E7D53">Kaydedildi. Eşleşen servis kayıtları “Servis kayıtlarım”da.</Text>}
+          {done && <Text v="small" color="#1E7D53">Kaydedildi.</Text>}
           <ErrorText>{err}</ErrorText>
           <Text v="small" color={colors.textMuted} onPress={() => save(true)} accessibilityRole="button">Numarayı kaldır</Text>
         </>

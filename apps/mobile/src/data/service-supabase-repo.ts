@@ -13,6 +13,8 @@ import {
   type BusinessExpense,
   type BusinessVehicle,
   type ServiceRecord,
+  normalizeClaimCode,
+  type ClaimResult,
 } from '@piston/core';
 
 import { RepoError } from './repo';
@@ -258,6 +260,31 @@ export class ServiceSupabaseRepo implements ServiceRepo {
   async deleteExpense(id: string) {
     const { error } = await this.sb.from('business_expenses').delete().eq('id', id);
     if (error) fail(error);
+  }
+
+  async recordClaimCode(recordId: string) {
+    const { data, error } = await this.sb.rpc('service_record_claim_code', { p_record_id: recordId });
+    if (error) fail(error);
+    return data as string;
+  }
+
+  async resetRecordClaim(recordId: string) {
+    const { data, error } = await this.sb.rpc('reset_service_record_claim', { p_record_id: recordId });
+    if (error) fail(error);
+    return data as string;
+  }
+
+  async isRecordClaimed(recordId: string) {
+    const { data, error } = await this.sb.rpc('service_record_claimed', { p_record_id: recordId });
+    if (error) fail(error);
+    return data === true;
+  }
+
+  async claimRecord(code: string) {
+    const { data, error } = await this.sb.rpc('claim_service_record', { p_code: normalizeClaimCode(code) });
+    if (error) fail(error);
+    const r = data as { status: ClaimResult; record_id?: string };
+    return { status: r.status, recordId: r.record_id ?? null };
   }
 
   async myRecords() {

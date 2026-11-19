@@ -27,6 +27,8 @@ import {
   type ServiceRecordStatus,
   type ServiceResponse,
   type ServiceStatusChange,
+  normalizeClaimCode,
+  type ClaimResult,
 } from '@piston/core';
 
 import { RepoError } from './repo';
@@ -59,6 +61,9 @@ interface StoredRecord {
   payments?: (ServicePayment & { clientRequestId: string })[];
   /** Silinen kayıt saklanır, listelerden çıkar */
   deletedAt?: string | null;
+  /** Kayıt kodu ve bu cihazdaki hesaba bağlanıp bağlanmadığı (eski demo verisinde yok olabilir) */
+  claimCode?: string;
+  claimedByMe?: boolean;
   deleteReason?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -411,7 +416,58 @@ export class ServiceDemoRepo implements ServiceRepo {
   // ---------------- Müşteri tarafı ----------------
 
   private isMine(s: State, r: StoredRecord) {
-    return s.customers.find((c) => c.id === r.customerId)?.email === DEMO_CUSTOMER_EMAIL;
+    return r.claimedByMe === true || s.customers.find((c) => c.id === r.customerId)?.email === DEMO_CUSTOMER_EMAIL;
+  }
+
+  private newCode(s: State): string {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (;;) {
+      const bytes = Crypto.getRandomBytes(8);
+      const c = Array.from(bytes, (b) => alphabet[b % 32]).join('');
+      if (!s.records.some((r) => r.claimCode === c)) return c;
+    }
+  }
+
+  private businessRecord(s: State, recordId: string) {
+    const r = s.records.find((x) => x.id === recordId && !x.deletedAt);
+    if (!r) throw serviceError('NOT_FOUND');
+    this.biz(s, r.businessId);
+    return r;
+  }
+
+  async recordClaimCode(recordId: string) {
+    const s = await this.load();
+    const r = this.businessRecord(s, recordId);
+    if (!r.claimCode) {
+      r.claimCode = this.newCode(s);
+      await this.save();
+    }
+    return r.claimCode;
+  }
+
+  async resetRecordClaim(recordId: string) {
+    const s = await this.load();
+    const r = this.businessRecord(s, recordId);
+    r.claimCode = this.newCode(s);
+    r.claimedByMe = false;
+    await this.save();
+    return r.claimCode;
+  }
+
+  async isRecordClaimed(recordId: string) {
+    const s = await this.load();
+    return this.businessRecord(s, recordId).claimedByMe === true;
+  }
+
+  async claimRecord(code: string): Promise<{ status: ClaimResult; recordId: string | null }> {
+    const s = await this.load();
+    const c = normalizeClaimCode(code);
+    const r = s.records.find((x) => x.claimCode === c && !x.deletedAt);
+    if (!r) return { status: 'invalid', recordId: null };
+    if (r.claimedByMe) return { status: 'already_mine', recordId: r.id };
+    r.claimedByMe = true;
+    await this.save();
+    return { status: 'claimed', recordId: r.id };
   }
 
   async myRecords() {
