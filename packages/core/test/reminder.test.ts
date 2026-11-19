@@ -5,8 +5,8 @@ const d = {
   customerName: 'Ayşe Yılmaz',
   debtKurus: 188000,
   records: [
-    { id: 'r1', plate: '34 ABC 123', date: '2026-11-16', balanceKurus: 100000 },
-    { id: 'r2', plate: '34 ABC 123', date: '2026-11-17', balanceKurus: 88000 },
+    { id: 'r1', plate: '34 ABC 123', date: '2026-11-16', balanceKurus: 100000, open: false },
+    { id: 'r2', plate: '34 ABC 123', date: '2026-11-17', balanceKurus: 88000, open: false },
   ],
 };
 
