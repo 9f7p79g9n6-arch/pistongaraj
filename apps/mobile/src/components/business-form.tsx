@@ -88,7 +88,7 @@ export function BusinessForm({ initial, submitLabel, onSubmit }: {
 
       <Card style={{ gap: 4 }}>
         <Text v="smallStrong">Logo ve işletme fotoğrafı</Text>
-        <Muted small>Logo yükleme bir sonraki aşamada eklenecek.</Muted>
+        <Muted small>İşletmeni açtıktan sonra Menü → İşletme bilgileri bölümünden logonu ya da dükkânının fotoğrafını ekleyebilirsin.</Muted>
       </Card>
 
       <ErrorText>{err}</ErrorText>
