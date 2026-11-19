@@ -38,7 +38,7 @@ export default function Garajim() {
   const header = (
     <Row style={{ justifyContent: 'space-between' }}>
       <IconButton icon="menu" label="Profil ve ayarlar" onPress={() => router.push('/profil')} />
-      <Logo size={28} onGreen />
+      <Logo size={28} onDark />
       {active ? (
         <IconButton icon="bell" label="Bildirimler" onPress={() => router.push(`/vehicle/${active.id}/maintenance`)}
           dot={rulesByUrgency.some((r) => r.due.status !== 'ok') || myPendingCount > 0} />

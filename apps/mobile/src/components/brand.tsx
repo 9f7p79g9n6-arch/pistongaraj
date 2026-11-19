@@ -9,16 +9,16 @@ import { Icon, type IconName } from './icons';
 import { Pill, Text } from './ui';
 
 /** OTOM logosu. Logo rengi markanın kendisidir; açık temada da aynen kalır.
- *  onGreen: logo yeşili zemin üzerinde; yeşil kare kaybolmasın diye ince koyu çerçeve alır. */
-export function Logo({ size = 30, wordmark = true, sub, onGreen }: { size?: number; wordmark?: boolean; sub?: string; onGreen?: boolean }) {
+ *  onDark: koyu şerit üzerinde; yazı beyaz olur. */
+export function Logo({ size = 30, wordmark = true, sub, onDark }: { size?: number; wordmark?: boolean; sub?: string; onDark?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} accessible accessibilityRole="image" accessibilityLabel={sub ? `OTOM ${sub}` : 'OTOM'}>
-      <View style={{ width: size, height: size, borderRadius: size * 0.27, backgroundColor: colors.logo, alignItems: 'center', justifyContent: 'center', ...(onGreen ? { borderWidth: 1.5, borderColor: colors.onLogo } : null) }}>
+      <View style={{ width: size, height: size, borderRadius: size * 0.27, backgroundColor: colors.logo, alignItems: 'center', justifyContent: 'center'}}>
         <Text v="title" color={colors.onLogo} style={{ fontSize: size * 0.62, lineHeight: size * 0.8, fontWeight: '800' }}>O</Text>
       </View>
       {wordmark && (
         <View>
-          <Text v="smallStrong" color={colors.text} style={{ letterSpacing: 2, fontWeight: '800', fontSize: 14 }}>OTOM</Text>
+          <Text v="smallStrong" color={onDark ? '#FFFFFF' : colors.text} style={{ letterSpacing: 2, fontWeight: '800', fontSize: 14 }}>OTOM</Text>
           {sub ? <Text v="label" color={colors.brandDark} style={{ letterSpacing: 1.5, fontWeight: '700', fontSize: 10, lineHeight: 12 }}>{sub}</Text> : null}
         </View>
       )}

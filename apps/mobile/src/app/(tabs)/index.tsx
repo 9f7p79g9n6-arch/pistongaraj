@@ -73,7 +73,7 @@ export default function Home() {
   const header = (
     <Row style={{ justifyContent: 'space-between' }}>
       <IconButton icon="menu" label="Profil ve ayarlar" onPress={() => router.push('/profil')} />
-      <Logo size={28} onGreen />
+      <Logo size={28} onDark />
       <Row gap={space.xs}>
         <IconButton icon="users" label="Marka grupları" onPress={() => router.push('/sosyal/gruplar')} />
         <NotificationBell />

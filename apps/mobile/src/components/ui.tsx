@@ -1,8 +1,9 @@
 /**
  * Ortak arayüz bileşenleri. Ekranlar renk ve ölçüyü doğrudan değil, bu bileşenler üzerinden kullanır.
  */
-import { router } from 'expo-router';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { setStatusBarStyle } from 'expo-status-bar';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -59,13 +60,19 @@ export function DemoBadge() {
 
 /**
  * Kaydırılabilir ekran iskeleti: güvenli alan, başlık, geri düğmesi.
- * band: ekranın üstünde, durum çubuğunun altına kadar uzanan logo yeşili şerit (ana sayfa logosu için).
+ * band: ekranın üstünde, durum çubuğunun altına kadar uzanan koyu şerit (ana sayfa logosu için); durum çubuğu yazısı açık olur.
  */
 export function Screen({ title, back, right, children, scroll = true, footer, band }: {
   title?: string; back?: boolean; right?: ReactNode; children: ReactNode; scroll?: boolean; footer?: ReactNode; band?: ReactNode;
 }) {
   // Sekme çubuğu olmayan ekranlarda alttaki ana ekran çizgisine (iPhone) düğme denk gelmesin
   const { bottom, top } = useSafeAreaInsets();
+  // Koyu şeritli ekranlarda durum çubuğu (saat, pil) açık renk; ekrandan çıkınca koyuya döner
+  useFocusEffect(useCallback(() => {
+    if (!band) return undefined;
+    setStatusBarStyle('light');
+    return () => setStatusBarStyle('dark');
+  }, [band]));
   const header = (title || back || right) && (
     <View style={s.header}>
       <View style={s.row}>
@@ -84,7 +91,7 @@ export function Screen({ title, back, right, children, scroll = true, footer, ba
     <SafeAreaView style={s.screen} edges={band ? ['left', 'right'] : ['top', 'left', 'right']}>
       {band ? (
         <View style={[s.band, { paddingTop: top + space.sm }]}>
-          <View style={{ width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' }}>{band}</View>
+          <OnBandCtx.Provider value><View style={{ width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' }}>{band}</View></OnBandCtx.Provider>
         </View>
       ) : null}
       <KeyboardAvoidingView style={s.inner} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -152,12 +159,16 @@ export function Button({ title, onPress, variant = 'secondary', loading, disable
   );
 }
 
+/** Koyu üst şeridin içinde mi (düğmeler koyu zemine uygun görünür) */
+const OnBandCtx = createContext(false);
+
 export function IconButton({ icon, label, onPress, accent, dot }: { icon: IconName; label: string; onPress: () => void; accent?: boolean; dot?: boolean }) {
   const a = useAccent();
+  const onBand = useContext(OnBandCtx);
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} hitSlop={6}
-      style={({ pressed }) => [s.iconBtn, accent && { backgroundColor: a.fill }, pressed && s.pressed]}>
-      <Icon name={icon} size={20} color={accent ? a.onFill : colors.text} />
+      style={({ pressed }) => [s.iconBtn, onBand && { backgroundColor: colors.barButton }, accent && { backgroundColor: a.fill }, pressed && s.pressed]}>
+      <Icon name={icon} size={20} color={accent ? a.onFill : onBand ? '#FFFFFF' : colors.text} />
       {dot && <View style={[s.dot, { backgroundColor: a.fill }]} />}
     </Pressable>
   );
@@ -331,7 +342,7 @@ export function Stat({ label, value, note }: { label: string; value: string; not
 export const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   inner: { flex: 1, width: '100%', maxWidth: MAX_WIDTH, alignSelf: 'center' },
-  band: { backgroundColor: colors.logo, paddingHorizontal: space.lg, paddingBottom: space.md, borderBottomWidth: 1, borderBottomColor: colors.logoLine },
+  band: { backgroundColor: colors.tabBar, paddingHorizontal: space.lg, paddingBottom: space.md, borderBottomWidth: 1, borderBottomColor: colors.barLine },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md, gap: space.md },
   scroll: { paddingHorizontal: space.lg, paddingBottom: 40 },
   footer: { paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.lg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line, backgroundColor: colors.bg },

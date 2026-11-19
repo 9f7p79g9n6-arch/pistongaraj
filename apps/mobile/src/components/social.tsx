@@ -18,7 +18,7 @@ const LIKE_RED = '#E5484D';
 
 export function Avatar({ name, size = 38 }: { name: string; size?: number }) {
   return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.tabBar, alignItems: 'center', justifyContent: 'center' }}
+    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.logo, alignItems: 'center', justifyContent: 'center' }}
       importantForAccessibility="no" accessibilityElementsHidden>
       <Text v="bodyStrong" color={colors.onLogo} style={{ fontSize: size * 0.42 }}>{name.trim().slice(0, 1).toLocaleUpperCase('tr') || 'O'}</Text>
     </View>

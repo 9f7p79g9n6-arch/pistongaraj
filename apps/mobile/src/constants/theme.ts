@@ -35,11 +35,16 @@ export const colors = {
   special: '#20252B',
   onSpecial: '#FFFFFF',
   onSpecialMuted: '#B4BAC2',
-  /** Alt menü zemini: logo yeşili */
-  tabBar: '#B6F000',
+  /** Alt menü ve üst logo şeridi zemini: koyu antrasit (logo yeşili üstünde parlar) */
+  tabBar: '#17191D',
+  /** Koyu şerit üzerinde ikincil yazı/ikon ve ince çizgi */
+  onBarMuted: '#9AA1AB',
+  barLine: '#2B3038',
+  /** Koyu şeritteki yuvarlak düğme zemini */
+  barButton: '#262A31',
   /** Grafikte nötr seri */
   neutral: '#7B838E',
-  /** Logo rengi (değişmez): yeşil kare üzerinde koyu "P" */
+  /** Logo rengi (değişmez): yeşil kare üzerinde koyu "O" */
   logo: '#B6F000',
   onLogo: '#17191D',
   /** Logo yeşili üzerinde ikincil yazı/ikon (kontrast 5,6:1) */
