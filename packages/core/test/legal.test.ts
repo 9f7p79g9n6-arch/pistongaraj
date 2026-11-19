@@ -18,6 +18,6 @@ describe('hukuk metinleri', () => {
     expect(t).toMatch(/24 saat/);
   });
   it('doldurulması gereken alanlar listeleniyor (yayından önce boş olmalı)', () => {
-    expect(legalPlaceholders()).toContain('[ŞİRKET UNVANI]');
+    expect(legalPlaceholders()).toContain('[AD SOYAD]');
   });
 });
