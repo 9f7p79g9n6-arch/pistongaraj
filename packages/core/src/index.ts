@@ -17,5 +17,6 @@ export * from './forum';
 export * from './reminder';
 export * from './quotes';
 export * from './social';
+export * from './turkiye-il-ilce';
 export * from './claim-code';
 export * from './legal';

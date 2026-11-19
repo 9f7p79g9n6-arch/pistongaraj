@@ -1,6 +1,8 @@
 /** İşletme kayıt ve düzenleme formu (isletme-ac ve servis/profil ekranları) */
 import {
   BUSINESS_CATEGORIES,
+  canonicalProvince,
+  districtsOf,
   normalizeEmail,
   normalizePhoneTR,
   validateBusiness,
@@ -12,12 +14,13 @@ import { View } from 'react-native';
 
 import { space } from '@/constants/theme';
 import type { NewBusiness } from '@/data/service-repo';
+import { CityPicker, DistrictPicker } from './place-picker';
 import { Button, Card, Chip, ErrorText, Field, Muted, Row, Section, Text } from './ui';
 
 export function toBusinessInput(b: Business | null): BusinessInput {
   return {
     name: b?.name ?? '', contactName: b?.contactName ?? '', phone: b?.phone ? b.phone.replace(/^\+90/, '0') : '', email: b?.email ?? '',
-    city: b?.city ?? '', district: b?.district ?? '', address: b?.address ?? '', category: b?.category ?? null,
+    city: b?.city ? canonicalProvince(b.city) ?? b.city : '', district: b?.district ?? '', address: b?.address ?? '', category: b?.category ?? null,
     taxOffice: b?.taxOffice ?? '', taxNumber: b?.taxNumber ?? '',
   };
 }
@@ -74,8 +77,9 @@ export function BusinessForm({ initial, submitLabel, onSubmit }: {
 
       <Section title="Adres">
         <Row>
-          <Field label="Şehir" value={f.city} onChangeText={set('city')} error={errors.city} />
-          <Field label="İlçe" value={f.district} onChangeText={set('district')} error={errors.district} />
+          <CityPicker value={f.city} error={errors.city}
+            onChange={(c) => setF((p) => ({ ...p, city: c, district: districtsOf(c).includes(p.district) ? p.district : '' }))} />
+          <DistrictPicker city={f.city} value={f.district} onChange={set('district')} error={errors.district} />
         </Row>
         <Field label="Açık adres" value={f.address} onChangeText={set('address')} error={errors.address} multiline placeholder="Sanayi sitesi, blok, no" />
       </Section>

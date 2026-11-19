@@ -18,6 +18,7 @@ export type BusinessCategory =
   | 'auto_ac'
   | 'spare_parts'
   | 'appraisal'
+  | 'tuning'
   | 'other';
 
 export const BUSINESS_CATEGORIES: { value: BusinessCategory; label: string }[] = [
@@ -29,6 +30,7 @@ export const BUSINESS_CATEGORIES: { value: BusinessCategory; label: string }[] =
   { value: 'auto_ac', label: 'Oto klima' },
   { value: 'spare_parts', label: 'Yedek parça' },
   { value: 'appraisal', label: 'Ekspertiz' },
+  { value: 'tuning', label: 'Tuning ve modifiye' },
   { value: 'other', label: 'Diğer' },
 ];
 

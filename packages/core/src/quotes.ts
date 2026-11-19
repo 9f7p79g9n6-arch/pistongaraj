@@ -14,7 +14,7 @@ export const QUOTE_STATUS_LABEL: Record<QuoteStatus, string> = { open: 'Teklif b
 export const PART_CONDITION_LABEL: Record<PartCondition, string> = { original: 'Orijinal', equivalent: 'Muadil (yan sanayi)', used: 'Çıkma' };
 
 /** Rehberde ve talepte seçilebilen servis kategorileri (parça talebi her zaman "Yedek parça"ya gider) */
-export const SERVICE_DIRECTORY_CATEGORIES: BusinessCategory[] = ['private_service', 'mechanic', 'auto_electric', 'body_paint', 'tire', 'auto_ac', 'appraisal'];
+export const SERVICE_DIRECTORY_CATEGORIES: BusinessCategory[] = ['private_service', 'mechanic', 'auto_electric', 'body_paint', 'tire', 'auto_ac', 'tuning', 'appraisal'];
 
 export const QUOTE_LIMITS = {
   titleMin: 5,

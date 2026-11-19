@@ -188,6 +188,8 @@ export function Field({ label, error, hint, ...input }: { label: string; error?:
  * ekran) kullanılınca almaz; aksi hâlde farklı yükseklikteki alanlar (çok satırlı, hata yazılı) eşit yüksekliğe sıkışır.
  */
 const InRowCtx = createContext(false);
+/** Row içinde mi (alan yan yana eşit genişliğe yayılsın diye) */
+export const useInRow = () => useContext(InRowCtx);
 
 export function Row({ children, gap = space.md, style }: { children: ReactNode; gap?: number; style?: StyleProp<ViewStyle> }) {
   return <InRowCtx.Provider value><View style={[s.row, { gap }, style]}>{children}</View></InRowCtx.Provider>;

@@ -14,6 +14,7 @@ import { marketRepo } from '@/data/market';
 import { RepoError } from '@/data/repo';
 import { useApp } from '@/data/store';
 import { loadCity, saveCity } from '@/lib/city';
+import { CityPicker } from '@/components/place-picker';
 
 export default function NewQuoteRequest() {
   const params = useLocalSearchParams<{ tur?: string; isletme?: string; isletmeAdi?: string }>();
@@ -91,7 +92,7 @@ export default function NewQuoteRequest() {
           </Stack>
         )}
 
-        <Field label="Şehir" value={city} onChangeText={setCity} placeholder="Örn. Konya" autoCapitalize="words"
+        <CityPicker value={city} onChange={setCity}
           hint={picked ? undefined : kind === 'part' ? 'Bu şehirdeki doğrulanmış yedek parçacılara gider.' : 'Bu şehirdeki doğrulanmış servislere gider (en fazla 20).'} />
 
         <Field label={kind === 'part' ? 'Aradığın parça' : 'Sorun ya da istediğin iş'} value={title} onChangeText={setTitle} maxLength={120}

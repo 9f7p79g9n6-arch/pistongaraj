@@ -9,11 +9,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { SpecialCard } from '@/components/brand';
 import { Icon } from '@/components/icons';
 import { BusinessCard, RequestCard } from '@/components/market';
-import { Button, Empty, ErrorText, Field, Muted, Row, Screen, Section, Stack, Text } from '@/components/ui';
+import { Button, Empty, ErrorText, Muted, Row, Screen, Section, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { marketRepo } from '@/data/market';
 import { RepoError } from '@/data/repo';
 import { loadCity, saveCity } from '@/lib/city';
+import { CityPicker } from '@/components/place-picker';
 
 export default function Parts() {
   const [city, setCity] = useState('');
@@ -66,7 +67,7 @@ export default function Parts() {
           </Section>
 
           <Section title="Yedek parçacılar">
-            <Field label="Şehir" value={city} onChangeText={setCity} onBlur={() => { void saveCity(city); void load(); }} placeholder="Örn. Konya" autoCapitalize="words" />
+            <CityPicker value={city} emptyLabel="Tüm şehirler" onChange={(c) => { setCity(c); void saveCity(c); }} />
             {sellers === null ? <Muted>Yükleniyor…</Muted> : sellers.length === 0 ? (
               <Empty title="Doğrulanmış yedek parçacı bulunamadı" body="Bu şehirde henüz doğrulanmış yedek parçacı yok. Şehri boş bırakıp tümüne bakabilirsin." />
             ) : (

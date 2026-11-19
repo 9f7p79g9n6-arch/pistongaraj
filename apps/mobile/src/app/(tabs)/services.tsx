@@ -13,6 +13,7 @@ import { space } from '@/constants/theme';
 import { marketRepo } from '@/data/market';
 import { RepoError } from '@/data/repo';
 import { loadCity, saveCity } from '@/lib/city';
+import { CityPicker } from '@/components/place-picker';
 
 export default function Services() {
   const [city, setCity] = useState('');
@@ -49,7 +50,7 @@ export default function Services() {
       ) : (
         <>
           <Row gap={space.sm} style={{ marginTop: space.md }}>
-            <Field label="Şehir" value={city} onChangeText={setCity} onBlur={() => saveCity(city)} placeholder="Örn. Konya" autoCapitalize="words" />
+            <CityPicker value={city} emptyLabel="Tüm şehirler" onChange={(c) => { setCity(c); void saveCity(c); }} />
             <Field label="Ara" value={query} onChangeText={setQuery} placeholder="Servis adı, ilçe" />
           </Row>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: space.md, marginHorizontal: -space.lg }}
