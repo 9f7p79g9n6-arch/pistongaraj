@@ -9,7 +9,7 @@ import { normalizePlate, type TrafficFine, type ExpenseRecord, type FuelRecord, 
 import { Platform } from 'react-native';
 
 import { env } from '@/lib/env';
-import { RepoError, type Account, type ConsentType, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
+import { RepoError, type Account, type AppNotification, type NotifyPrefs, type ConsentType, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
 
 type Row = Record<string, any>;
 
@@ -334,6 +334,49 @@ export class SupabaseRepo implements GarageRepo {
 
   async registerPushToken(token: string, platform: 'ios' | 'android' | 'web') {
     const { error } = await this.sb.rpc('register_device_token', { p_token: token, p_platform: platform });
+    if (error) fail(error);
+  }
+
+  async listNotifications(opts?: { before?: string }): Promise<AppNotification[]> {
+    let q = this.sb.from('notifications').select('id, kind, title, body, data, read_at, created_at')
+      .order('created_at', { ascending: false }).limit(30);
+    if (opts?.before) q = q.lt('created_at', opts.before);
+    const { data, error } = await q;
+    if (error) fail(error);
+    return (data ?? []).map((r) => ({
+      id: r.id as string, kind: r.kind as string, title: r.title as string, body: (r.body as string | null) ?? null,
+      url: typeof (r.data as { url?: unknown })?.url === 'string' ? (r.data as { url: string }).url : null,
+      read: r.read_at != null, createdAt: r.created_at as string,
+    }));
+  }
+
+  async unreadNotificationCount() {
+    const { count, error } = await this.sb.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null);
+    if (error) fail(error);
+    return count ?? 0;
+  }
+
+  async markNotificationsRead() {
+    const { error } = await this.sb.rpc('mark_notifications_read');
+    if (error) fail(error);
+  }
+
+  async getNotifyPrefs(): Promise<NotifyPrefs> {
+    const uid = await this.uid();
+    const { data, error } = await this.sb.from('profiles')
+      .select('notify_reminders, notify_service, notify_quotes, notify_social').eq('id', uid).single();
+    if (error) fail(error);
+    return { reminders: data.notify_reminders !== false, service: data.notify_service !== false, quotes: data.notify_quotes !== false, social: data.notify_social !== false };
+  }
+
+  async setNotifyPrefs(patch: Partial<NotifyPrefs>) {
+    const uid = await this.uid();
+    const row: Record<string, boolean> = {};
+    if (patch.reminders != null) row.notify_reminders = patch.reminders;
+    if (patch.service != null) row.notify_service = patch.service;
+    if (patch.quotes != null) row.notify_quotes = patch.quotes;
+    if (patch.social != null) row.notify_social = patch.social;
+    const { error } = await this.sb.from('profiles').update(row).eq('id', uid);
     if (error) fail(error);
   }
 }

@@ -19,6 +19,7 @@ const ok=(c,m,x="")=>{console.log((c?"✓ ":"✗ ")+m+(c?"":" "+x)); if(!c) proc
   ok(JSON.stringify(kinds)===JSON.stringify(["fine_discount:f1","maintenance_due:r1"]),"7 gün içinde bildirilen bakım tekrar gönderilmiyor; ceza hatırlatması ekleniyor",JSON.stringify(kinds));
   const fine=st.notifInserts.find(n=>n.kind==="fine_discount");
   ok(fine && fine.title==="Ceza indirimine 2 gün kaldı" && fine.body.includes("1.500") && fine.body.includes("2.000"),"ceza mesajı indirimli tutarı gösteriyor",fine&&fine.body);
-  ok(st.notifInserts.every(n=>!("url" in n)),"veritabanına yalnızca tablo sütunları yazılıyor");
-  ok(st.pushes.length===2 && st.pushes.some(p=>p.data.url==="/vehicle/v1/fines"),"iki push gönderildi, ceza bildirimi ceza ekranına götürüyor",JSON.stringify(st.pushes));
+  ok(st.notifInserts.every(n=>!("url" in n)) && st.notifInserts.every(n=>typeof n.data.url==="string"),"bildirim satırında açılacak ekran data.url içinde");
+  ok(st.notifInserts.find(n=>n.kind==="fine_discount").data.url==="/vehicle/v1/fines","ceza bildirimi ceza ekranını açar");
+  ok(st.pushes.length===0,"telefona gönderimi push-dispatch yapar; bu fonksiyon doğrudan göndermez");
 })();'

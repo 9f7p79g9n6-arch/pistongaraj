@@ -57,7 +57,7 @@ function message(r: DueRow): { title: string; body: string } {
 }
 
 Deno.serve(async (req) => {
-  const secret = Deno.env.get('REMINDERS_CRON_SECRET');
+  const secret = Deno.env.get('CRON_SECRET') ?? Deno.env.get('REMINDERS_CRON_SECRET');
   if (!secret || req.headers.get('x-cron-secret') !== secret) return json({ error: 'unauthorized' }, 401);
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
@@ -89,31 +89,11 @@ Deno.serve(async (req) => {
     data: { rule_id: d.rule_id, vehicle_id: d.vehicle_id }, url: `/vehicle/${d.vehicle_id}/maintenance`,
   }));
   const outgoing = [...maintNotifs, ...fineNotifs];
-  if (!outgoing.length) return json({ sent: 0 });
+  if (!outgoing.length) return json({ notifications: 0 });
 
-  const { data: tokens } = await admin
-    .from('device_tokens')
-    .select('token, user_id')
-    .in('user_id', [...new Set(outgoing.map((o) => o.user_id))]);
-
-  const notifRows = outgoing.map(({ url: _url, ...row }) => row);
-  await admin.from('notifications').insert(notifRows);
-
-  const pushes = outgoing.flatMap((o) =>
-    (tokens ?? []).filter((t) => t.user_id === o.user_id).map((t) => ({
-      to: t.token, sound: 'default', title: o.title, body: o.body, data: { url: o.url },
-    })),
-  );
-
-  let sent = 0;
-  for (let i = 0; i < pushes.length; i += 100) {
-    const batch = pushes.slice(i, i + 100);
-    const res = await fetch(Deno.env.get('EXPO_PUSH_URL') ?? 'https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(batch),
-    });
-    if (res.ok) sent += batch.length;
-  }
-  return json({ sent, notifications: notifRows.length });
+  // Telefona gönderimi push-dispatch yapar (kullanıcının bildirim tercihine göre); burada yalnızca kayıt oluşturulur
+  const notifRows = outgoing.map(({ url, ...row }) => ({ ...row, data: { ...row.data, url } }));
+  const { error: insErr } = await admin.from('notifications').insert(notifRows);
+  if (insErr) return json({ error: insErr.message }, 500);
+  return json({ notifications: notifRows.length });
 });

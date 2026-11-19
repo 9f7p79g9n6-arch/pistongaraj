@@ -9,6 +9,8 @@ import { colors } from '@/constants/theme';
 import { BusinessProvider, useBusiness } from '@/data/business-store';
 import { TermsAcceptedContext } from '@/components/terms-gate';
 import { AppProvider, repo, useApp } from '@/data/store';
+import { usePushSetup } from '@/lib/notifications';
+import { openAppLink } from '@/lib/open-link';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -35,6 +37,8 @@ function Routes() {
   }, [accountId]);
   const biz = useBusiness();
   const signedIn = !!account;
+  // Bildirime dokununca ilgili ekran açılır (koşullar onaylanmamışsa koruma onay ekranında tutar)
+  usePushSetup(repo, signedIn, (url) => { setTimeout(() => openAppLink(url, biz.setMode), 0); });
   const allReady = ready && (!signedIn || (biz.ready && termsOk !== null));
   const restored = useRef(false);
   const pathname = usePathname();
@@ -88,6 +92,9 @@ function Routes() {
         <Stack.Screen name="teklif/[id]" />
         <Stack.Screen name="yonetim" />
         <Stack.Screen name="profil" />
+        <Stack.Screen name="bildirimler" />
+        <Stack.Screen name="ayarlar" />
+        <Stack.Screen name="yardim" />
         <Stack.Screen name="sosyal/yeni" options={{ presentation: 'modal' }} />
         <Stack.Screen name="sosyal/[id]" />
         <Stack.Screen name="sosyal/kisi/[id]" />

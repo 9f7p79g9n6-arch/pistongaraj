@@ -3,57 +3,18 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { SpecialCard } from '@/components/brand';
-import { MyPhoneCard } from '@/components/my-phone';
 import { Button, Card, Divider, ErrorText, Field, ListItem, Muted, Pill, Screen, Section, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
-import { serviceRepo, useBusiness } from '@/data/business-store';
+import { useBusiness } from '@/data/business-store';
 import { RepoError } from '@/data/repo';
-import { ServiceDemoRepo } from '@/data/service-demo-repo';
 import { socialRepo } from '@/data/social';
 import { repo, useApp } from '@/data/store';
-import { confirm, notify } from '@/lib/confirm';
 import { env } from '@/lib/env';
-import { enablePush } from '@/lib/notifications';
 
 export default function Profile() {
   const { account, vehicles } = useApp();
   const biz = useBusiness();
   const [busy, setBusy] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-
-  const push = async () => {
-    setBusy('push');
-    setErr(null);
-    try {
-      const res = await enablePush(repo);
-      if (res.ok) notify('Bildirimler açıldı', 'Bakım zamanı yaklaşınca sana haber vereceğiz.');
-      else setErr(res.reason);
-    } catch (e) {
-      setErr(e instanceof RepoError ? e.message : 'Bildirimler açılamadı.');
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const deleteAccount = async () => {
-    const ok = await confirm(
-      'Hesabını sil',
-      'Araçların, bakım, yakıt ve masraf kayıtların ve yüklediğin belgeler kalıcı olarak silinir. Bu işlem geri alınamaz.',
-      'Hesabı sil',
-      true,
-    );
-    if (!ok) return;
-    setBusy('delete');
-    setErr(null);
-    try {
-      await repo.deleteAccount();
-      // Demo: işletme verisi de bu cihazdan silinir. Gerçek sürümde işletme kayıtları işletmeye aittir (bkz. KVKK notu).
-      if (serviceRepo instanceof ServiceDemoRepo) await serviceRepo.reset();
-    } catch (e) {
-      setErr(e instanceof RepoError ? e.message : 'Hesap silinemedi.');
-      setBusy(null);
-    }
-  };
 
   return (
     <Screen title="Profil" back>
@@ -92,7 +53,6 @@ export default function Profile() {
             subtitle={biz.myPendingCount > 0 ? `${biz.myPendingCount} kayıt onayını bekliyor` : 'Servislerin senin için açtığı kayıtlar'}
             onPress={() => router.push('/servis-kayitlarim')} />
         </Card>
-        <MyPhoneCard />
       </Section>
 
       <Section title="OTOM SERVİS">
@@ -104,13 +64,6 @@ export default function Profile() {
             <ListItem icon="store" title="İşletme hesabı aç" subtitle="Servis, usta ve oto sanayi işletmeleri için. Şimdilik ücretsiz."
               onPress={() => { biz.setMode('business'); router.push('/servis/isletme-ac'); }} />
           )}
-        </Card>
-      </Section>
-
-      <Section title="Bildirimler">
-        <Card style={{ paddingVertical: 0 }}>
-          <ListItem icon="bell" title="Bakım bildirimlerini aç" subtitle="Bakım ve belge tarihleri yaklaşınca haber verir"
-            onPress={push} right={busy === 'push' ? <Muted small>Açılıyor…</Muted> : undefined} />
         </Card>
       </Section>
 
@@ -134,19 +87,16 @@ export default function Profile() {
         </Section>
       )}
 
-      <Section title="Gizlilik ve güvenlik">
+      <Section title="Uygulama">
         <Card style={{ paddingVertical: 0 }}>
-          <ListItem icon="doc" title="Kullanım koşulları" onPress={() => router.push('/legal/kosullar')} />
+          <ListItem icon="bell" title="Bildirimler" onPress={() => router.push('/bildirimler')} />
           <Divider />
-          <ListItem icon="shield" title="Gizlilik politikası" onPress={() => router.push('/legal/gizlilik')} />
+          <ListItem icon="gear" title="Ayarlar" subtitle="Bildirim tercihleri, hesap, gizlilik, hesabı silme" onPress={() => router.push('/ayarlar')} />
           <Divider />
-          <ListItem icon="shield" title="KVKK aydınlatma metni" onPress={() => router.push('/legal/kvkk')} />
-          <Divider />
-          <ListItem icon="trash" title="Hesabımı sil" subtitle="Tüm verilerin kalıcı olarak silinir" danger onPress={deleteAccount} />
+          <ListItem icon="question" title="Yardım" subtitle="Sık sorulan sorular ve destek" onPress={() => router.push('/yardim')} />
         </Card>
       </Section>
 
-      <ErrorText>{err}</ErrorText>
       <Button title="Çıkış yap" icon="logout" variant="ghost" style={{ marginTop: space.xl }} loading={busy === 'out'}
         onPress={async () => { setBusy('out'); await repo.signOut(); }} />
       <Muted small style={{ marginTop: space.md, textAlign: 'center' }}>

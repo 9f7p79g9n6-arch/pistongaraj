@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
 import { BigAction, CountTile, NextStageCard, RecordCard } from '@/components/servis';
+import { NotificationBell } from '@/components/notification-bell';
 import { Button, Card, DemoBadge, Empty, ErrorText, Muted, Pill, Row, Screen, Section, Segmented, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
 import { useBusiness } from '@/data/business-store';
@@ -64,6 +65,7 @@ export default function Panel() {
           <Text v="title" numberOfLines={1}>{business.name}</Text>
         </Stack>
         <Stack gap={4} style={{ alignItems: 'flex-end' }}>
+          <NotificationBell />
           <DemoBadge />
           {business.status !== 'active' && <Pill tone={business.status === 'suspended' ? 'bad' : 'warn'}>{BUSINESS_STATUS_LABEL[business.status]}</Pill>}
         </Stack>

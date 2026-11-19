@@ -23,7 +23,7 @@ import {
 } from '@piston/core';
 
 import { analyzeWithArtifactClaude, ArtifactAiError } from '@/lib/artifact-ai';
-import { RepoError, type Account, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
+import { RepoError, type Account, type AppNotification, type NotifyPrefs, type LightIdentification, type LightRequest, type NewFine, type GarageRepo, type NewEvent, type NewExpense, type NewFuel, type NewRule, type NewVehicle, type VehicleBundle, type VehiclePatch } from './repo';
 
 const KEY = 'piston-demo-v1';
 
@@ -38,6 +38,22 @@ interface DemoState {
   expenses: ExpenseRecord[];
   fines?: TrafficFine[];
   consents: { consent: string; granted: boolean; textVersion: string; at: string }[];
+  notifications?: AppNotification[];
+  notifyPrefs?: NotifyPrefs;
+}
+
+/** Demo bildirimleri: örnek olduğu başlıkta belirtilir */
+function sampleNotifications(vehicleId: string | undefined): AppNotification[] {
+  const now = Date.now();
+  const at = (h: number) => new Date(now - h * 3_600_000).toISOString();
+  return [
+    { id: id(), kind: 'fine_discount', title: 'Ceza indirimine 2 gün kaldı (örnek)', body: 'Ford Focus · 1.625,25 ₺ ile ödeyebilirsin (normali 2.167 ₺)',
+      url: vehicleId ? `/vehicle/${vehicleId}/fines` : null, read: false, createdAt: at(2) },
+    { id: id(), kind: 'maintenance_due', title: 'Polen filtresi gecikti (örnek)', body: 'Ford Focus · 44 gün gecikti',
+      url: vehicleId ? `/vehicle/${vehicleId}/maintenance` : null, read: false, createdAt: at(26) },
+    { id: id(), kind: 'service_new', title: 'Yeni servis kaydı (örnek)', body: 'Örnek Oto Servis aracın için bir kayıt açtı. Kayıt kodunu girerek görebilirsin.',
+      url: '/servis-kayitlarim', read: true, createdAt: at(72) },
+  ];
 }
 
 const id = () => Crypto.randomUUID();
@@ -333,5 +349,39 @@ export class DemoRepo implements GarageRepo {
 
   async registerPushToken() {
     // Demo modunda sunucu yok
+  }
+
+  private async notifs(): Promise<AppNotification[]> {
+    const s = await this.load();
+    if (!s.notifications) {
+      s.notifications = sampleNotifications(s.vehicles.find((v) => !v.archived)?.id);
+      await this.save();
+    }
+    return s.notifications;
+  }
+
+  async listNotifications(opts?: { before?: string }) {
+    const list = await this.notifs();
+    return list.filter((n) => !opts?.before || n.createdAt < opts.before).slice(0, 30).map((n) => ({ ...n }));
+  }
+
+  async unreadNotificationCount() {
+    return (await this.notifs()).filter((n) => !n.read).length;
+  }
+
+  async markNotificationsRead() {
+    const list = await this.notifs();
+    list.forEach((n) => { n.read = true; });
+    await this.save();
+  }
+
+  async getNotifyPrefs(): Promise<NotifyPrefs> {
+    const s = await this.load();
+    return s.notifyPrefs ?? { reminders: true, service: true, quotes: true, social: true };
+  }
+
+  async setNotifyPrefs(patch: Partial<NotifyPrefs>) {
+    const cur = await this.getNotifyPrefs();
+    await this.mutate((s) => { s.notifyPrefs = { ...cur, ...patch }; });
   }
 }

@@ -9,6 +9,7 @@ import { Pressable, View } from 'react-native';
 
 import { Logo } from '@/components/brand';
 import { Icon } from '@/components/icons';
+import { NotificationBell } from '@/components/notification-bell';
 import { Avatar, SocialPostCard } from '@/components/social';
 import { Button, Card, Empty, ErrorText, IconButton, Muted, Row, Screen, Segmented, Stack, Text } from '@/components/ui';
 import { colors, space } from '@/constants/theme';
@@ -73,7 +74,10 @@ export default function Home() {
     <Row style={{ justifyContent: 'space-between' }}>
       <IconButton icon="menu" label="Profil ve ayarlar" onPress={() => router.push('/profil')} />
       <Logo size={28} onGreen />
-      <IconButton icon="users" label="Marka grupları" onPress={() => router.push('/sosyal/gruplar')} />
+      <Row gap={space.xs}>
+        <IconButton icon="users" label="Marka grupları" onPress={() => router.push('/sosyal/gruplar')} />
+        <NotificationBell />
+      </Row>
     </Row>
   );
 

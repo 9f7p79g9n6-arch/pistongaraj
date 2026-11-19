@@ -33,6 +33,25 @@ export interface Account {
   isAdmin: boolean;
 }
 
+/** Uygulama içi bildirim (servis, teklif, topluluk, hatırlatma). `url` dokununca açılacak ekran. */
+export interface AppNotification {
+  id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  url: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+/** Telefona bildirim tercihleri. Kapalı grup uygulama içinde yine listelenir, telefona gönderilmez. */
+export interface NotifyPrefs {
+  reminders: boolean;
+  service: boolean;
+  quotes: boolean;
+  social: boolean;
+}
+
 export interface LightIdentification {
   quality: 'ok' | 'blurry' | 'too_dark' | 'glare' | 'no_dashboard';
   lights: DetectedLight[];
@@ -115,4 +134,11 @@ export interface GarageRepo {
 
   // Bildirim
   registerPushToken(token: string, platform: 'ios' | 'android' | 'web'): Promise<void>;
+
+  // Bildirimler
+  listNotifications(opts?: { before?: string }): Promise<AppNotification[]>;
+  unreadNotificationCount(): Promise<number>;
+  markNotificationsRead(): Promise<void>;
+  getNotifyPrefs(): Promise<NotifyPrefs>;
+  setNotifyPrefs(patch: Partial<NotifyPrefs>): Promise<void>;
 }
