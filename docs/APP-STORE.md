@@ -16,9 +16,9 @@ Bu belge App Store Connect'te doldurulacak alanların hazır metnidir. Karakter 
 | Paket kimliği | com.pistongarage.app |
 | Birincil dil | Türkçe |
 | Telif | © 2026 [AD SOYAD] (bireysel geliştirici hesabı) |
-| Gizlilik politikası adresi | `docs/site/gizlilik.html` yayınlandığı adres (bkz. BILGISAYAR-TALIMATI.md, adım 6) |
-| Destek adresi | `docs/site/destek.html` yayınlandığı adres |
-| Pazarlama adresi (isteğe bağlı) | `docs/site/index.html` yayınlandığı adres |
+| Gizlilik politikası adresi | https://otom-app.netlify.app/gizlilik.html |
+| Destek adresi | https://otom-app.netlify.app/destek.html |
+| Pazarlama adresi (isteğe bağlı) | https://otom-app.netlify.app |
 
 > "OTOM" adı App Store'da başka bir uygulamada kullanılıyorsa Apple adı kabul etmez. Ad alınamazsa
 > öneri: "OTOM Garaj: Bakım ve Servis".
