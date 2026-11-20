@@ -1,13 +1,99 @@
 <!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KVKK Aydınlatma Metni · OTOM</title>
+<meta name="description" content="OTOM: aracının bakımını, masraflarını ve servis geçmişini tek yerde tut; servislerden teklif al.">
+<meta name="theme-color" content="#17191D">
+<link rel="icon" href="favicon.png">
 <style>
-  :root { --bg:#fff; --fg:#16181c; --muted:#5b6170; --line:#e6e8ec; --brand:#d6303d; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#14161a; --fg:#eef0f3; --muted:#a3a9b5; --line:#2a2e36; --brand:#ff5a66; } }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-  header { border-bottom:1px solid var(--line); } nav { max-width:760px; margin:0 auto; padding:14px 20px; display:flex; flex-wrap:wrap; gap:16px; }
-  nav a { color:var(--muted); text-decoration:none; font-weight:600; font-size:14px; } nav a[aria-current] { color:var(--brand); }
-  main { max-width:760px; margin:0 auto; padding:24px 20px 64px; } h1 { font-size:28px; line-height:1.2; margin:8px 0 4px; }
-  h2 { font-size:18px; margin:28px 0 6px; } p { margin:0 0 12px; } .meta { color:var(--muted); font-size:14px; }
-  .draft { border:1px solid var(--brand); color:var(--brand); padding:8px 12px; border-radius:8px; font-size:14px; margin:12px 0; }
-  a { color:var(--brand); }
-</style></head><body><header><nav><a href="index.html">OTOM</a><a href="kosullar.html">Kullanım koşulları</a><a href="gizlilik.html">Gizlilik</a><a href="kvkk.html" aria-current="page">KVKK</a><a href="destek.html">Destek</a></nav></header><main><h1>KVKK Aydınlatma Metni</h1><p class="meta">Sürüm 2026-11-v2 · Son güncelleme 19 Kasım 2026</p><p class="draft">TASLAK — yayından önce hukuk kontrolü gerekir. Köşeli parantezli alanlar doldurulmalıdır.</p><p>6698 sayılı Kişisel Verilerin Korunması Kanunu'nun 10. maddesi uyarınca, kişisel verilerinin işlenmesine ilişkin seni bilgilendiririz.</p><h2>Veri sorumlusu</h2><p>[ŞİRKET UNVANI], [ŞİRKET ADRESİ], [MERSİS NO / VERGİ DAİRESİ VE NUMARASI], [KEP ADRESİ — varsa]</p><h2>İşlenen veriler</h2><p>Kimlik ve iletişim (ad, e-posta, isteğe bağlı telefon), araç ve kullanım verileri (araç bilgileri, bakım, yakıt, masraf, ceza kayıtları), görsel veriler (yüklediğin fotoğraf ve videolar), topluluk verileri (paylaşımlar, yorumlar, şikâyetler), işlem güvenliği verileri (giriş kayıtları, bildirim anahtarı), onay kayıtları.</p><h2>Amaçlar</h2><p>Üyelik ve kimlik doğrulama; uygulama özelliklerinin sunulması; servis kayıtlarının ilgili kişiye iletilmesi; topluluk alanlarının işletilmesi ve denetimi; bildirim gönderimi; bilgi güvenliğinin sağlanması; hukuki yükümlülüklerin yerine getirilmesi; açık rızan varsa pazarlama iletisi gönderimi.</p><h2>Hukuki sebepler</h2><p>Sözleşmenin kurulması ve ifası (md. 5/2-c), hukuki yükümlülük (md. 5/2-ç), bir hakkın tesisi ve korunması (md. 5/2-e), meşru menfaat (md. 5/2-f). Pazarlama iletileri ve yurt dışına aktarımda gerekli hâllerde açık rıza (md. 5/1, md. 9).</p><h2>Aktarım</h2><p>Barındırma, bildirim ve e-posta gönderimi hizmeti aldığımız tedarikçilere (bir kısmı yurt dışında, md. 9 kapsamındaki güvencelerle), teklifini kabul ettiğin işletmeye ve yasal zorunluluk hâlinde yetkili kurumlara aktarılabilir. [Hukuk kontrolü: tedarikçi listesi ve aktarım dayanağı.]</p><h2>Toplama yöntemi</h2><p>Verilerin, uygulamaya senin girdiğin bilgilerle ve servis kaydı açan işletmenin girdiği bilgilerle elektronik ortamda toplanır.</p><h2>Hakların</h2><p>KVKK md. 11 uyarınca verilerinin işlenip işlenmediğini öğrenme, bilgi isteme, amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı kişileri bilme, düzeltme, silme, itiraz ve zararın giderilmesini isteme hakların vardır. Başvurularını pistondestek@gmail.com adresine iletebilirsin. Hesabını uygulama içinden kendin de silebilirsin.</p></main></body></html>
+  :root { --bg:#F3F4F6; --surface:#FFFFFF; --tint:#F7FBEA; --tint-line:#DDEBB4; --fg:#242930; --muted:#5F6772; --line:#E3E6EA;
+    --bar:#17191D; --bar-fg:#FFFFFF; --bar-muted:#AEB4BD; --logo:#B6F000; --on-logo:#17191D; --link:#3F5E00; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#101215; --surface:#1A1D22; --tint:#1C2214; --tint-line:#33401C;
+    --fg:#EEF0F3; --muted:#A3A9B5; --line:#2A2E36; --link:#C9F24D; } }
+  :root[data-theme="dark"] { --bg:#101215; --surface:#1A1D22; --tint:#1C2214; --tint-line:#33401C; --fg:#EEF0F3; --muted:#A3A9B5; --line:#2A2E36; --link:#C9F24D; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:var(--link); }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 20px; }
+  header.top { background:var(--bar); color:var(--bar-fg); position:sticky; top:0; z-index:5; border-bottom:1px solid #2B3038; }
+  header.top .wrap { display:flex; align-items:center; gap:16px; min-height:64px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; color:var(--bar-fg); text-decoration:none; font-weight:800; letter-spacing:.06em; font-size:20px; margin-right:auto; }
+  .brand img { width:34px; height:34px; border-radius:9px; display:block; }
+  nav.links { display:flex; gap:4px; flex-wrap:wrap; }
+  nav.links a { color:var(--bar-muted); text-decoration:none; font-weight:600; font-size:14px; padding:6px 10px; border-radius:8px; }
+  nav.links a:hover { color:var(--bar-fg); }
+  nav.links a[aria-current] { color:var(--logo); background:rgba(182,240,0,.12); }
+  footer { border-top:1px solid var(--line); color:var(--muted); font-size:14px; padding:28px 0 40px; }
+  footer .wrap { display:flex; flex-wrap:wrap; gap:12px 24px; align-items:center; }
+  footer a { color:var(--muted); }
+  /* Hukuk ve destek sayfaları */
+  main.doc { max-width:760px; margin:0 auto; padding:32px 20px 64px; }
+  main.doc h1 { font-size:30px; line-height:1.2; margin:0 0 6px; }
+  main.doc h2 { font-size:18px; margin:28px 0 6px; }
+  main.doc p { margin:0 0 12px; }
+  .meta { color:var(--muted); font-size:14px; }
+  .draft { border:1px solid #D6303D; color:#D6303D; padding:8px 12px; border-radius:10px; font-size:14px; margin:12px 0; }
+  /* Tanıtım sayfası */
+  .hero { background:var(--bar); color:var(--bar-fg); padding:56px 0 72px; overflow:hidden; }
+  .hero .wrap { display:grid; grid-template-columns:1.1fr .9fr; gap:48px; align-items:center; }
+  .eyebrow { display:inline-block; color:var(--logo); font-weight:700; font-size:13px; letter-spacing:.12em; text-transform:uppercase; margin-bottom:14px; }
+  .hero h1 { font-size:clamp(34px, 5.4vw, 56px); line-height:1.05; margin:0 0 18px; letter-spacing:-.02em; }
+  .hero h1 em { font-style:normal; color:var(--logo); }
+  .hero p.lead { color:var(--bar-muted); font-size:18px; max-width:520px; margin:0 0 28px; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:10px; padding:13px 20px; border-radius:14px; font-weight:700; text-decoration:none; font-size:16px; }
+  .btn.primary { background:var(--logo); color:var(--on-logo); }
+  .btn.ghost { color:var(--bar-fg); border:1px solid #3A404A; }
+  .btn small { display:block; font-weight:600; font-size:11px; opacity:.75; line-height:1.1; }
+  .btn .two { display:flex; flex-direction:column; line-height:1.15; }
+  .phone { justify-self:center; width:290px; border-radius:42px; background:#0B0C0E; padding:12px; box-shadow:0 30px 80px rgba(0,0,0,.45), 0 0 0 1px #2B3038; }
+  .screen { border-radius:32px; background:#F3F4F6; overflow:hidden; color:#242930; }
+  .s-band { background:#17191D; color:#fff; display:flex; align-items:center; gap:8px; padding:30px 16px 14px; font-weight:800; letter-spacing:.06em; font-size:14px; }
+  .s-band i { width:22px; height:22px; border-radius:6px; background:#B6F000; color:#17191D; display:grid; place-items:center; font-style:normal; font-size:13px; }
+  .s-body { padding:14px; display:grid; gap:10px; }
+  .s-hi { font-weight:800; font-size:19px; }
+  .s-sub { color:#737B85; font-size:12px; margin-top:-8px; }
+  .s-dark { background:#20252B; color:#fff; border-radius:18px; padding:14px; }
+  .s-dark small { color:#9AA1AB; font-size:10px; letter-spacing:.08em; font-weight:700; }
+  .s-dark b { display:block; font-size:16px; margin:2px 0; }
+  .s-dark span { color:#FF8A92; font-size:12px; }
+  .s-dark .bar { margin-top:12px; background:#D6303D; border-radius:12px; text-align:center; font-weight:700; font-size:13px; padding:9px; }
+  .s-card { background:#F7FBEA; border:1px solid #DDEBB4; border-radius:16px; padding:12px; font-size:12px; }
+  .s-card b { display:block; font-size:13px; color:#242930; }
+  .s-card span { color:#737B85; }
+  .s-tabs { display:flex; justify-content:space-around; background:#17191D; color:#9AA1AB; font-size:10px; padding:10px 6px 18px; }
+  .s-tabs .on { color:#B6F000; }
+  section.block { padding:72px 0; }
+  section.block h2 { font-size:clamp(26px, 3.4vw, 36px); line-height:1.15; margin:0 0 10px; letter-spacing:-.01em; }
+  section.block p.intro { color:var(--muted); max-width:640px; margin:0 0 32px; font-size:17px; }
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .card { background:var(--tint); border:1px solid var(--tint-line); border-radius:20px; padding:22px; }
+  .card .ic { width:44px; height:44px; border-radius:13px; background:var(--logo); color:var(--on-logo); display:grid; place-items:center; margin-bottom:14px; }
+  .card h3 { margin:0 0 6px; font-size:17px; }
+  .card p { margin:0; color:var(--muted); font-size:15px; }
+  .dark { background:var(--bar); color:var(--bar-fg); }
+  .dark p.intro { color:var(--bar-muted) !important; }
+  .dark .card { background:#20252B; border-color:#2B3038; }
+  .dark .card p { color:var(--bar-muted); }
+  .trust { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .trust div { display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; }
+  .trust .ic { color:var(--link); flex:none; margin-top:2px; }
+  .trust b { display:block; margin-bottom:2px; }
+  .trust span { color:var(--muted); font-size:15px; }
+  .final { text-align:center; padding:72px 0; }
+  .final h2 { font-size:clamp(26px, 3.4vw, 36px); margin:0 0 10px; }
+  .final p { color:var(--muted); margin:0 0 24px; }
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns:1fr; gap:40px; }
+    .grid, .trust { grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding:36px 0 52px; }
+    .grid, .trust { grid-template-columns:1fr; }
+    section.block, .final { padding:52px 0; }
+    nav.links a { padding:6px 7px; font-size:13px; }
+    .phone { width:260px; }
+  }
+</style></head><body>
+<header class="top"><div class="wrap"><a class="brand" href="index.html"><img src="logo.png" alt="">OTOM</a><nav class="links" aria-label="Site"><a href="destek.html">Destek</a><a href="gizlilik.html">Gizlilik</a><a href="kosullar.html">Koşullar</a><a href="kvkk.html" aria-current="page">KVKK</a></nav></div></header>
+<main class="doc"><h1>KVKK Aydınlatma Metni</h1><p class="meta">Sürüm 2026-11-v2 · Son güncelleme 19 Kasım 2026</p><p class="draft">TASLAK — yayından önce hukuk kontrolü gerekir. Köşeli parantezli alanlar doldurulmalıdır.</p><p>6698 sayılı Kişisel Verilerin Korunması Kanunu'nun 10. maddesi uyarınca, kişisel verilerinin işlenmesine ilişkin seni bilgilendiririz.</p><h2>Veri sorumlusu</h2><p>[AD SOYAD] (gerçek kişi), [ADRES]. E-posta: pistondestek@gmail.com</p><h2>İşlenen veriler</h2><p>Kimlik ve iletişim (ad, e-posta, isteğe bağlı telefon), araç ve kullanım verileri (araç bilgileri, bakım, yakıt, masraf, ceza kayıtları), görsel veriler (yüklediğin fotoğraf ve videolar), topluluk verileri (paylaşımlar, yorumlar, şikâyetler), işlem güvenliği verileri (giriş kayıtları, bildirim anahtarı), onay kayıtları.</p><h2>Amaçlar</h2><p>Üyelik ve kimlik doğrulama; uygulama özelliklerinin sunulması; servis kayıtlarının ilgili kişiye iletilmesi; topluluk alanlarının işletilmesi ve denetimi; bildirim gönderimi; bilgi güvenliğinin sağlanması; hukuki yükümlülüklerin yerine getirilmesi; açık rızan varsa pazarlama iletisi gönderimi.</p><h2>Hukuki sebepler</h2><p>Sözleşmenin kurulması ve ifası (md. 5/2-c), hukuki yükümlülük (md. 5/2-ç), bir hakkın tesisi ve korunması (md. 5/2-e), meşru menfaat (md. 5/2-f). Pazarlama iletileri ve yurt dışına aktarımda gerekli hâllerde açık rıza (md. 5/1, md. 9).</p><h2>Aktarım</h2><p>Barındırma, bildirim ve e-posta gönderimi hizmeti aldığımız tedarikçilere (bir kısmı yurt dışında, md. 9 kapsamındaki güvencelerle), teklifini kabul ettiğin işletmeye ve yasal zorunluluk hâlinde yetkili kurumlara aktarılabilir.</p><h2>Toplama yöntemi</h2><p>Verilerin, uygulamaya senin girdiğin bilgilerle ve servis kaydı açan işletmenin girdiği bilgilerle elektronik ortamda toplanır.</p><h2>Hakların</h2><p>KVKK md. 11 uyarınca verilerinin işlenip işlenmediğini öğrenme, bilgi isteme, amacına uygun kullanılıp kullanılmadığını öğrenme, aktarıldığı kişileri bilme, düzeltme, silme, itiraz ve zararın giderilmesini isteme hakların vardır. Başvurularını pistondestek@gmail.com adresine iletebilirsin. Hesabını uygulama içinden kendin de silebilirsin.</p></main>
+<footer><div class="wrap"><span>© 2026 OTOM</span><a href="kosullar.html">Kullanım koşulları</a><a href="gizlilik.html">Gizlilik politikası</a><a href="kvkk.html">KVKK aydınlatma metni</a><a href="destek.html">Destek</a><a href="mailto:pistondestek@gmail.com">pistondestek@gmail.com</a></div></footer>
+</body></html>

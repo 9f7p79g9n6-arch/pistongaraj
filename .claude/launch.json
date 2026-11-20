@@ -23,6 +23,12 @@
         "set EXPO_PUBLIC_DEMO_MODE=1&& npm.cmd run web -w mobile -- --port 8082"
       ],
       "port": 8082
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-site.cjs"],
+      "port": 5055
     }
   ]
 }
