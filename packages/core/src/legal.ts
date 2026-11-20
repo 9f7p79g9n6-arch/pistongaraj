@@ -34,5 +34,5 @@ export function legalDoc(key: LegalDocKey): LegalDoc {
 /** Metinde doldurulmamış (köşeli parantezli) alan kaldı mı — yayından önce kontrol için */
 export function legalPlaceholders(): string[] {
   const all = JSON.stringify(TEXTS);
-  return [...new Set(all.match(/\[[^\]]+\]/g) ?? [])];
+  return [...new Set(all.match(/\[[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9 /—,.-]*\]/g) ?? [])];
 }

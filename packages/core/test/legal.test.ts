@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LEGAL_VERSION, legalDoc, legalPlaceholders } from '../src';
+import { LEGAL_STATUS, LEGAL_VERSION, legalDoc, legalPlaceholders } from '../src';
 
 describe('hukuk metinleri', () => {
   it('üç belge de dolu ve şirket alanları yerleştirilmiş', () => {
@@ -17,7 +17,8 @@ describe('hukuk metinleri', () => {
     expect(t).toMatch(/engelleyebilir/);
     expect(t).toMatch(/24 saat/);
   });
-  it('doldurulması gereken alanlar listeleniyor (yayından önce boş olmalı)', () => {
-    expect(legalPlaceholders()).toContain('[AD SOYAD]');
+  it('yayın: doldurulmamış alan ve taslak uyarısı kalmadı', () => {
+    expect(legalPlaceholders()).toEqual([]);
+    expect(LEGAL_STATUS).toBe('');
   });
 });
