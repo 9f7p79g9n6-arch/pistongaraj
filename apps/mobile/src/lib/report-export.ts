@@ -73,7 +73,7 @@ export async function shareReportPdf(rep: ServiceReport, b: Business, debtorsLis
 
 export async function shareReportCsv(records: readonly ServiceRecord[], rep: ServiceReport, b: Business, expenses: readonly BusinessExpense[] = []): Promise<'shared' | 'downloaded' | 'unavailable'> {
   const csv = reportCsv(records, rep.period, expenses);
-  const name = `piston-${fileSafe(b.name)}-${rep.period.from}-${rep.period.to}.csv`;
+  const name = `otom-${fileSafe(b.name)}-${rep.period.from}-${rep.period.to}.csv`;
   if (Platform.OS === 'web') {
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
