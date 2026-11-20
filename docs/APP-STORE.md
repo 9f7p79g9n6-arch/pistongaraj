@@ -130,6 +130,10 @@ Location (when in use only) is requested only in business mode, when the shop ow
 car owners can get driving directions to the shop. Car owners' location is never collected.
 ```
 
+**20.11.2026: inceleme hesabı açıldı ve örnek veriler sunucuya eklendi** (profil adı "Deniz Yılmaz"; Renault Clio 34 OTM 2026,
+9 bakım/tarih hatırlatması, 1 bakım kaydı, 4 yakıt, 4 masraf, 1 ceza; doğrulama bekleyen "OTOM Örnek Servis" işletmesi ve
+onay bekleyen 1 servis kaydı; Ana Sayfa'da 1 paylaşım + 1 soru). Aşağıdaki liste bu yüzden tamam:
+
 İnceleme hesabında önceden şunlar hazır olsun (incelemeci boş ekran görmesin):
 1. 1 araç (bakım kuralları otomatik gelir), birkaç yakıt ve masraf kaydı.
 2. 1 işletme (Profil → İşletme hesabı aç) ve o işletmeden bu hesaba açılmış 1 servis kaydı (kayıt kodu ile bağlanmış).
