@@ -15,7 +15,7 @@ Bu belge App Store Connect'te doldurulacak alanların hazır metnidir. Karakter 
 | İkincil kategori | Yaşam Tarzı (Lifestyle) |
 | Paket kimliği | com.pistongarage.app |
 | Birincil dil | Türkçe |
-| Telif | © 2026 [ŞİRKET UNVANI] |
+| Telif | © 2026 [AD SOYAD] (bireysel geliştirici hesabı) |
 | Gizlilik politikası adresi | `docs/site/gizlilik.html` yayınlandığı adres (bkz. BILGISAYAR-TALIMATI.md, adım 6) |
 | Destek adresi | `docs/site/destek.html` yayınlandığı adres |
 | Pazarlama adresi (isteğe bağlı) | `docs/site/index.html` yayınlandığı adres |
@@ -92,8 +92,11 @@ Toplanan veriler — hepsi **kullanıcıya bağlı**, **takip için kullanılmı
 | Tanımlayıcılar → Kullanıcı kimliği | Hesap kimliği | Hesap |
 | Tanımlayıcılar → Cihaz kimliği | Bildirim anahtarı (push token) | Bildirim gönderme |
 | Diğer veriler | Araç, bakım, yakıt, masraf, ceza kayıtları, şehir | Uygulamanın asıl işlevi |
+| Konum → Kesin konum | Yalnızca işletme sahibi "konumu kaydet"e basarsa dükkânın konumu (bir kez) | Araç sahiplerine yol tarifi |
 
-Toplanmayan: konum, kişiler, sağlık, finans/ödeme bilgisi, tarama/arama geçmişi, kullanım verisi, tanılama.
+Araç sahiplerinin konumu toplanmaz; yol tarifi telefonun kendi harita uygulamasında açılır.
+
+Toplanmayan: kişiler, sağlık, finans/ödeme bilgisi, tarama/arama geçmişi, kullanım verisi, tanılama.
 
 > Gösterge ışığı fotoğrafı yalnızca analiz için gönderilir ve saklanmaz (açık rıza ile). Yine de
 > "Fotoğraflar veya videolar" satırı bunu kapsar.
@@ -122,6 +125,9 @@ The app is in Turkish. Main areas:
 
 No in-app purchases. No payments are made in the app; prices are agreed directly with businesses.
 Push notifications are optional and requested only when the user taps "Telefona bildirimleri aç".
+Location (when in use only) is requested only in business mode, when the shop owner taps
+"Şu an dükkândayım, konumu kaydet" (Menü > İşletme bilgileri) to save the shop's location once, so that
+car owners can get driving directions to the shop. Car owners' location is never collected.
 ```
 
 İnceleme hesabında önceden şunlar hazır olsun (incelemeci boş ekran görmesin):
@@ -142,6 +148,6 @@ Push notifications are optional and requested only when the user taps "Telefona 
 - Şifreleme beyanı: `ITSAppUsesNonExemptEncryption = false` (app.json'da) — yalnızca standart HTTPS.
 - Gizlilik bildirimi (PrivacyInfo.xcprivacy): app.json → `ios.privacyManifests` (derlemede üretilir).
 - Sürüm: app.json `version` 1.0.0; derleme numarasını EAS otomatik artırır (`appVersionSource: remote`).
-- Hukuk metinlerindeki `[ŞİRKET UNVANI]`, `[ŞİRKET ADRESİ]`, `[MERSİS…]`, `[KEP]` yerleri **göndermeden önce**
-  doldurulmalı ve metinler bir avukata kontrol ettirilmeli. Taslak uyarısı kalkınca `packages/core/src/legal-texts.json`
+- Yayın şahıs (bireysel) hesapla yapılır. Hukuk metinlerindeki `[AD SOYAD]` ve `[ADRES]` yerleri **göndermeden önce**
+  doldurulmalı; metinlerin bir avukata kontrol ettirilmesi önerilir. Taslak uyarısı kalkınca `packages/core/src/legal-texts.json`
   içindeki `status` alanı boşaltılır ve `npm run site` ile sayfalar yeniden üretilir.
