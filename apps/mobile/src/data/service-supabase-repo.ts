@@ -46,6 +46,7 @@ const toBusiness = (r: Row, role: Business['role'], logoUrl: string | null): Bus
   logoUrl: logoUrl ?? (r.logo_path ? `${process.env.EXPO_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/business-photos/${r.logo_path}` : null),
   status: r.status,
   description: r.description ?? null, workingHours: r.working_hours ?? null,
+  latitude: r.latitude ?? null, longitude: r.longitude ?? null,
   role, createdAt: r.created_at,
 });
 const toCustomer = (r: Row): BusinessCustomer => ({

@@ -87,6 +87,7 @@ function fail(err: { message?: string; code?: string } | null): never {
 const toBusiness = (j: Row): PublicBusiness => ({
   id: j.id, name: j.name, category: j.category, city: j.city, district: j.district, address: j.address, phone: j.phone,
   description: j.description ?? null, workingHours: j.working_hours ?? null, logoPath: j.logo_path ?? null,
+  latitude: j.latitude == null ? null : Number(j.latitude), longitude: j.longitude == null ? null : Number(j.longitude),
   ratingAvg: j.rating_avg == null ? null : Number(j.rating_avg), ratingCount: Number(j.rating_count ?? 0),
 });
 const toOffer = (j: Row): QuoteOffer => ({
@@ -188,6 +189,14 @@ class MarketRepo {
       if (up) fail(up);
     }
     const { error } = await this.sb.from('businesses').update({ logo_path: path }).eq('id', businessId);
+    if (error) fail(error);
+  }
+
+  /** Dükkân konumunu kaydeder (yetki: işletme yönetimi, sunucu kuralı). null: konumu kaldır. */
+  async setBusinessLocation(businessId: string, loc: { latitude: number; longitude: number } | null): Promise<void> {
+    if (!this.sb) throw new RepoError('DEMO', MESSAGES.DEMO!);
+    const { error } = await this.sb.from('businesses')
+      .update({ latitude: loc?.latitude ?? null, longitude: loc?.longitude ?? null }).eq('id', businessId);
     if (error) fail(error);
   }
 

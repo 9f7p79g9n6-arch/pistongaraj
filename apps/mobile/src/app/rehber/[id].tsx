@@ -1,14 +1,16 @@
 /** Rehberdeki işletmenin sayfası: bilgiler, iletişim, yol tarifi, onaylı yorumlar ve "Bu işletmeden teklif iste". */
-import { formatPhoneTR, mapsSearchUrl, ratingText, timeAgoTR, type BusinessReview, type PublicBusiness } from '@piston/core';
+import { businessCoords, formatPhoneTR, ratingText, timeAgoTR, type BusinessReview, type PublicBusiness } from '@piston/core';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 
+import { Icon } from '@/components/icons';
 import { BusinessThumb, categoryLabel, Stars } from '@/components/market';
 import { Button, Card, Empty, Muted, Pill, Row, Screen, Section, Stack, Text } from '@/components/ui';
-import { space } from '@/constants/theme';
+import { colors, space } from '@/constants/theme';
 import { marketRepo } from '@/data/market';
 import { RepoError } from '@/data/repo';
+import { openDirections } from '@/lib/directions';
 import { openWhatsApp } from '@/lib/share-record';
 
 export default function BusinessPage() {
@@ -48,7 +50,12 @@ export default function BusinessPage() {
         </Row>
         {b.description ? <Text>{b.description}</Text> : null}
         <View style={{ gap: 2 }}>
-          <Muted small>{`${b.address}, ${b.district} / ${b.city}`}</Muted>
+          <Pressable onPress={() => void openDirections(b)} accessibilityRole="button" hitSlop={6}
+            accessibilityLabel={`Adres: ${b.address}, ${b.district} / ${b.city}. Yol tarifi al`}
+            style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'flex-start', gap: 6, paddingVertical: 2, opacity: pressed ? 0.6 : 1 })}>
+            <Icon name="pin" size={16} color={colors.brand} />
+            <Text v="small" color={colors.brand} style={{ flex: 1, textDecorationLine: 'underline' }}>{`${b.address}, ${b.district} / ${b.city}`}</Text>
+          </Pressable>
           {b.workingHours ? <Muted small>{`Çalışma saatleri: ${b.workingHours}`}</Muted> : null}
           <Muted small>{formatPhoneTR(b.phone)}</Muted>
         </View>
@@ -61,7 +68,7 @@ export default function BusinessPage() {
           <Button title="Ara" icon="user" style={{ flex: 1 }} onPress={() => Linking.openURL(`tel:${b.phone}`)} />
           <Button title="WhatsApp" icon="forum" style={{ flex: 1 }} onPress={() => openWhatsApp(b.phone, 'Merhaba, OTOM üzerinden ulaşıyorum.')} />
         </Row>
-        <Button title="Yol tarifi" icon="car" variant="ghost" onPress={() => Linking.openURL(mapsSearchUrl(b))} />
+        <Button title={businessCoords(b) ? 'Yol tarifi al' : 'Yol tarifi al (adrese göre)'} icon="pin" variant="outline" onPress={() => void openDirections(b)} />
       </Stack>
 
       <Section title={b.reviews.length ? `Yorumlar (${b.ratingCount})` : 'Yorumlar'}>

@@ -83,6 +83,9 @@ export interface Business {
   taxOffice: string | null;
   taxNumber: string | null;
   logoUrl: string | null;
+  /** Dükkân konumu (araç sahiplerine yol tarifi için) */
+  latitude?: number | null;
+  longitude?: number | null;
   /** Rehberde görünen tanıtım ve çalışma saatleri */
   description?: string | null;
   workingHours?: string | null;

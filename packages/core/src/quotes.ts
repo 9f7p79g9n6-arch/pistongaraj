@@ -40,6 +40,9 @@ export interface PublicBusiness {
   workingHours: string | null;
   /** İşletme fotoğrafının dosya yolu (herkese açık klasör) */
   logoPath: string | null;
+  /** İşletmenin kaydettiği dükkân konumu (yoksa yol tarifi adresle aranır) */
+  latitude?: number | null;
+  longitude?: number | null;
   ratingAvg: number | null;
   ratingCount: number;
 }
@@ -138,4 +141,28 @@ export function ratingText(avg: number | null, count: number): string {
 /** Harita uygulamasında adres araması (konum paylaşılmaz, yalnızca işletmenin adresi aranır) */
 export function mapsSearchUrl(b: Pick<PublicBusiness, 'name' | 'address' | 'district' | 'city'>): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${b.name}, ${b.address}, ${b.district}/${b.city}`)}`;
+}
+
+type DirectionsTarget = Pick<PublicBusiness, 'name' | 'address' | 'district' | 'city'> & { latitude?: number | null; longitude?: number | null };
+
+/** İşletmenin kayıtlı konumu varsa "enlem,boylam"; yoksa null */
+export function businessCoords(b: { latitude?: number | null; longitude?: number | null }): string | null {
+  return b.latitude != null && b.longitude != null ? `${b.latitude},${b.longitude}` : null;
+}
+
+/**
+ * Yol tarifi bağlantıları: harita uygulaması bulunduğun yerden işletmeye araç rotasını hemen açar.
+ * İşletme konumunu kaydettiyse tam noktaya, kaydetmediyse açık adrese yönlendirir.
+ */
+export function directionsUrls(b: DirectionsTarget): { apple: string; google: string; exact: boolean } {
+  const coords = businessCoords(b);
+  const dest = coords ?? `${b.name}, ${b.address}, ${b.district}/${b.city}`;
+  const label = encodeURIComponent(b.name);
+  return {
+    apple: coords
+      ? `https://maps.apple.com/?daddr=${coords}&dirflg=d&q=${label}`
+      : `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`,
+    exact: !!coords,
+  };
 }
